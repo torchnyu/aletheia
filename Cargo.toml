@@ -1,0 +1,9 @@
+[package]
+name = "aletheia"
+version = "0.1.0"
+authors = ["Nicholas Yang <ny585@nyu.edu>"]
+edition = "2018"
+
+[dependencies]
+reqwest = "0.9.5"
+serde_json = "1.0"
