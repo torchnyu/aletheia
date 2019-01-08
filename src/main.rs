@@ -1,27 +1,15 @@
-extern crate failure;
-extern crate reqwest;
-extern crate serde_json;
-extern crate toml;
 #[macro_use]
 extern crate failure_derive;
 
-use reqwest::Client;
 use std::collections::BTreeMap;
 use std::fs::File;
-use std::io;
 use std::io::Read;
 use toml::Value;
 
-use failure::err_msg;
-use failure::Error;
+mod errors;
+mod github;
 
-#[derive(Debug, Fail)]
-enum AletheiaError {
-    #[fail(display = "Config error: {}", message)]
-    ConfigError { message: String },
-}
-
-pub type Result<T> = std::result::Result<T, Error>;
+use crate::errors::{AletheiaError, Result};
 
 fn main() -> Result<()> {
     let repos: Vec<&'static str> = vec![
@@ -29,20 +17,8 @@ fn main() -> Result<()> {
         "nicholaslyang/saber",
         "jsonkao/jasonkao.me",
     ];
-    check_repos(repos.as_slice());
+    github::check_repos(repos.as_slice());
     let config = load_config()?;
-    println!("{:?}", config);
-    Ok(())
-}
-
-fn check_repos(repos: &[&'static str]) -> Result<()> {
-    let client = Client::new();
-    for repo in repos {
-        let url = format!("https://api.github.com/repos/{}", repo);
-        let body = client.get(&url).send()?.text()?;
-        let parsed_body: serde_json::Value = serde_json::from_str(&body)?;
-        println!("{}", parsed_body["created_at"]);
-    }
     Ok(())
 }
 
