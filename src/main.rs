@@ -1,15 +1,13 @@
 #[macro_use]
 extern crate failure_derive;
 
-use chrono::prelude::*;
-use serde_derive::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Read;
 
 mod github;
 mod types;
 
-use crate::types::{AletheiaError, Result, RulesConfig};
+use crate::types::{Result, RulesConfig};
 
 fn main() -> Result<()> {
     let repos: Vec<&'static str> = vec![
@@ -19,6 +17,9 @@ fn main() -> Result<()> {
     ];
     let config = load_config()?;
     let issues = github::check_repos(repos.as_slice(), config.into_rules()?)?;
+    for issue in issues {
+        println!("{}", issue);
+    }
     Ok(())
 }
 

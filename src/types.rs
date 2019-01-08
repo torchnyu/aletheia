@@ -1,10 +1,20 @@
 use chrono::prelude::*;
 use failure::Error;
 use serde_derive::{Deserialize, Serialize};
+use std::fmt;
 
+// Raw repository response from API
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Repository {
+pub struct RepositoryResponse {
     pub created_at: String,
+    pub updated_at: String,
+    pub size: i64,
+    pub forks_count: i64,
+}
+
+pub struct Repository {
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
     pub size: i64,
     pub forks_count: i64,
 }
@@ -31,10 +41,10 @@ pub struct Rules {
 }
 
 #[derive(Debug)]
-pub enum Issues {
-    Date {
+pub enum Issue {
+    RepoCreationDate {
         start_date: DateTime<Utc>,
-        repo_date: DateTime<Utc>,
+        repo_creation_date: DateTime<Utc>,
     },
     TeamSize {
         max_collaborators: i64,
@@ -49,5 +59,40 @@ impl RulesConfig {
             end_date: self.end_date.parse::<DateTime<Utc>>()?,
             max_collaborators: self.max_collaborators,
         })
+    }
+}
+
+impl Repository {
+    pub fn new(response: RepositoryResponse) -> Result<Repository> {
+        Ok(Repository {
+            created_at: response.created_at.parse::<DateTime<Utc>>()?,
+            updated_at: response.updated_at.parse::<DateTime<Utc>>()?,
+            size: response.size,
+            forks_count: response.forks_count,
+        })
+    }
+}
+
+impl fmt::Display for Issue {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Issue::RepoCreationDate {
+                repo_creation_date,
+                start_date,
+            } => write!(
+                f,
+                "Repository created on {} but hackathon started {}",
+                repo_creation_date.to_rfc2822(),
+                start_date.to_rfc2822()
+            ),
+            Issue::TeamSize {
+                collaborators,
+                max_collaborators,
+            } => write!(
+                f,
+                "Team size is {} but max team size is {}",
+                collaborators, max_collaborators
+            ),
+        }
     }
 }
