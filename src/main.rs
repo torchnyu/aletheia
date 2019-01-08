@@ -6,20 +6,10 @@ use serde_derive::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Read;
 
-mod errors;
 mod github;
+mod types;
 
-use crate::errors::{AletheiaError, Result};
-
-#[derive(Serialize, Deserialize, Debug)]
-struct Config {
-    rules: Rules,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct Rules {
-    start_date: String,
-}
+use crate::types::{AletheiaError, Result, RulesConfig};
 
 fn main() -> Result<()> {
     let repos: Vec<&'static str> = vec![
@@ -28,12 +18,8 @@ fn main() -> Result<()> {
         "jsonkao/jasonkao.me",
     ];
     let config = load_config()?;
-    let start_date = config
-        .rules
-        .start_date
-        .parse::<DateTime<Utc>>()?
-        .timestamp();
-    github::check_repos(repos.as_slice(), start_date)?;
+    let issues = github::check_repos(repos.as_slice(), config.into_rules()?)?;
+    println!("{:?}", issues);
     Ok(())
 }
 
@@ -44,9 +30,8 @@ fn read_config_file() -> Result<String> {
     Ok(contents)
 }
 
-fn load_config() -> Result<Config> {
+fn load_config() -> Result<RulesConfig> {
     let contents = read_config_file()?;
     let config = toml::from_str(&contents)?;
-    println!("{:?}", config);
     Ok(config)
 }
