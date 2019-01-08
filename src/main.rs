@@ -1,5 +1,7 @@
 #[macro_use]
 extern crate failure_derive;
+#[macro_use]
+extern crate serde_derive;
 
 use std::collections::BTreeMap;
 use std::fs::File;
