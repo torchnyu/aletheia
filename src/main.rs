@@ -1,17 +1,25 @@
 #[macro_use]
 extern crate failure_derive;
-#[macro_use]
-extern crate serde_derive;
 
-use std::collections::BTreeMap;
+use chrono::prelude::*;
+use serde_derive::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Read;
-use toml::Value;
 
 mod errors;
 mod github;
 
 use crate::errors::{AletheiaError, Result};
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Config {
+    rules: Rules,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Rules {
+    start_date: String,
+}
 
 fn main() -> Result<()> {
     let repos: Vec<&'static str> = vec![
@@ -19,8 +27,13 @@ fn main() -> Result<()> {
         "nicholaslyang/saber",
         "jsonkao/jasonkao.me",
     ];
-    github::check_repos(repos.as_slice());
     let config = load_config()?;
+    let start_date = config
+        .rules
+        .start_date
+        .parse::<DateTime<Utc>>()?
+        .timestamp();
+    github::check_repos(repos.as_slice(), start_date)?;
     Ok(())
 }
 
@@ -31,17 +44,9 @@ fn read_config_file() -> Result<String> {
     Ok(contents)
 }
 
-fn parse_config(contents: String) -> Result<Value> {
-    Ok(contents.parse::<toml::value::Value>()?)
-}
-
-fn load_config() -> Result<BTreeMap<String, Value>> {
+fn load_config() -> Result<Config> {
     let contents = read_config_file()?;
-    let config = parse_config(contents)?;
-    match config {
-        Value::Table(t) => Ok(t),
-        _ => Err(AletheiaError::ConfigError {
-            message: "No table".to_string(),
-        })?,
-    }
+    let config = toml::from_str(&contents)?;
+    println!("{:?}", config);
+    Ok(config)
 }
