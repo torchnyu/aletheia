@@ -2,11 +2,13 @@ use crate::types::{AletheiaError, Issues, Repository, Result, Rules};
 use chrono::prelude::*;
 use reqwest::Client;
 
+static GITHUB_API: &'static str = "https://api.github.com/repos/";
+
 pub fn check_repos(repos: &[&'static str], rules: Rules) -> Result<Vec<Issues>> {
     let client = Client::new();
     let mut issues = Vec::new();
     for repo in repos {
-        let url = format!("https://api.github.com/repos/{}", repo);
+        let url = format!("{}{}", GITHUB_API, repo);
         let body = client.get(&url).send()?.text()?;
         let repo: Repository = serde_json::from_str(&body)?;
         let created_at_date = repo.created_at.parse::<DateTime<Utc>>()?;

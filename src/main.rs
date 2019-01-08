@@ -19,7 +19,6 @@ fn main() -> Result<()> {
     ];
     let config = load_config()?;
     let issues = github::check_repos(repos.as_slice(), config.into_rules()?)?;
-    println!("{:?}", issues);
     Ok(())
 }
 
