@@ -1,6 +1,8 @@
+#![feature(proc_macro_hygiene, decl_macro)]
 #[macro_use]
 extern crate failure_derive;
 
+use itertools::Itertools;
 use std::fs::File;
 use std::io::Read;
 
@@ -8,19 +10,18 @@ mod github;
 mod types;
 
 use crate::types::{Result, RulesConfig};
+use rocket::*;
 
-fn main() -> Result<()> {
-    let repos: Vec<&'static str> = vec![
-        "hacknyu/hacknyu-2019",
-        "nicholaslyang/saber",
-        "jsonkao/jasonkao.me",
-    ];
+#[get("/<username>/<repo_name>")]
+fn index(username: String, repo_name: String) -> Result<String> {
     let config = load_config()?;
-    let issues = github::check_repos(repos.as_slice(), config.into_rules()?)?;
-    for issue in issues {
-        println!("{}", issue);
-    }
-    Ok(())
+    let repo = format!("{}/{}", username, repo_name).to_string();
+    let issues = github::check_repo(&repo, config.into_rules()?)?;
+    Ok(issues.iter().map(ToString::to_string).join("\n"))
+}
+
+fn main() {
+    rocket::ignite().mount("/", routes![index]).launch();
 }
 
 fn read_config_file() -> Result<String> {
