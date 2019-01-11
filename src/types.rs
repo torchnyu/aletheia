@@ -1,7 +1,12 @@
+use crate::models::Project;
+use crate::schema::projects;
 use chrono::prelude::*;
 use failure::Error;
+use serde::de::{self, Deserialize, Deserializer};
 use serde_derive::{Deserialize, Serialize};
 use std::fmt;
+use std::fmt::Display;
+use std::str::FromStr;
 
 // Raw repository response from API
 #[derive(Serialize, Deserialize, Debug)]
@@ -38,6 +43,33 @@ pub struct Rules {
     pub start_date: DateTime<Utc>,
     pub end_date: DateTime<Utc>,
     pub max_collaborators: i64,
+}
+
+#[derive(Insertable, Serialize, Deserialize)]
+#[table_name = "projects"]
+pub struct InsertableProject {
+    pub name: String,
+    #[serde(deserialize_with = "from_str")]
+    pub repository_id: i32,
+}
+
+fn from_str<'de, T, D>(deserializer: D) -> std::result::Result<T, D::Error>
+where
+    T: FromStr,
+    T::Err: Display,
+    D: Deserializer<'de>,
+{
+    let s = String::deserialize(deserializer)?;
+    T::from_str(&s).map_err(de::Error::custom)
+}
+
+impl InsertableProject {
+    pub fn from_project(project: Project) -> InsertableProject {
+        InsertableProject {
+            name: project.name,
+            repository_id: project.repository_id,
+        }
+    }
 }
 
 #[derive(Debug)]
