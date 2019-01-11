@@ -3,6 +3,9 @@
 extern crate failure_derive;
 
 #[macro_use]
+extern crate rocket_contrib;
+
+#[macro_use]
 extern crate diesel;
 
 use itertools::Itertools;
@@ -17,12 +20,14 @@ mod types;
 
 use crate::models::Project;
 use crate::types::{InsertableProject, Result, RulesConfig};
-use diesel::pg::PgConnection;
-use diesel::prelude::*;
 use dotenv::dotenv;
 use rocket::*;
+use rocket_contrib::databases::diesel as other_diesel;
 use rocket_contrib::json::Json;
 use std::env;
+
+#[database("postgres_logs")]
+pub struct LogsDbConn(diesel::PgConnection);
 
 #[get("/<username>/<repo_name>")]
 fn validate_repo(username: String, repo_name: String) -> Result<String> {
@@ -33,28 +38,21 @@ fn validate_repo(username: String, repo_name: String) -> Result<String> {
 }
 
 #[get("/")]
-pub fn index() -> Result<Json<Vec<Project>>> {
-    let connection = establish_connection();
-    Ok(Json(controllers::all(&connection)?))
+pub fn index(conn: LogsDbConn) -> Result<Json<Vec<Project>>> {
+    Ok(Json(controllers::all(&conn)?))
 }
 
 #[post("/", format = "application/json", data = "<project>")]
-pub fn create(project: Json<InsertableProject>) -> Result<Json<Project>> {
+pub fn create(conn: LogsDbConn, project: Json<InsertableProject>) -> Result<Json<Project>> {
     let project = project.into_inner();
-    let connection = establish_connection();
-    Ok(Json(controllers::insert(project, &connection)?))
-}
-
-fn establish_connection() -> PgConnection {
-    dotenv().ok();
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    PgConnection::establish(&database_url).expect(&format!("Error connecting to {}", database_url))
+    Ok(Json(controllers::insert(project, &conn)?))
 }
 
 fn main() {
     rocket::ignite()
         .mount("/", routes![validate_repo])
         .mount("/projects", routes![index, create])
+        .attach(LogsDbConn::fairing())
         .launch();
 }
 

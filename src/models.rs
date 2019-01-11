@@ -1,8 +1,8 @@
 #![allow(proc_macro_derive_resolution_fallback)]
 
 use crate::schema::*;
-use diesel;
-use diesel::{AsChangeset, Queryable};
+use diesel::prelude::*;
+use diesel::{self, AsChangeset, Queryable};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Queryable, AsChangeset, Serialize, Deserialize)]
