@@ -2,7 +2,7 @@ use crate::models::Project;
 use crate::schema::projects;
 use chrono::prelude::*;
 use failure::Error;
-use rocket_contrib::databases::diesel::{self, Insertable};
+use rocket_contrib::databases::diesel::Insertable;
 use serde::de::{self, Deserialize, Deserializer};
 use serde_derive::{Deserialize, Serialize};
 use std::fmt;
@@ -45,6 +45,9 @@ pub struct Rules {
     pub end_date: DateTime<Utc>,
     pub max_collaborators: i64,
 }
+
+#[database("postgres_logs")]
+pub struct DbConn(diesel::PgConnection);
 
 #[derive(Insertable, Serialize, Deserialize)]
 #[table_name = "projects"]

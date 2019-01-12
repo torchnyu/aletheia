@@ -15,19 +15,13 @@ use std::io::Read;
 mod controllers;
 mod github;
 mod models;
+mod routes;
 mod schema;
 mod types;
 
-use crate::models::Project;
-use crate::types::{InsertableProject, Result, RulesConfig};
-use dotenv::dotenv;
+use crate::types::{DbConn, Result, RulesConfig};
 use rocket::*;
-use rocket_contrib::databases::diesel as other_diesel;
 use rocket_contrib::json::Json;
-use std::env;
-
-#[database("postgres_logs")]
-pub struct LogsDbConn(diesel::PgConnection);
 
 #[get("/<username>/<repo_name>")]
 fn validate_repo(username: String, repo_name: String) -> Result<String> {
@@ -37,22 +31,10 @@ fn validate_repo(username: String, repo_name: String) -> Result<String> {
     Ok(issues.iter().map(ToString::to_string).join("\n"))
 }
 
-#[get("/")]
-pub fn index(conn: LogsDbConn) -> Result<Json<Vec<Project>>> {
-    Ok(Json(controllers::all(&conn)?))
-}
-
-#[post("/", format = "application/json", data = "<project>")]
-pub fn create(conn: LogsDbConn, project: Json<InsertableProject>) -> Result<Json<Project>> {
-    let project = project.into_inner();
-    Ok(Json(controllers::insert(project, &conn)?))
-}
-
 fn main() {
     rocket::ignite()
-        .mount("/", routes![validate_repo])
-        .mount("/projects", routes![index, create])
-        .attach(LogsDbConn::fairing())
+        .mount("/projects", routes![routes::index, routes::create])
+        .attach(DbConn::fairing())
         .launch();
 }
 
