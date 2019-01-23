@@ -9,5 +9,13 @@ use serde_derive::{Deserialize, Serialize};
 pub struct Project {
     pub id: i32,
     pub name: String,
-    pub repository_id: i32,
+    pub repository_url: String,
+}
+
+#[derive(Queryable, AsChangeset, Serialize, Deserialize)]
+#[table_name = "contributors"]
+pub struct Contributor {
+    pub id: i32,
+    pub username: String,
+    pub email: String,
 }

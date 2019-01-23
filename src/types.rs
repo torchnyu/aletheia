@@ -1,13 +1,11 @@
-use crate::models::Project;
-use crate::schema::projects;
+use crate::models::{Contributor, Project};
+use crate::schema::{contributors, projects};
 use chrono::prelude::*;
 use failure::Error;
 use rocket_contrib::databases::diesel::Insertable;
-use serde::de::{self, Deserialize, Deserializer};
 use serde_derive::{Deserialize, Serialize};
 use std::fmt;
 use std::fmt::Display;
-use std::str::FromStr;
 
 // Raw repository response from API
 #[derive(Serialize, Deserialize, Debug)]
@@ -50,13 +48,38 @@ pub struct Rules {
 pub struct DbConn(diesel::PgConnection);
 
 #[derive(Insertable, Serialize, Deserialize)]
+#[table_name = "contributors"]
+pub struct InsertableContributor {
+    pub username: String,
+    pub email: String,
+}
+
+impl InsertableContributor {
+    pub fn from_contributor(contributor: Contributor) -> InsertableContributor {
+        InsertableContributor {
+            username: contributor.username,
+            email: contributor.email,
+        }
+    }
+}
+
+#[derive(Insertable, Serialize, Deserialize)]
 #[table_name = "projects"]
 pub struct InsertableProject {
     pub name: String,
-    #[serde(deserialize_with = "from_str")]
-    pub repository_id: i32,
+    pub repository_url: String,
 }
 
+impl InsertableProject {
+    pub fn from_project(project: Project) -> InsertableProject {
+        InsertableProject {
+            name: project.name,
+            repository_url: project.repository_url,
+        }
+    }
+}
+
+/*
 fn from_str<'de, T, D>(deserializer: D) -> std::result::Result<T, D::Error>
 where
     T: FromStr,
@@ -66,15 +89,7 @@ where
     let s = String::deserialize(deserializer)?;
     T::from_str(&s).map_err(de::Error::custom)
 }
-
-impl InsertableProject {
-    pub fn from_project(project: Project) -> InsertableProject {
-        InsertableProject {
-            name: project.name,
-            repository_id: project.repository_id,
-        }
-    }
-}
+*/
 
 #[derive(Debug)]
 pub enum Issue {

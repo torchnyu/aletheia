@@ -1,4 +1,4 @@
-#![feature(proc_macro_hygiene, decl_macro, custom_attribute)]
+#![feature(proc_macro_hygiene, decl_macro)]
 #[macro_use]
 extern crate failure_derive;
 
@@ -21,7 +21,6 @@ mod types;
 
 use crate::types::{DbConn, Result, RulesConfig};
 use rocket::*;
-use rocket_contrib::json::Json;
 
 #[get("/<username>/<repo_name>")]
 fn validate_repo(username: String, repo_name: String) -> Result<String> {
@@ -31,9 +30,22 @@ fn validate_repo(username: String, repo_name: String) -> Result<String> {
     Ok(issues.iter().map(ToString::to_string).join("\n"))
 }
 
+#[get("/")]
+fn index() -> String {
+    "Welcome to Aletheia, a hackathon cheating detector!".to_string()
+}
+
 fn main() {
     rocket::ignite()
-        .mount("/projects", routes![routes::index, routes::create])
+        .mount(
+            "/projects",
+            routes![routes::projects::index, routes::projects::create],
+        )
+        .mount(
+            "/contributors",
+            routes![routes::contributors::index, routes::contributors::create],
+        )
+        .mount("/", routes![index])
         .attach(DbConn::fairing())
         .launch();
 }
