@@ -42,8 +42,8 @@ fn main() {
             routes![routes::projects::index, routes::projects::create],
         )
         .mount(
-            "/contributors",
-            routes![routes::contributors::index, routes::contributors::create],
+            "/users",
+            routes![routes::users::index, routes::users::create],
         )
         .mount("/", routes![index])
         .attach(DbConn::fairing())

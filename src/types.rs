@@ -1,5 +1,5 @@
-use crate::models::{Contributor, Project};
-use crate::schema::{contributors, projects};
+use crate::models::{Project, User};
+use crate::schema::{projects, users};
 use chrono::prelude::*;
 use failure::Error;
 use rocket_contrib::databases::diesel::Insertable;
@@ -48,17 +48,17 @@ pub struct Rules {
 pub struct DbConn(diesel::PgConnection);
 
 #[derive(Insertable, Serialize, Deserialize)]
-#[table_name = "contributors"]
-pub struct InsertableContributor {
+#[table_name = "users"]
+pub struct InsertableUser {
     pub username: String,
     pub email: String,
 }
 
-impl InsertableContributor {
-    pub fn from_contributor(contributor: Contributor) -> InsertableContributor {
-        InsertableContributor {
-            username: contributor.username,
-            email: contributor.email,
+impl InsertableUser {
+    pub fn from_user(user: User) -> InsertableUser {
+        InsertableUser {
+            username: user.username,
+            email: user.email,
         }
     }
 }

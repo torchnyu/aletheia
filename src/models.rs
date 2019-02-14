@@ -13,8 +13,8 @@ pub struct Project {
 }
 
 #[derive(Queryable, AsChangeset, Serialize, Deserialize)]
-#[table_name = "contributors"]
-pub struct Contributor {
+#[table_name = "users"]
+pub struct User {
     pub id: i32,
     pub username: String,
     pub email: String,
