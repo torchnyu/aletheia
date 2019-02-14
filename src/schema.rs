@@ -1,12 +1,4 @@
 table! {
-    contributors (id) {
-        id -> Int4,
-        username -> Varchar,
-        email -> Varchar,
-    }
-}
-
-table! {
     projects (id) {
         id -> Int4,
         name -> Varchar,
@@ -14,7 +6,17 @@ table! {
     }
 }
 
+table! {
+    users (id) {
+        id -> Int4,
+        display_name -> Varchar,
+        email -> Varchar,
+        password_digest -> Varchar,
+        salt -> Varchar,
+    }
+}
+
 allow_tables_to_appear_in_same_query!(
-    contributors,
     projects,
+    users,
 );

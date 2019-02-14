@@ -5,7 +5,6 @@ use failure::Error;
 use rocket_contrib::databases::diesel::Insertable;
 use serde_derive::{Deserialize, Serialize};
 use std::fmt;
-use std::fmt::Display;
 
 // Raw repository response from API
 #[derive(Serialize, Deserialize, Debug)]
@@ -48,22 +47,6 @@ pub struct Rules {
 pub struct DbConn(diesel::PgConnection);
 
 #[derive(Insertable, Serialize, Deserialize)]
-#[table_name = "users"]
-pub struct InsertableUser {
-    pub username: String,
-    pub email: String,
-}
-
-impl InsertableUser {
-    pub fn from_user(user: User) -> InsertableUser {
-        InsertableUser {
-            username: user.username,
-            email: user.email,
-        }
-    }
-}
-
-#[derive(Insertable, Serialize, Deserialize)]
 #[table_name = "projects"]
 pub struct InsertableProject {
     pub name: String,
@@ -78,18 +61,6 @@ impl InsertableProject {
         }
     }
 }
-
-/*
-fn from_str<'de, T, D>(deserializer: D) -> std::result::Result<T, D::Error>
-where
-    T: FromStr,
-    T::Err: Display,
-    D: Deserializer<'de>,
-{
-    let s = String::deserialize(deserializer)?;
-    T::from_str(&s).map_err(de::Error::custom)
-}
-*/
 
 #[derive(Debug)]
 pub enum Issue {

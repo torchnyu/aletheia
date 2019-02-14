@@ -19,20 +19,20 @@ pub mod projects {
 }
 
 pub mod users {
-    use crate::models::User;
-    use crate::types::{DbConn, InsertableUser, Result};
+    use crate::models::{User, UserRequest, UserResult};
+    use crate::types::{DbConn, Result};
     use rocket::{get, post};
     use rocket_contrib::json::Json;
 
     #[get("/")]
-    pub fn index(conn: DbConn) -> Result<Json<Vec<User>>> {
+    pub fn index(conn: DbConn) -> Result<Json<Vec<UserResult>>> {
         Ok(Json(crate::controllers::users_controller::all(&conn)?))
     }
 
     #[post("/", format = "application/json", data = "<user>")]
-    pub fn create(conn: DbConn, user: Json<InsertableUser>) -> Result<Json<User>> {
+    pub fn create(conn: DbConn, user: Json<UserRequest>) -> Result<Json<UserResult>> {
         let user = user.into_inner();
-        Ok(Json(crate::controllers::users_controller::insert(
+        Ok(Json(crate::controllers::users_controller::create(
             user, &conn,
         )?))
     }
