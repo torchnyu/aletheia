@@ -8,6 +8,8 @@ extern crate rocket_contrib;
 #[macro_use]
 extern crate diesel;
 
+extern crate rand;
+
 use itertools::Itertools;
 use std::fs::File;
 use std::io::Read;

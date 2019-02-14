@@ -1,4 +1,4 @@
-use crate::models::{User, UserInsert, UserRequest, UserResult};
+use crate::models::{UserInsert, UserRequest, UserResult};
 use crate::schema::users;
 use crate::types::*;
 use diesel::prelude::*;

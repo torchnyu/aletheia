@@ -19,7 +19,7 @@ pub mod projects {
 }
 
 pub mod users {
-    use crate::models::{User, UserRequest, UserResult};
+    use crate::models::{UserRequest, UserResult};
     use crate::types::{DbConn, Result};
     use rocket::{get, post};
     use rocket_contrib::json::Json;

@@ -1,5 +1,6 @@
 use crate::schema::*;
 use crate::types::Result;
+use argonautica::input::Salt;
 use argonautica::Hasher;
 use diesel::{self, AsChangeset, Queryable};
 use serde_derive::{Deserialize, Serialize};
@@ -28,17 +29,18 @@ pub struct UserInsert {
 impl UserInsert {
     pub fn from_request(request: UserRequest) -> Result<UserInsert> {
         let mut hasher = Hasher::default();
-        let salt = "my salt!".to_string();
+        let salt = Salt::random(SALT_LENGTH);
+        let salt = salt.to_str()?;
         let password_digest = hasher
             .with_password(request.password)
             .with_secret_key("secret key!")
-            .with_salt(&salt)
+            .with_salt(salt)
             .hash()?;
         Ok(UserInsert {
             display_name: request.display_name,
             email: request.email,
             password_digest,
-            salt,
+            salt: salt.to_string(),
         })
     }
 }
