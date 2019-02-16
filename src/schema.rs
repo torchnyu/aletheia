@@ -12,7 +12,6 @@ table! {
         display_name -> Varchar,
         email -> Varchar,
         password_digest -> Varchar,
-        salt -> Varchar,
     }
 }
 

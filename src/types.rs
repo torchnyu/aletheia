@@ -6,7 +6,6 @@ use rocket_contrib::databases::diesel::Insertable;
 use serde_derive::{Deserialize, Serialize};
 use std::fmt;
 
-// Raw repository response from API
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RepositoryResponse {
     pub created_at: String,
@@ -26,6 +25,10 @@ pub struct Repository {
 pub enum AletheiaError {
     #[fail(display = "Config error: {}", message)]
     ConfigError { message: String },
+    #[fail(display = "No such user: {}", email)]
+    NoUserError { email: String },
+    #[fail(display = "User already exists with email: {}", email)]
+    UserAlreadyExists { email: String },
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

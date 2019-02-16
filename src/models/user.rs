@@ -1,9 +1,10 @@
 use crate::schema::*;
 use crate::types::Result;
 use argonautica::input::Salt;
-use argonautica::Hasher;
+use argonautica::{Hasher, Verifier};
 use diesel::{self, AsChangeset, Queryable};
 use serde_derive::{Deserialize, Serialize};
+use std::env;
 
 const SALT_LENGTH: u32 = 16;
 
@@ -14,16 +15,26 @@ pub struct User {
     pub display_name: String,
     pub email: String,
     pub password_digest: String,
-    pub salt: String,
 }
 
-#[derive(Insertable, Serialize, Deserialize)]
+impl User {
+    pub fn validate_credentials(self: &User, creds: &LoginRequest) -> Result<bool> {
+        let mut verifier = Verifier::default();
+
+        Ok(verifier
+            .with_hash(self.password_digest.clone())
+            .with_password(creds.password.clone())
+            .with_secret_key(env::var("SECRET_KEY")?)
+            .verify()?)
+    }
+}
+
+#[derive(Debug, Insertable, Serialize, Deserialize)]
 #[table_name = "users"]
 pub struct UserInsert {
     pub display_name: String,
     pub email: String,
     pub password_digest: String,
-    pub salt: String,
 }
 
 impl UserInsert {
@@ -33,14 +44,13 @@ impl UserInsert {
         let salt = salt.to_str()?;
         let password_digest = hasher
             .with_password(request.password)
-            .with_secret_key("secret key!")
+            .with_secret_key(env::var("SECRET_KEY")?)
             .with_salt(salt)
             .hash()?;
         Ok(UserInsert {
             display_name: request.display_name,
             email: request.email,
             password_digest,
-            salt: salt.to_string(),
         })
     }
 }
@@ -55,15 +65,21 @@ pub struct UserRequest {
 // Don't send the password through the API idiot
 #[derive(Queryable, AsChangeset, Serialize, Deserialize)]
 #[table_name = "users"]
-pub struct UserResult {
+pub struct UserResponse {
     pub id: i32,
     pub display_name: String,
     pub email: String,
 }
 
-impl UserResult {
-    pub fn from_user(user: User) -> UserResult {
-        UserResult {
+#[derive(Serialize, Deserialize)]
+pub struct LoginRequest {
+    pub email: String,
+    pub password: String,
+}
+
+impl UserResponse {
+    pub fn from_user(user: User) -> UserResponse {
+        UserResponse {
             id: user.id,
             display_name: user.display_name,
             email: user.email,

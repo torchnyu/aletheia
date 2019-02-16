@@ -19,21 +19,30 @@ pub mod projects {
 }
 
 pub mod users {
-    use crate::models::{UserRequest, UserResult};
+    use crate::models::{LoginRequest, User, UserRequest, UserResponse};
     use crate::types::{DbConn, Result};
-    use rocket::{get, post};
+    use rocket::http::Header;
+    use rocket::{get, post, Response};
     use rocket_contrib::json::Json;
 
     #[get("/")]
-    pub fn index(conn: DbConn) -> Result<Json<Vec<UserResult>>> {
+    pub fn index(conn: DbConn) -> Result<Json<Vec<UserResponse>>> {
         Ok(Json(crate::controllers::users_controller::all(&conn)?))
     }
 
     #[post("/", format = "application/json", data = "<user>")]
-    pub fn create(conn: DbConn, user: Json<UserRequest>) -> Result<Json<UserResult>> {
+    pub fn create(conn: DbConn, user: Json<UserRequest>) -> Result<Json<UserResponse>> {
         let user = user.into_inner();
         Ok(Json(crate::controllers::users_controller::create(
             user, &conn,
         )?))
+    }
+
+    #[post("/login", format = "application/json", data = "<creds>")]
+    pub fn login(conn: DbConn, creds: Json<LoginRequest>) -> Result<Json<UserResponse>> {
+        let creds = creds.into_inner();
+        let user = crate::controllers::users_controller::login(&creds, &conn)?;
+        let token = crate::tokens::create_token(&creds.email)?;
+        Ok(Json(user))
     }
 }

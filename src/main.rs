@@ -1,13 +1,12 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 #[macro_use]
 extern crate failure_derive;
-
 #[macro_use]
 extern crate rocket_contrib;
-
 #[macro_use]
 extern crate diesel;
-
+extern crate dotenv;
+extern crate jsonwebtoken as jwt;
 extern crate rand;
 
 use itertools::Itertools;
@@ -19,6 +18,7 @@ mod github;
 mod models;
 mod routes;
 mod schema;
+mod tokens;
 mod types;
 
 use crate::types::{DbConn, Result, RulesConfig};
@@ -38,6 +38,7 @@ fn index() -> String {
 }
 
 fn main() {
+    dotenv::dotenv().expect("Failed to read .env file");
     rocket::ignite()
         .mount(
             "/projects",
@@ -45,7 +46,11 @@ fn main() {
         )
         .mount(
             "/users",
-            routes![routes::users::index, routes::users::create],
+            routes![
+                routes::users::index,
+                routes::users::create,
+                routes::users::login
+            ],
         )
         .mount("/", routes![index])
         .attach(DbConn::fairing())
