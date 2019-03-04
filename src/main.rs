@@ -74,6 +74,10 @@ fn main() {
             ],
         )
         .mount(
+            "/submissions",
+            routes![routes::submissions::index, routes::submissions::create],
+        )
+        .mount(
             "/",
             routes![index, graphiql, handle_graphql_get, handle_graphql_post],
         )

@@ -19,6 +19,32 @@ pub mod projects {
     }
 }
 
+pub mod submissions {
+    use crate::db::Connection;
+    use crate::models::{Submission, SubmissionInsert};
+    use crate::types::Result;
+    use rocket::{get, post};
+    use rocket_contrib::json::Json;
+
+    #[get("/")]
+    pub fn index(conn: Connection) -> Result<Json<Vec<Submission>>> {
+        Ok(Json(crate::controllers::submissions_controller::all(
+            &conn,
+        )?))
+    }
+
+    #[post("/", format = "application/json", data = "<submission>")]
+    pub fn create(
+        conn: Connection,
+        submission: Json<SubmissionInsert>,
+    ) -> Result<Json<Submission>> {
+        let submission = submission.into_inner();
+        Ok(Json(crate::controllers::submissions_controller::insert(
+            submission, &conn,
+        )?))
+    }
+}
+
 pub mod users {
     use crate::db::Connection;
     use crate::models::{LoginRequest, UserRequest, UserResponse};
