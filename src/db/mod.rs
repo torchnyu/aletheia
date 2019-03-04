@@ -1,6 +1,7 @@
 use diesel::pg::PgConnection;
 use diesel::r2d2::ConnectionManager;
 use diesel::Connection as DieselConnection;
+use r2d2;
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};
 use rocket::{Outcome, Request, State};
@@ -18,10 +19,8 @@ pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 pub fn init_pool() -> Pool {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
-    let config = r2d2::Config::default();
-
     let manager = ConnectionManager::<PgConnection>::new(&database_url[..]);
-    r2d2::Pool::new(config, manager).expect(&format!("Error connection to {}", &database_url[..]))
+    r2d2::Pool::new(manager).expect(&format!("Error connection to {}", &database_url[..]))
 }
 
 pub struct Connection(r2d2::PooledConnection<ConnectionManager<PgConnection>>);

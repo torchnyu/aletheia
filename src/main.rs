@@ -10,9 +10,11 @@ extern crate juniper;
 extern crate dotenv;
 extern crate jsonwebtoken as jwt;
 extern crate juniper_rocket;
+extern crate r2d2;
 extern crate rand;
 
 use crate::db::Connection;
+use crate::graphql::Context;
 use itertools::Itertools;
 use juniper::{EmptyMutation, RootNode};
 use rocket::response::content;
@@ -24,13 +26,12 @@ use std::io::Read;
 mod controllers;
 mod db;
 mod github;
+mod graphql;
 mod models;
 mod routes;
 mod schema;
 mod tokens;
 mod types;
-
-type Schema = RootNode<'static, Connection, EmptyMutation<Connection>>;
 
 #[get("/")]
 fn index() -> String {
@@ -47,6 +48,18 @@ fn handle_graphql_get(
     request: juniper_rocket::GraphQLRequest,
     database: Connection,
 ) -> juniper_rocket::GraphQLResponse {
+    let schema = graphql::create_schema();
+    let context = Context { database };
+    request.execute(&schema, &context)
+}
+
+#[post("/graphql", data = "<request>")]
+fn handle_graphql_post(
+    request: juniper_rocket::GraphQLRequest,
+    database: Connection,
+) -> juniper_rocket::GraphQLResponse {
+    let schema = graphql::create_schema();
+    let context = Context { database };
     request.execute(&schema, &context)
 }
 
@@ -65,7 +78,10 @@ fn main() {
                 routes::users::login
             ],
         )
-        .mount("/", routes![index, graphiql])
+        .mount(
+            "/",
+            routes![index, graphiql, handle_graphql_get, handle_graphql_post],
+        )
         .manage(db::init_pool())
         .launch();
 }
