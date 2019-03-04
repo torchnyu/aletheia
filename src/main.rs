@@ -5,15 +5,24 @@ extern crate failure_derive;
 extern crate rocket_contrib;
 #[macro_use]
 extern crate diesel;
+#[macro_use]
+extern crate juniper;
 extern crate dotenv;
 extern crate jsonwebtoken as jwt;
+extern crate juniper_rocket;
 extern crate rand;
 
+use crate::db::Connection;
 use itertools::Itertools;
+use juniper::{EmptyMutation, RootNode};
+use rocket::response::content;
+use rocket::State;
+use rocket::*;
 use std::fs::File;
 use std::io::Read;
 
 mod controllers;
+mod db;
 mod github;
 mod models;
 mod routes;
@@ -21,20 +30,24 @@ mod schema;
 mod tokens;
 mod types;
 
-use crate::types::{DbConn, Result, RulesConfig};
-use rocket::*;
-
-#[get("/<username>/<repo_name>")]
-fn validate_repo(username: String, repo_name: String) -> Result<String> {
-    let config = load_config()?;
-    let repo = format!("{}/{}", username, repo_name).to_string();
-    let issues = github::check_repo(&repo, config.into_rules()?)?;
-    Ok(issues.iter().map(ToString::to_string).join("\n"))
-}
+type Schema = RootNode<'static, Connection, EmptyMutation<Connection>>;
 
 #[get("/")]
 fn index() -> String {
-    "Welcome to Aletheia, a hackathon cheating detector!".to_string()
+    "Welcome to Aletheia, HackNYU's centralized API!".to_string()
+}
+
+#[get["/graphiql"]]
+fn graphiql() -> content::Html<String> {
+    juniper_rocket::graphiql_source("/graphiql")
+}
+
+#[get("/graphql?<request>")]
+fn handle_graphql_get(
+    request: juniper_rocket::GraphQLRequest,
+    database: Connection,
+) -> juniper_rocket::GraphQLResponse {
+    request.execute(&schema, &context)
 }
 
 fn main() {
@@ -52,20 +65,7 @@ fn main() {
                 routes::users::login
             ],
         )
-        .mount("/", routes![index])
-        .attach(DbConn::fairing())
+        .mount("/", routes![index, graphiql])
+        .manage(db::init_pool())
         .launch();
-}
-
-fn read_config_file() -> Result<String> {
-    let mut file = File::open("config.toml")?;
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
-    Ok(contents)
-}
-
-fn load_config() -> Result<RulesConfig> {
-    let contents = read_config_file()?;
-    let config = toml::from_str(&contents)?;
-    Ok(config)
 }

@@ -19,11 +19,17 @@ pub mod projects {
 }
 
 pub mod users {
-    use crate::models::{LoginRequest, User, UserRequest, UserResponse};
+    use crate::models::{LoginRequest, UserRequest, UserResponse};
     use crate::types::{DbConn, Result};
     use rocket::http::Header;
-    use rocket::{get, post, Response};
+    use rocket::{get, post, Responder};
     use rocket_contrib::json::Json;
+
+    #[derive(Responder)]
+    pub struct AuthenticatedResponse {
+        data: Json<UserResponse>,
+        header: Header<'static>,
+    }
 
     #[get("/")]
     pub fn index(conn: DbConn) -> Result<Json<Vec<UserResponse>>> {
@@ -39,10 +45,14 @@ pub mod users {
     }
 
     #[post("/login", format = "application/json", data = "<creds>")]
-    pub fn login(conn: DbConn, creds: Json<LoginRequest>) -> Result<Json<UserResponse>> {
+    pub fn login(conn: DbConn, creds: Json<LoginRequest>) -> Result<AuthenticatedResponse> {
         let creds = creds.into_inner();
         let user = crate::controllers::users_controller::login(&creds, &conn)?;
         let token = crate::tokens::create_token(&creds.email)?;
-        Ok(Json(user))
+        let response = AuthenticatedResponse {
+            data: Json(user),
+            header: Header::new("token", token),
+        };
+        Ok(response)
     }
 }
