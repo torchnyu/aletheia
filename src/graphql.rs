@@ -1,4 +1,7 @@
 use crate::db::Connection;
+use crate::models::UserResponse;
+use crate::types::Result;
+use juniper::FieldResult;
 use juniper::RootNode;
 
 pub struct Context {
@@ -17,10 +20,11 @@ pub struct MutationRoot {}
 graphql_object!(QueryRoot: Context as "Query" |&self| {
     description: "The root query object of the schema"
 
-    field test_field(
+    field get_all_users(
         &executor
-    ) -> String {
-        "This is a test field".to_string()
+    ) -> FieldResult<Vec<UserResponse>> {
+        let database = &executor.context().database;
+        Ok(crate::controllers::users_controller::all(&database)?)
     }
 
 });
