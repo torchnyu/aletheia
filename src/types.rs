@@ -1,8 +1,5 @@
-use crate::models::Project;
-use crate::schema::projects;
 use chrono::prelude::*;
 use failure::Error;
-use rocket_contrib::databases::diesel::Insertable;
 use serde_derive::{Deserialize, Serialize};
 use std::fmt;
 
@@ -48,22 +45,6 @@ pub struct Rules {
 
 #[database("postgres_logs")]
 pub struct DbConn(diesel::PgConnection);
-
-#[derive(Insertable, Serialize, Deserialize)]
-#[table_name = "projects"]
-pub struct InsertableProject {
-    pub name: String,
-    pub repository_url: String,
-}
-
-impl InsertableProject {
-    pub fn from_project(project: Project) -> InsertableProject {
-        InsertableProject {
-            name: project.name,
-            repository_url: project.repository_url,
-        }
-    }
-}
 
 #[derive(Debug)]
 pub enum Issue {
