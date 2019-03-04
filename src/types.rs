@@ -2,7 +2,6 @@ use crate::models::Project;
 use crate::schema::projects;
 use chrono::prelude::*;
 use failure::Error;
-use r2d2;
 use rocket_contrib::databases::diesel::Insertable;
 use serde_derive::{Deserialize, Serialize};
 use std::fmt;

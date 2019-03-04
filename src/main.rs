@@ -15,13 +15,8 @@ extern crate rand;
 
 use crate::db::Connection;
 use crate::graphql::Context;
-use itertools::Itertools;
-use juniper::{EmptyMutation, RootNode};
 use rocket::response::content;
-use rocket::State;
 use rocket::*;
-use std::fs::File;
-use std::io::Read;
 
 mod controllers;
 mod db;

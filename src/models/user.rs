@@ -71,10 +71,16 @@ pub struct UserResponse {
     pub email: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, GraphQLObject)]
 pub struct LoginRequest {
     pub email: String,
     pub password: String,
+}
+
+#[derive(GraphQLObject)]
+pub struct LoginResponse {
+    pub token: String,
+    pub user: UserResponse,
 }
 
 impl UserResponse {
