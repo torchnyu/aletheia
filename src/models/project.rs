@@ -2,7 +2,7 @@ use crate::schema::*;
 use diesel::{self, AsChangeset, Queryable};
 use serde_derive::{Deserialize, Serialize};
 
-#[derive(Queryable, AsChangeset, Serialize, Deserialize)]
+#[derive(Identifiable, Queryable, AsChangeset, Serialize, Deserialize, Associations)]
 #[table_name = "projects"]
 pub struct Project {
     pub id: i32,

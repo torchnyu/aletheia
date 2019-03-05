@@ -1,10 +1,9 @@
 use crate::models::{Project, User};
 use crate::schema::*;
-use diesel::associations::BelongsTo;
 use diesel::{self, AsChangeset, Queryable};
 use serde_derive::{Deserialize, Serialize};
 
-#[derive(Queryable, AsChangeset, Serialize, Deserialize, Associations)]
+#[derive(Identifiable, Queryable, AsChangeset, Serialize, Deserialize, Associations)]
 #[table_name = "submissions"]
 #[belongs_to(User)]
 #[belongs_to(Project)]

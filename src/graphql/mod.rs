@@ -1,5 +1,7 @@
+pub mod project_type;
+
 use crate::db::Connection;
-use crate::models::{LoginRequest, LoginResponse, UserResponse};
+use crate::models::{LoginRequest, LoginResponse, Project, UserResponse};
 use juniper::FieldResult;
 use juniper::RootNode;
 
@@ -24,6 +26,13 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     ) -> FieldResult<Vec<UserResponse>> {
         let database = &executor.context().database;
         Ok(crate::controllers::users_controller::all(&database)?)
+    }
+
+    field projects(
+        &executor
+    ) -> FieldResult<Vec<Project>> {
+        let database = &executor.context().database;
+        Ok(crate::controllers::projects_controller::all(&database)?)
     }
 
 });
