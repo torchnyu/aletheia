@@ -7,7 +7,6 @@ use diesel::BelongingToDsl;
 use diesel::ExpressionMethods;
 use diesel::QueryDsl;
 use diesel::RunQueryDsl;
-use juniper::FieldResult;
 
 graphql_object!(Project: Context |&self| {
     description: "A hackathon project"
@@ -17,11 +16,11 @@ graphql_object!(Project: Context |&self| {
     }
 
     field name(&executor) -> String {
-        self.name
+        self.name.clone()
     }
 
     field repository_url(&executor) -> String {
-        self.repository_url
+        self.repository_url.clone()
     }
     
     field contributors(&executor) -> Vec<UserResponse> {
@@ -29,6 +28,6 @@ graphql_object!(Project: Context |&self| {
         let user_ids = Submission::belonging_to(self).select(submissions::user_id);
         users::table.filter(users::id.eq(any(user_ids)))
             .select((id, display_name, email))
-            .load::<UserResponse>(database).expect("Could not load tags")
+            .load::<UserResponse>(database).expect("Could not load contributors")
     }
 });

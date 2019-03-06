@@ -1,13 +1,17 @@
 pub mod project_type;
+pub mod user_type;
 
 use crate::db::Connection;
 use crate::models::{LoginRequest, LoginResponse, Project, UserResponse};
+use juniper::Context as JuniperContext;
 use juniper::FieldResult;
 use juniper::RootNode;
 
 pub struct Context {
     pub database: Connection,
 }
+
+impl JuniperContext for Context {}
 
 type Schema = RootNode<'static, QueryRoot, MutationRoot>;
 

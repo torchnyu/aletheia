@@ -62,8 +62,7 @@ pub struct UserRequest {
     pub password: String,
 }
 
-// Don't send the password through the API idiot
-#[derive(Queryable, AsChangeset, Serialize, Deserialize, GraphQLObject)]
+#[derive(Identifiable, Queryable, AsChangeset, Serialize, Deserialize, Associations)]
 #[table_name = "users"]
 pub struct UserResponse {
     pub id: i32,
