@@ -1,11 +1,14 @@
 use super::Context;
-use crate::models::{UserResponse, Submission, Project};
+use crate::models::{Submission, Project};
 use crate::schema::{projects, submissions};
 use diesel::pg::expression::dsl::any;
 use diesel::BelongingToDsl;
 use diesel::ExpressionMethods;
 use diesel::QueryDsl;
 use diesel::RunQueryDsl;
+
+pub use crate::models::UserResponse;
+
 
 graphql_object!(UserResponse: Context as "User" |&self| {
     description: "A user"
@@ -14,12 +17,12 @@ graphql_object!(UserResponse: Context as "User" |&self| {
         self.id
     }
 
-    field display_name(&executor) -> String {
-        self.display_name.clone()
+    field display_name(&executor) -> &str {
+        &self.display_name
     }
 
-    field email(&executor) -> String {
-        self.email.clone()
+    field email(&executor) -> &str {
+        &self.email
     }
     
     field projects(&executor) -> Vec<Project> {

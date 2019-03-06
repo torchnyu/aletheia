@@ -76,7 +76,6 @@ pub struct LoginRequest {
     pub password: String,
 }
 
-#[derive(GraphQLObject)]
 pub struct LoginResponse {
     pub token: String,
     pub user: UserResponse,

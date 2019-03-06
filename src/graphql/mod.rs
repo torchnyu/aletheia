@@ -1,8 +1,10 @@
 pub mod project_type;
 pub mod user_type;
 
+use self::project_type::Project;
+use self::user_type::UserResponse;
 use crate::db::Connection;
-use crate::models::{LoginRequest, LoginResponse, Project, UserResponse};
+use crate::models::{LoginRequest, LoginResponse};
 use juniper::Context as JuniperContext;
 use juniper::FieldResult;
 use juniper::RootNode;
@@ -21,6 +23,17 @@ pub fn create_schema() -> Schema {
 
 pub struct QueryRoot {}
 pub struct MutationRoot {}
+
+graphql_object!(LoginResponse: Context |&self| {
+
+    field user(&executor) -> &UserResponse {
+        &self.user
+    }
+
+    field token(&executor) -> &str {
+        &self.token
+    }
+});
 
 graphql_object!(QueryRoot: Context as "Query" |&self| {
     description: "The root query object of the schema"

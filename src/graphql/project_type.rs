@@ -1,5 +1,5 @@
 use crate::graphql::Context;
-use crate::models::{Project, Submission, UserResponse};
+use crate::models::{Submission, UserResponse};
 use crate::schema::users::dsl::{display_name, email, id};
 use crate::schema::{submissions, users};
 use diesel::pg::expression::dsl::any;
@@ -7,6 +7,8 @@ use diesel::BelongingToDsl;
 use diesel::ExpressionMethods;
 use diesel::QueryDsl;
 use diesel::RunQueryDsl;
+
+pub use crate::models::Project;
 
 graphql_object!(Project: Context |&self| {
     description: "A hackathon project"
