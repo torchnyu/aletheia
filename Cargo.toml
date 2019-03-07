@@ -16,6 +16,7 @@ failure = "0.1.5"
 failure_derive = "0.1.5"
 chrono = "0.4"
 rocket = "0.4.0"
+rocket_cors = { git = "https://github.com/lawliet89/rocket_cors", branch = "master" }
 itertools = "0.8"
 diesel = { version = "1.4.1", features = ["postgres"] }
 dotenv = "0.9.0"

@@ -15,8 +15,10 @@ extern crate rand;
 
 use crate::db::Connection;
 use crate::graphql::Context;
+use crate::types::Result;
 use rocket::response::content;
 use rocket::*;
+use rocket_cors::CorsOptions;
 
 mod controllers;
 mod db;
@@ -58,7 +60,9 @@ fn handle_graphql_post(
     request.execute(&schema, &context)
 }
 
-fn main() {
+fn main() -> Result<()> {
+    let default = CorsOptions::default();
+    let cors = CorsOptions::to_cors(&default)?;
     dotenv::dotenv().expect("Failed to read .env file");
     rocket::ignite()
         .mount(
@@ -81,6 +85,8 @@ fn main() {
             "/",
             routes![index, graphiql, handle_graphql_get, handle_graphql_post],
         )
+        .attach(cors)
         .manage(db::init_pool())
         .launch();
+    Ok(())
 }
