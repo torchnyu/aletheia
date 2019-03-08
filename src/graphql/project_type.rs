@@ -17,12 +17,20 @@ graphql_object!(Project: Context |&self| {
         self.id
     }
 
-    field name(&executor) -> String {
-        self.name.clone()
+    field name(&executor) -> &str {
+        &self.name
     }
 
-    field repository_url(&executor) -> String {
-        self.repository_url.clone()
+    field repository_url(&executor) -> &str {
+        &self.repository_url
+    }
+
+    field color(&executor) -> &str {
+        &self.color
+    }
+
+    field description(&executor) -> &str {
+        &self.description
     }
     
     field contributors(&executor) -> Vec<UserResponse> {

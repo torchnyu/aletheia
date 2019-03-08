@@ -3,6 +3,8 @@ table! {
         id -> Int4,
         name -> Varchar,
         repository_url -> Varchar,
+        color -> Varchar,
+        description -> Nullable<Varchar>,
     }
 }
 
