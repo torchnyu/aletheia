@@ -5,39 +5,64 @@ extern crate failure_derive;
 extern crate rocket_contrib;
 #[macro_use]
 extern crate diesel;
+#[macro_use]
+extern crate juniper;
 extern crate dotenv;
 extern crate jsonwebtoken as jwt;
+extern crate juniper_rocket;
+extern crate r2d2;
 extern crate rand;
 
-use itertools::Itertools;
-use std::fs::File;
-use std::io::Read;
+use crate::db::Connection;
+use crate::graphql::Context;
+use crate::types::Result;
+use rocket::response::content;
+use rocket::*;
+use rocket_cors::CorsOptions;
 
 mod controllers;
+mod db;
 mod github;
+mod graphql;
 mod models;
 mod routes;
 mod schema;
 mod tokens;
 mod types;
 
-use crate::types::{DbConn, Result, RulesConfig};
-use rocket::*;
-
-#[get("/<username>/<repo_name>")]
-fn validate_repo(username: String, repo_name: String) -> Result<String> {
-    let config = load_config()?;
-    let repo = format!("{}/{}", username, repo_name).to_string();
-    let issues = github::check_repo(&repo, config.into_rules()?)?;
-    Ok(issues.iter().map(ToString::to_string).join("\n"))
-}
-
 #[get("/")]
 fn index() -> String {
-    "Welcome to Aletheia, a hackathon cheating detector!".to_string()
+    "Welcome to Aletheia, HackNYU's centralized API!".to_string()
 }
 
-fn main() {
+#[get["/graphiql"]]
+fn graphiql() -> content::Html<String> {
+    juniper_rocket::graphiql_source("/graphiql")
+}
+
+#[get("/graphql?<request>")]
+fn handle_graphql_get(
+    request: juniper_rocket::GraphQLRequest,
+    database: Connection,
+) -> juniper_rocket::GraphQLResponse {
+    let schema = graphql::create_schema();
+    let context = Context { database };
+    request.execute(&schema, &context)
+}
+
+#[post("/graphql", data = "<request>")]
+fn handle_graphql_post(
+    request: juniper_rocket::GraphQLRequest,
+    database: Connection,
+) -> juniper_rocket::GraphQLResponse {
+    let schema = graphql::create_schema();
+    let context = Context { database };
+    request.execute(&schema, &context)
+}
+
+fn main() -> Result<()> {
+    let default = CorsOptions::default();
+    let cors = CorsOptions::to_cors(&default)?;
     dotenv::dotenv().expect("Failed to read .env file");
     rocket::ignite()
         .mount(
@@ -52,20 +77,16 @@ fn main() {
                 routes::users::login
             ],
         )
-        .mount("/", routes![index])
-        .attach(DbConn::fairing())
+        .mount(
+            "/submissions",
+            routes![routes::submissions::index, routes::submissions::create],
+        )
+        .mount(
+            "/",
+            routes![index, graphiql, handle_graphql_get, handle_graphql_post],
+        )
+        .attach(cors)
+        .manage(db::init_pool())
         .launch();
-}
-
-fn read_config_file() -> Result<String> {
-    let mut file = File::open("config.toml")?;
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
-    Ok(contents)
-}
-
-fn load_config() -> Result<RulesConfig> {
-    let contents = read_config_file()?;
-    let config = toml::from_str(&contents)?;
-    Ok(config)
+    Ok(())
 }

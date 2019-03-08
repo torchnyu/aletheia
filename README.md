@@ -1,16 +1,5 @@
 # Aletheia
 
-Aletheia is a cheating detector for hackathons. The eventual goal is
-to cover the various forms of cheating, such as:
-
-- Starting a project before the hackathon
-- Plagiarized code
-- Teams larger than the max size
-- Contributors to multiple repos
-
-
-In addition, Aletheia may discover some other useful facts such as:
-
-- Usage of persistence
-- Hard coding data
-
+Aletheia is an API for as many services as possible. Right now, it's
+just going to power HackNYU's site, but perhaps it will be used for
+other services. 

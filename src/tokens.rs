@@ -2,16 +2,15 @@ use crate::types::Result;
 use chrono::{Duration, Local};
 use jwt::{decode, encode, Header, Validation};
 use serde_derive::{Deserialize, Serialize};
-use std::convert::From;
 use std::env;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
-    issuer: String,
-    subject: String,
-    issued_at: i64,
-    expiry: i64,
-    email: String,
+    iss: String,
+    sub: String,
+    iua: i64,
+    exp: i64,
+    uid: String,
 }
 
 static EXPIRY_DURATION: i64 = 72;
@@ -19,11 +18,11 @@ static EXPIRY_DURATION: i64 = 72;
 impl Claims {
     fn new(email: &str) -> Self {
         Claims {
-            issuer: "localhost".into(),
-            subject: "auth".into(),
-            email: email.to_owned(),
-            issued_at: Local::now().timestamp(),
-            expiry: (Local::now() + Duration::hours(EXPIRY_DURATION)).timestamp(),
+            iss: "localhost".into(),
+            sub: "auth".into(),
+            uid: email.to_owned(),
+            iua: Local::now().timestamp(),
+            exp: (Local::now() + Duration::hours(EXPIRY_DURATION)).timestamp(),
         }
     }
 }

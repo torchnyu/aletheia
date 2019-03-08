@@ -1,4 +1,4 @@
-use crate::models::Project;
+use crate::models::{Project, ProjectInsert};
 use crate::schema::projects;
 use crate::types::*;
 use diesel::prelude::*;
@@ -12,7 +12,7 @@ pub fn get(id: i32, conn: &diesel::PgConnection) -> Result<Project> {
     Ok(projects::table.find(id).get_result::<Project>(conn)?)
 }
 
-pub fn insert(project: InsertableProject, conn: &diesel::PgConnection) -> Result<Project> {
+pub fn insert(project: ProjectInsert, conn: &diesel::PgConnection) -> Result<Project> {
     Ok(diesel::insert_into(projects::table)
         .values(&project)
         .get_result(conn)?)
