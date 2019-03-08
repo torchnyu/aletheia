@@ -1,6 +1,6 @@
-use crate::models::{Project, ProjectInsert};
 use crate::schema::projects;
-use crate::types::*;
+use crate::types::{Project, ProjectInsert};
+use crate::utils::*;
 use diesel::prelude::*;
 use rocket_contrib::databases::diesel;
 

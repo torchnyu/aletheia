@@ -1,7 +1,7 @@
 pub mod projects {
     use crate::db::Connection;
-    use crate::models::{Project, ProjectInsert};
-    use crate::types::Result;
+    use crate::types::{Project, ProjectInsert};
+    use crate::utils::Result;
     use rocket::{get, post};
     use rocket_contrib::json::Json;
 
@@ -21,8 +21,8 @@ pub mod projects {
 
 pub mod submissions {
     use crate::db::Connection;
-    use crate::models::{Submission, SubmissionInsert};
-    use crate::types::Result;
+    use crate::types::{Submission, SubmissionInsert};
+    use crate::utils::Result;
     use rocket::{get, post};
     use rocket_contrib::json::Json;
 
@@ -47,8 +47,8 @@ pub mod submissions {
 
 pub mod users {
     use crate::db::Connection;
-    use crate::models::{LoginRequest, UserRequest, UserResponse};
-    use crate::types::Result;
+    use crate::types::{LoginRequest, UserRequest, UserResponse};
+    use crate::utils::Result;
     use rocket::http::Header;
     use rocket::{get, post, Responder};
     use rocket_contrib::json::Json;

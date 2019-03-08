@@ -1,4 +1,4 @@
-use crate::types::Result;
+use crate::utils::Result;
 use chrono::{Duration, Local};
 use jwt::{decode, encode, Header, Validation};
 use serde_derive::{Deserialize, Serialize};
