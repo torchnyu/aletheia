@@ -2,15 +2,8 @@ use crate::schema::*;
 use diesel::{self, AsChangeset, Queryable};
 use super::Context;
 use serde_derive::{Deserialize, Serialize};
-use crate::types::{Submission, UserResponse};
-use crate::schema::users::dsl::{display_name, email, id};
-use crate::schema::{submissions, users};
-use diesel::pg::expression::dsl::any;
-use diesel::BelongingToDsl;
-use diesel::ExpressionMethods;
-use diesel::QueryDsl;
-use diesel::RunQueryDsl;
-
+use crate::types::{UserResponse};
+use crate::resolvers;
 
 #[derive(Identifiable, Queryable, AsChangeset, Serialize, Deserialize, Associations)]
 #[table_name = "projects"]
@@ -70,9 +63,6 @@ graphql_object!(Project: Context |&self| {
     
     field contributors(&executor) -> Vec<UserResponse> {
         let database: &diesel::PgConnection = &executor.context().database;
-        let user_ids = Submission::belonging_to(self).select(submissions::user_id);
-        users::table.filter(users::id.eq(any(user_ids)))
-            .select((id, display_name, email))
-            .load::<UserResponse>(database).expect("Could not load contributors")
+        resolvers::project::contributors(self, database)
     }
 });

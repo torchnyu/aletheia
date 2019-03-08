@@ -15,7 +15,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         let credentials = LoginRequest {
             email, password
         };
-        let user = crate::controllers::users_controller::login(&credentials, &database)?;
+        let user = crate::resolvers::user::login(&credentials, &database)?;
         let token = crate::tokens::create_token(&user.email)?;
         Ok(LoginResponse {  user, token })
     }

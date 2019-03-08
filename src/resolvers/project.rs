@@ -1,7 +1,10 @@
-use crate::schema::projects;
-use crate::types::{Project, ProjectInsert};
+use crate::schema::users::columns;
+use crate::schema::{projects, submissions, users};
+use crate::types::{Project, ProjectInsert, Submission, UserResponse};
 use crate::utils::*;
+use diesel::dsl::any;
 use diesel::prelude::*;
+use diesel::BelongingToDsl;
 use rocket_contrib::databases::diesel;
 
 pub fn all(conn: &diesel::PgConnection) -> Result<Vec<Project>> {
@@ -26,4 +29,13 @@ pub fn update(id: i32, person: Project, conn: &diesel::PgConnection) -> Result<P
 
 pub fn delete(id: i32, conn: &diesel::PgConnection) -> Result<usize> {
     Ok(diesel::delete(projects::table.find(id)).execute(conn)?)
+}
+
+pub fn contributors(project: &Project, conn: &diesel::PgConnection) -> Vec<UserResponse> {
+    let user_ids = Submission::belonging_to(project).select(submissions::user_id);
+    users::table
+        .filter(users::id.eq(any(user_ids)))
+        .select((columns::id, columns::display_name, columns::email))
+        .load::<UserResponse>(conn)
+        .expect("Could not load contributors")
 }

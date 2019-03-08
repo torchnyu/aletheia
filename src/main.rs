@@ -20,9 +20,9 @@ use rocket::response::content;
 use rocket::*;
 use rocket_cors::CorsOptions;
 
-mod controllers;
 mod db;
 mod github;
+mod resolvers;
 mod routes;
 mod schema;
 mod tokens;
