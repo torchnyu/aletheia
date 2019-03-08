@@ -1,7 +1,7 @@
 pub mod projects {
     use crate::db::Connection;
     use crate::resolvers;
-    use crate::types::{Project, ProjectInsert};
+    use crate::types::{Project, ProjectInsert, ProjectRequest};
     use crate::utils::Result;
     use rocket::{get, post};
     use rocket_contrib::json::Json;
@@ -12,9 +12,12 @@ pub mod projects {
     }
 
     #[post("/", format = "application/json", data = "<project>")]
-    pub fn create(conn: Connection, project: Json<ProjectInsert>) -> Result<Json<Project>> {
+    pub fn create(conn: Connection, project: Json<ProjectRequest>) -> Result<Json<Project>> {
         let project = project.into_inner();
-        Ok(Json(resolvers::project::insert(project, &conn)?))
+        Ok(Json(resolvers::project::insert(
+            ProjectInsert::from_request(project),
+            &conn,
+        )?))
     }
 }
 

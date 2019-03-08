@@ -5,6 +5,7 @@ table! {
         repository_url -> Varchar,
         color -> Varchar,
         description -> Nullable<Varchar>,
+        slug -> Varchar,
     }
 }
 

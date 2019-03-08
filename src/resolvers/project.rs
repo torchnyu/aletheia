@@ -15,6 +15,12 @@ pub fn get(id: i32, conn: &diesel::PgConnection) -> Result<Project> {
     Ok(projects::table.find(id).get_result::<Project>(conn)?)
 }
 
+pub fn get_by_slug(slug: &str, conn: &diesel::PgConnection) -> Result<Project> {
+    Ok(projects::table
+        .filter(projects::slug.eq(slug))
+        .first(conn)?)
+}
+
 pub fn insert(project: ProjectInsert, conn: &diesel::PgConnection) -> Result<Project> {
     Ok(diesel::insert_into(projects::table)
         .values(&project)

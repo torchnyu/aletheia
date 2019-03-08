@@ -12,6 +12,7 @@ extern crate jsonwebtoken as jwt;
 extern crate juniper_rocket;
 extern crate r2d2;
 extern crate rand;
+extern crate slug;
 
 use crate::db::Connection;
 use crate::types::Context;
