@@ -1,36 +1,37 @@
 pub mod projects {
     use crate::db::Connection;
-    use crate::models::{Project, ProjectInsert};
-    use crate::types::Result;
+    use crate::resolvers;
+    use crate::types::{Project, ProjectInsert, ProjectRequest};
+    use crate::utils::Result;
     use rocket::{get, post};
     use rocket_contrib::json::Json;
 
     #[get("/")]
     pub fn index(conn: Connection) -> Result<Json<Vec<Project>>> {
-        Ok(Json(crate::controllers::projects_controller::all(&conn)?))
+        Ok(Json(resolvers::project::all(&conn)?))
     }
 
     #[post("/", format = "application/json", data = "<project>")]
-    pub fn create(conn: Connection, project: Json<ProjectInsert>) -> Result<Json<Project>> {
+    pub fn create(conn: Connection, project: Json<ProjectRequest>) -> Result<Json<Project>> {
         let project = project.into_inner();
-        Ok(Json(crate::controllers::projects_controller::insert(
-            project, &conn,
+        Ok(Json(resolvers::project::insert(
+            ProjectInsert::from_request(project),
+            &conn,
         )?))
     }
 }
 
 pub mod submissions {
     use crate::db::Connection;
-    use crate::models::{Submission, SubmissionInsert};
-    use crate::types::Result;
+    use crate::resolvers;
+    use crate::types::{Submission, SubmissionInsert};
+    use crate::utils::Result;
     use rocket::{get, post};
     use rocket_contrib::json::Json;
 
     #[get("/")]
     pub fn index(conn: Connection) -> Result<Json<Vec<Submission>>> {
-        Ok(Json(crate::controllers::submissions_controller::all(
-            &conn,
-        )?))
+        Ok(Json(resolvers::submission::all(&conn)?))
     }
 
     #[post("/", format = "application/json", data = "<submission>")]
@@ -39,16 +40,15 @@ pub mod submissions {
         submission: Json<SubmissionInsert>,
     ) -> Result<Json<Submission>> {
         let submission = submission.into_inner();
-        Ok(Json(crate::controllers::submissions_controller::insert(
-            submission, &conn,
-        )?))
+        Ok(Json(resolvers::submission::insert(submission, &conn)?))
     }
 }
 
 pub mod users {
     use crate::db::Connection;
-    use crate::models::{LoginRequest, UserRequest, UserResponse};
-    use crate::types::Result;
+    use crate::resolvers;
+    use crate::types::{LoginRequest, UserRequest, UserResponse};
+    use crate::utils::Result;
     use rocket::http::Header;
     use rocket::{get, post, Responder};
     use rocket_contrib::json::Json;
@@ -61,21 +61,19 @@ pub mod users {
 
     #[get("/")]
     pub fn index(conn: Connection) -> Result<Json<Vec<UserResponse>>> {
-        Ok(Json(crate::controllers::users_controller::all(&conn)?))
+        Ok(Json(resolvers::user::all(&conn)?))
     }
 
     #[post("/", format = "application/json", data = "<user>")]
     pub fn create(conn: Connection, user: Json<UserRequest>) -> Result<Json<UserResponse>> {
         let user = user.into_inner();
-        Ok(Json(crate::controllers::users_controller::create(
-            user, &conn,
-        )?))
+        Ok(Json(resolvers::user::create(user, &conn)?))
     }
 
     #[post("/login", format = "application/json", data = "<creds>")]
     pub fn login(conn: Connection, creds: Json<LoginRequest>) -> Result<AuthenticatedResponse> {
         let creds = creds.into_inner();
-        let user = crate::controllers::users_controller::login(&creds, &conn)?;
+        let user = resolvers::user::login(&creds, &conn)?;
         let token = crate::tokens::create_token(&creds.email)?;
         let response = AuthenticatedResponse {
             data: Json(user),

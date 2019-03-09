@@ -1,6 +1,6 @@
-use crate::models::{LoginRequest, User, UserInsert, UserRequest, UserResponse};
 use crate::schema::users::dsl::{display_name, email, id, users};
-use crate::types::{AletheiaError, Result};
+use crate::types::{LoginRequest, User, UserInsert, UserRequest, UserResponse};
+use crate::utils::{AletheiaError, Result};
 use diesel::dsl::*;
 use diesel::prelude::*;
 use rocket_contrib::databases::diesel;

@@ -12,23 +12,23 @@ extern crate jsonwebtoken as jwt;
 extern crate juniper_rocket;
 extern crate r2d2;
 extern crate rand;
+extern crate slug;
 
 use crate::db::Connection;
-use crate::graphql::Context;
-use crate::types::Result;
+use crate::types::Context;
+use crate::utils::Result;
 use rocket::response::content;
 use rocket::*;
 use rocket_cors::CorsOptions;
 
-mod controllers;
 mod db;
 mod github;
-mod graphql;
-mod models;
+mod resolvers;
 mod routes;
 mod schema;
 mod tokens;
 mod types;
+mod utils;
 
 #[get("/")]
 fn index() -> String {
@@ -45,7 +45,7 @@ fn handle_graphql_get(
     request: juniper_rocket::GraphQLRequest,
     database: Connection,
 ) -> juniper_rocket::GraphQLResponse {
-    let schema = graphql::create_schema();
+    let schema = types::create_schema();
     let context = Context { database };
     request.execute(&schema, &context)
 }
@@ -55,7 +55,7 @@ fn handle_graphql_post(
     request: juniper_rocket::GraphQLRequest,
     database: Connection,
 ) -> juniper_rocket::GraphQLResponse {
-    let schema = graphql::create_schema();
+    let schema = types::create_schema();
     let context = Context { database };
     request.execute(&schema, &context)
 }
