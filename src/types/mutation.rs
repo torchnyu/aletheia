@@ -1,4 +1,7 @@
-use super::{Context, LoginRequest, LoginResponse, Project, ProjectInsert, ProjectRequest};
+use super::{
+    Context, LoginRequest, LoginResponse, Project, ProjectInsert, ProjectRequest, Tokenized,
+};
+use crate::tokens::Claims;
 use juniper::FieldResult;
 
 pub struct MutationRoot {}
@@ -17,7 +20,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         };
         let user = crate::resolvers::user::login(&credentials, &database)?;
         let token = crate::tokens::create_token(&user.email)?;
-        Ok(LoginResponse {  user, token })
+        Ok(LoginResponse { user, token })
     }
 
     field create_project(
@@ -25,10 +28,14 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         name: String,
         repository_url: String,
         color: String,
-        description: Option<String>
-    ) -> FieldResult<Project> {
+        description: Option<String>,
+        token: String
+    ) -> FieldResult<Tokenized<Project>> {
+        let token = Claims::from_string(token)?;
+        let new_token = token.validate()?;
         let request = ProjectRequest { name, repository_url, color, description};
         let database = &executor.context().database;
-        Ok(crate::resolvers::project::insert(ProjectInsert::from_request(request), database)?)
+        let project = crate::resolvers::project::insert(ProjectInsert::from_request(request), database)?;
+        Ok(Tokenized { inner: project, token: new_token.to_string()? })
     }
 });

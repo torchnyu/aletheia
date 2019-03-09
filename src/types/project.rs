@@ -93,3 +93,19 @@ graphql_object!(Project: Context |&self| {
         resolvers::project::contributors(self, database)
     }
 });
+
+#[derive(Serialize, Deserialize)]
+pub struct Tokenized<T> {
+    pub inner: T,
+    pub token: String
+}
+
+graphql_object!(Tokenized<Project>: Context as "AuthenticatedProject" |&self| {
+    field token() -> &str {
+        &self.token
+    }
+
+    field project() -> &Project {
+        &self.inner
+    }
+});
