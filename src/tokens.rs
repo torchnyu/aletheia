@@ -3,6 +3,7 @@ use chrono::{Duration, Local};
 use jwt::{decode, encode, Header, Validation};
 use serde_derive::{Deserialize, Serialize};
 use std::env;
+use std::str::FromStr;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
@@ -37,12 +38,6 @@ impl Claims {
         }
     }
 
-    pub fn from_string(string: String) -> Result<Self> {
-        let secret_key = env::var("SECRET_KEY")?;
-        let token = decode::<Claims>(&string, secret_key.as_bytes(), &Validation::default())?;
-        Ok(token.claims)
-    }
-
     pub fn validate(&self) -> Result<Self> {
         let is_not_expired = Local::now().timestamp() < self.exp;
         if is_not_expired {
@@ -62,4 +57,14 @@ pub fn create_token(email: &str) -> Result<String> {
     let claims = Claims::new(email);
     let secret_key = env::var("SECRET_KEY")?;
     Ok(encode(&Header::default(), &claims, secret_key.as_bytes())?)
+}
+
+impl FromStr for Claims {
+    type Err = failure::Error;
+
+    fn from_str(string: &str) -> Result<Self> {
+        let secret_key = env::var("SECRET_KEY")?;
+        let token = decode::<Claims>(&string, secret_key.as_bytes(), &Validation::default())?;
+        Ok(token.claims)
+    }
 }

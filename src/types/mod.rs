@@ -3,12 +3,14 @@ mod mutation;
 mod project;
 mod query;
 mod submission;
+mod tokenized;
 mod user;
 pub use self::login::*;
 pub use self::mutation::*;
 pub use self::project::*;
 pub use self::query::*;
 pub use self::submission::*;
+pub use self::tokenized::*;
 pub use self::user::*;
 
 use crate::db::Connection;

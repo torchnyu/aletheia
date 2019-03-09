@@ -16,6 +16,7 @@ VALUES ('nicholaslyang',
 	'mypasswordblahblahblah');
 
 
+
 INSERT INTO submissions (user_id, project_id)
-VALUES (1, 1), (1, 2);
+(SELECT users.id, projects.id FROM users, projects);
 
