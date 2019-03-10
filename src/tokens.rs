@@ -1,12 +1,15 @@
 use crate::utils::Result;
 use chrono::{Duration, Local};
 use jwt::{decode, encode, Header, Validation};
+use rocket::http::Status;
+use rocket::request::{self, FromRequest, Request};
+use rocket::Outcome;
 use serde_derive::{Deserialize, Serialize};
 use std::env;
 use std::str::FromStr;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Claims {
+pub struct Token {
     // Issuer
     iss: String,
     // Subject
@@ -25,11 +28,15 @@ static EXPIRY_DURATION: i64 = 24;
 pub enum TokenError {
     #[fail(display = "Token expired")]
     Expired,
+    #[fail(display = "Could not parse token")]
+    ParseFailure,
+    #[fail(display = "Wrong number of tokens: {}", num)]
+    ArityMismatch { num: usize },
 }
 
-impl Claims {
+impl Token {
     fn new(email: &str) -> Self {
-        Claims {
+        Token {
             iss: "localhost".into(),
             sub: "auth".into(),
             uid: email.to_owned(),
@@ -53,18 +60,41 @@ impl Claims {
     }
 }
 
+impl<'a, 'r> FromRequest<'a, 'r> for Token {
+    type Error = TokenError;
+
+    fn from_request(request: &'a Request<'r>) -> request::Outcome<Token, Self::Error> {
+        let keys: Vec<_> = request.headers().get("token").collect();
+        if keys.len() != 1 {
+            return Outcome::Failure((
+                Status::BadRequest,
+                TokenError::ArityMismatch { num: keys.len() },
+            ));
+        }
+
+        if let Ok(token) = keys[0].parse::<Token>() {
+            match token.validate() {
+                Err(_err) => Outcome::Failure((Status::BadRequest, TokenError::Expired)),
+                Ok(new_token) => Outcome::Success(new_token),
+            }
+        } else {
+            Outcome::Failure((Status::BadRequest, TokenError::ParseFailure))
+        }
+    }
+}
+
 pub fn create_token(email: &str) -> Result<String> {
-    let claims = Claims::new(email);
+    let claims = Token::new(email);
     let secret_key = env::var("SECRET_KEY")?;
     Ok(encode(&Header::default(), &claims, secret_key.as_bytes())?)
 }
 
-impl FromStr for Claims {
+impl FromStr for Token {
     type Err = failure::Error;
 
     fn from_str(string: &str) -> Result<Self> {
         let secret_key = env::var("SECRET_KEY")?;
-        let token = decode::<Claims>(&string, secret_key.as_bytes(), &Validation::default())?;
+        let token = decode::<Token>(&string, secret_key.as_bytes(), &Validation::default())?;
         Ok(token.claims)
     }
 }

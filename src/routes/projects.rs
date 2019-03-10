@@ -1,6 +1,6 @@
 use crate::db::Connection;
 use crate::resolvers;
-use crate::tokens::Claims;
+use crate::tokens::Token;
 use crate::types::{Project, ProjectInsert, ProjectRequest, Tokenized};
 use crate::utils::Result;
 use rocket::{get, post};
@@ -17,7 +17,7 @@ pub fn create(
     project_with_token: Json<Tokenized<ProjectRequest>>,
 ) -> Result<Json<Tokenized<Project>>> {
     let project_with_token = project_with_token.into_inner();
-    let token = project_with_token.token.parse::<Claims>()?;
+    let token = project_with_token.token.parse::<Token>()?;
     let new_token = token.validate()?.to_string()?;
     let new_project = resolvers::project::insert(
         ProjectInsert::from_request(project_with_token.payload),

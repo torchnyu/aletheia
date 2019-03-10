@@ -1,7 +1,7 @@
 use super::{
     Context, LoginRequest, LoginResponse, Project, ProjectInsert, ProjectRequest, Tokenized,
 };
-use crate::tokens::Claims;
+use crate::tokens::Token;
 use juniper::FieldResult;
 
 pub struct MutationRoot {}
@@ -31,7 +31,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         description: Option<String>,
         token: String
     ) -> FieldResult<Tokenized<Project>> {
-        let token = token.parse::<Claims>()?;
+        let token = token.parse::<Token>()?;
         let new_token = token.validate()?;
         let request = ProjectRequest { name, repository_url, color, description};
         let database = &executor.context().database;
