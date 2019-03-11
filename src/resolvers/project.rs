@@ -1,6 +1,7 @@
 use crate::schema::users::columns;
 use crate::schema::{projects, submissions, users};
-use crate::types::{Project, ProjectInsert, Submission, UserResponse};
+use crate::tokens::Token;
+use crate::types::{Project, ProjectInsert, Submission, SubmissionInsert, UserResponse};
 use crate::utils::*;
 use diesel::dsl::any;
 use diesel::prelude::*;
@@ -21,10 +22,28 @@ pub fn get_by_slug(slug: &str, conn: &diesel::PgConnection) -> Result<Project> {
         .first(conn)?)
 }
 
-pub fn insert(project: ProjectInsert, conn: &diesel::PgConnection) -> Result<Project> {
-    Ok(diesel::insert_into(projects::table)
-        .values(&project)
-        .get_result(conn)?)
+pub fn create(
+    token: &Token,
+    project: ProjectInsert,
+    conn: &diesel::PgConnection,
+) -> Result<Project> {
+    conn.transaction::<_, _, _>(|| {
+        let project: Project = diesel::insert_into(projects::table)
+            .values(&project)
+            .get_result(conn)?;
+        let user_id = users::table
+            .filter(users::email.eq(&token.uid))
+            .select(users::id)
+            .first(conn)?;
+        let submission = SubmissionInsert {
+            user_id,
+            project_id: project.id,
+        };
+        let _submission: Submission = diesel::insert_into(submissions::table)
+            .values(&submission)
+            .get_result(conn)?;
+        Ok(project)
+    })
 }
 
 pub fn update(id: i32, person: Project, conn: &diesel::PgConnection) -> Result<Project> {

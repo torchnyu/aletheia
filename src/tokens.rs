@@ -11,15 +11,15 @@ use std::str::FromStr;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Token {
     // Issuer
-    iss: String,
+    pub iss: String,
     // Subject
-    sub: String,
+    pub sub: String,
     // Issued at
-    iua: i64,
+    pub iua: i64,
     // Expiry
-    exp: i64,
+    pub exp: i64,
     // User email
-    uid: String,
+    pub uid: String,
 }
 
 static EXPIRY_DURATION: i64 = 24;
@@ -46,12 +46,11 @@ impl Token {
     }
 
     pub fn validate(&self) -> Result<Self> {
-        let is_not_expired = Local::now().timestamp() < self.exp;
-        if is_not_expired {
-            Ok(Self::new(&self.uid))
-        } else {
-            Err(TokenError::Expired)?
+        let is_expired = Local::now().timestamp() > self.exp;
+        if is_expired {
+            return Err(TokenError::Expired)?;
         }
+        Ok(Self::new(&self.uid))
     }
 
     pub fn to_string(&self) -> Result<String> {

@@ -29,13 +29,13 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         repository_url: String,
         color: String,
         description: Option<String>,
-        token: String
+        token: String,
     ) -> FieldResult<Tokenized<Project>> {
         let token = token.parse::<Token>()?;
         let new_token = token.validate()?;
         let request = ProjectRequest { name, repository_url, color, description};
         let database = &executor.context().database;
-        let project = crate::resolvers::project::insert(ProjectInsert::from_request(request), database)?;
+        let project = crate::resolvers::project::create(&new_token, ProjectInsert::from_request(request), database)?;
         Ok(Tokenized { payload: project, token: new_token.to_string()? })
     }
 });

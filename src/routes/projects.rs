@@ -18,13 +18,14 @@ pub fn create(
 ) -> Result<Json<Tokenized<Project>>> {
     let project_with_token = project_with_token.into_inner();
     let token = project_with_token.token.parse::<Token>()?;
-    let new_token = token.validate()?.to_string()?;
-    let new_project = resolvers::project::insert(
+    let new_token = token.validate()?;
+    let new_project = resolvers::project::create(
+        &new_token,
         ProjectInsert::from_request(project_with_token.payload),
         &conn,
     )?;
     Ok(Json(Tokenized {
         payload: new_project,
-        token: new_token,
+        token: new_token.to_string()?,
     }))
 }
