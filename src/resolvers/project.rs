@@ -28,9 +28,13 @@ pub fn create(
     conn: &diesel::PgConnection,
 ) -> Result<Project> {
     conn.transaction::<_, _, _>(|| {
+        // Create project
         let project: Project = diesel::insert_into(projects::table)
             .values(&project)
             .get_result(conn)?;
+        // Get id from users table. We could probably also call user
+        // resolver. Idk if that's better (could cause circular
+        // dependencies)
         let user_id = users::table
             .filter(users::email.eq(&token.uid))
             .select(users::id)
@@ -39,6 +43,9 @@ pub fn create(
             user_id,
             project_id: project.id,
         };
+        // We need the variable for typechecking to infer the
+        // Submission type. I could use the turbofish (::<>) but this
+        // is a little cleaner imo
         let _submission: Submission = diesel::insert_into(submissions::table)
             .values(&submission)
             .get_result(conn)?;

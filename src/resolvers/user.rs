@@ -12,8 +12,12 @@ pub fn all(conn: &diesel::PgConnection) -> Result<Vec<UserResponse>> {
 }
 
 pub fn create(user: UserRequest, conn: &diesel::PgConnection) -> Result<UserResponse> {
-    let user_exists =
-        select(exists(users::table.filter(users::email.eq(&(user.email))))).get_result(conn)?;
+    let user_exists = select(exists(
+        users::table
+            .filter(users::email.eq(&(user.email)))
+            .or_filter(users::display_name.eq(&(user.display_name))),
+    ))
+    .get_result(conn)?;
     if user_exists {
         return Err(AletheiaError::UserAlreadyExists {
             email: user.email.clone(),
