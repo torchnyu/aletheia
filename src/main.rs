@@ -13,6 +13,8 @@ extern crate juniper_rocket;
 extern crate r2d2;
 extern crate rand;
 extern crate slug;
+#[macro_use]
+extern crate diesel_derive_enum;
 
 use crate::db::Connection;
 use crate::types::Context;

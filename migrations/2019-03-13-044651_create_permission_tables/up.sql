@@ -3,15 +3,15 @@ id SERIAL PRIMARY KEY,
 name VARCHAR NOT NULL
 );
 
-CREATE TYPE ACTION_TYPE AS ENUM ('create', 'read', 'update', 'delete');
-CREATE TYPE ACTION_MODIFIER AS ENUM ('all', 'self');
+CREATE TYPE action_type AS ENUM ('create', 'read', 'update', 'delete');
+CREATE TYPE action_modifier AS ENUM ('all', 'self');
 
 CREATE TABLE permissions (
 id SERIAL PRIMARY KEY,
 role_id INTEGER REFERENCES roles(id) NOT NULL,
 resource_name VARCHAR,
-action ACTION_TYPE,
-modifier ACTION_MODIFIER
+action action_type,
+modifier action_modifier
 );
 
 CREATE TABLE user_roles (

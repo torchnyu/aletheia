@@ -1,5 +1,6 @@
 mod login;
 mod mutation;
+mod permission;
 mod project;
 mod query;
 mod submission;
@@ -7,6 +8,7 @@ mod tokenized;
 mod user;
 pub use self::login::*;
 pub use self::mutation::*;
+pub use self::permission::*;
 pub use self::project::*;
 pub use self::query::*;
 pub use self::submission::*;

@@ -19,6 +19,7 @@ rocket = "0.4.0"
 rocket_cors = { git = "https://github.com/lawliet89/rocket_cors", branch = "master" }
 itertools = "0.8"
 diesel = { version = "1.4.1", features = ["postgres"] }
+diesel-derive-enum = { version = "0.4", features = ["postgres"] }
 dotenv = "0.9.0"
 rand = "0.6.5"
 jsonwebtoken = "5"
