@@ -75,4 +75,11 @@ joinable!(submissions -> users (user_id));
 joinable!(user_roles -> roles (role_id));
 joinable!(user_roles -> users (user_id));
 
-allow_tables_to_appear_in_same_query!(permissions, projects, roles, submissions, user_roles, users,);
+allow_tables_to_appear_in_same_query!(
+    permissions,
+    projects,
+    roles,
+    submissions,
+    user_roles,
+    users,
+);
