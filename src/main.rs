@@ -27,7 +27,9 @@ mod db;
 mod github;
 mod resolvers;
 mod routes;
+#[allow(unused_imports)]
 mod schema;
+mod sql_types;
 mod tokens;
 mod types;
 mod utils;
