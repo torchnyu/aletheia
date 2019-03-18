@@ -23,6 +23,7 @@ use rocket::response::content;
 use rocket::*;
 use rocket_cors::CorsOptions;
 
+mod authorization;
 mod db;
 mod github;
 mod resolvers;
@@ -30,7 +31,6 @@ mod routes;
 #[allow(unused_imports)]
 mod schema;
 mod sql_types;
-mod tokens;
 mod types;
 mod utils;
 

@@ -1,4 +1,6 @@
-#[derive(Debug, DbEnum)]
+use serde_derive::{Deserialize, Serialize};
+
+#[derive(Debug, DbEnum, Serialize, Deserialize)]
 #[DieselType = "Action_type"]
 pub enum ActionType {
     Create,
@@ -7,7 +9,7 @@ pub enum ActionType {
     Delete,
 }
 
-#[derive(Debug, DbEnum)]
+#[derive(Debug, DbEnum, Serialize, Deserialize)]
 #[DieselType = "Action_modifier"]
 pub enum ActionModifier {
     All,

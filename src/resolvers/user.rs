@@ -1,8 +1,9 @@
-use crate::schema::users;
-use crate::types::{LoginRequest, User, UserInsert, UserRequest, UserResponse};
+use crate::schema::{roles, user_roles, users};
+use crate::types::{LoginRequest, Role, User, UserInsert, UserRequest, UserResponse, UserRole};
 use crate::utils::{AletheiaError, Result};
 use diesel::dsl::*;
 use diesel::prelude::*;
+use diesel::BelongingToDsl;
 use rocket_contrib::databases::diesel;
 
 pub fn all(conn: &diesel::PgConnection) -> Result<Vec<UserResponse>> {
@@ -46,4 +47,12 @@ pub fn login(credentials: &LoginRequest, conn: &diesel::PgConnection) -> Result<
 pub fn get_by_email(email: &str, conn: &diesel::PgConnection) -> Result<UserResponse> {
     let user: User = users::table.filter(users::email.eq(email)).first(conn)?;
     Ok(UserResponse::from_user(user))
+}
+
+pub fn roles(user: &UserResponse, conn: &diesel::PgConnection) -> Vec<Role> {
+    let role_ids = UserRole::belonging_to(user).select(user_roles::role_id);
+    roles::table
+        .filter(roles::id.eq(any(role_ids)))
+        .load::<Role>(conn)
+        .expect("Could not load contributors")
 }

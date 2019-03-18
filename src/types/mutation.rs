@@ -1,7 +1,8 @@
 use super::{
-    Context, LoginRequest, LoginResponse, Project, ProjectInsert, ProjectRequest, Tokenized,
+    Context, LoginRequest, LoginResponse, Project, ProjectInsert, ProjectRequest, Token, Tokenized,
 };
-use crate::tokens::Token;
+
+use crate::sql_types::*;
 use juniper::FieldResult;
 
 pub struct MutationRoot {}
@@ -19,7 +20,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
             email, password
         };
         let user = crate::resolvers::user::login(&credentials, &database)?;
-        let token = crate::tokens::create_token(&user.email)?;
+        let token = Token::new(&user.email).to_string()?;
         Ok(LoginResponse { user, token })
     }
 
@@ -31,11 +32,18 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         description: Option<String>,
         token: String,
     ) -> FieldResult<Tokenized<Project>> {
-        let token = token.parse::<Token>()?;
-        let new_token = token.validate()?;
-        let request = ProjectRequest { name, repository_url, color, description};
+        let token = token.parse::<Token>()?.validate()?;
         let database = &executor.context().database;
-        let project = crate::resolvers::project::create(&new_token, ProjectInsert::from_request(request), database)?;
-        Ok(Tokenized { payload: project, token: new_token.to_string()? })
+        let user = crate::resolvers::user::get_by_email(&token.uid, &database)?;
+        crate::authorization::validate(
+            &database,
+            &user,
+            "Project".to_string(),
+            ActionType::Create,
+            ActionModifier::Self_
+        )?;
+        let request = ProjectRequest { name, repository_url, color, description};
+        let project = crate::resolvers::project::create(&token, ProjectInsert::from_request(request), database)?;
+        Ok(Tokenized { payload: project, token: token.to_string()? })
     }
 });

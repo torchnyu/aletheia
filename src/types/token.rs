@@ -35,7 +35,7 @@ pub enum TokenError {
 }
 
 impl Token {
-    fn new(email: &str) -> Self {
+    pub fn new(email: &str) -> Self {
         Token {
             iss: "localhost".into(),
             sub: "auth".into(),

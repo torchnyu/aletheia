@@ -1,7 +1,6 @@
 use crate::schema::users::columns;
 use crate::schema::{projects, submissions, users};
-use crate::tokens::Token;
-use crate::types::{Project, ProjectInsert, Submission, SubmissionInsert, UserResponse};
+use crate::types::{Project, ProjectInsert, Submission, SubmissionInsert, Token, UserResponse};
 use crate::utils::*;
 use diesel::dsl::any;
 use diesel::prelude::*;

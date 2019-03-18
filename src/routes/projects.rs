@@ -1,7 +1,6 @@
 use crate::db::Connection;
 use crate::resolvers;
-use crate::tokens::Token;
-use crate::types::{Project, ProjectInsert, ProjectRequest, Tokenized};
+use crate::types::{Project, ProjectInsert, ProjectRequest, Token, Tokenized};
 use crate::utils::Result;
 use rocket::{get, post};
 use rocket_contrib::json::Json;
@@ -11,21 +10,17 @@ pub fn index(conn: Connection) -> Result<Json<Vec<Project>>> {
     Ok(Json(resolvers::project::all(&conn)?))
 }
 
-#[post("/", format = "application/json", data = "<project_with_token>")]
+#[post("/", format = "application/json", data = "<project>")]
 pub fn create(
     conn: Connection,
-    project_with_token: Json<Tokenized<ProjectRequest>>,
+    project: Json<ProjectRequest>,
+    token: Token,
 ) -> Result<Json<Tokenized<Project>>> {
-    let project_with_token = project_with_token.into_inner();
-    let token = project_with_token.token.parse::<Token>()?;
-    let new_token = token.validate()?;
-    let new_project = resolvers::project::create(
-        &new_token,
-        ProjectInsert::from_request(project_with_token.payload),
-        &conn,
-    )?;
+    let project = project.into_inner();
+    let new_project =
+        resolvers::project::create(&token, ProjectInsert::from_request(project), &conn)?;
     Ok(Json(Tokenized {
         payload: new_project,
-        token: new_token.to_string()?,
+        token: token.to_string()?,
     }))
 }

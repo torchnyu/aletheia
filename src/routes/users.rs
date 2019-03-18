@@ -1,6 +1,6 @@
 use crate::db::Connection;
 use crate::resolvers;
-use crate::types::{LoginRequest, UserRequest, UserResponse};
+use crate::types::{LoginRequest, Token, UserRequest, UserResponse};
 use crate::utils::Result;
 use rocket::http::Header;
 use rocket::{get, post, Responder};
@@ -27,7 +27,7 @@ pub fn create(conn: Connection, user: Json<UserRequest>) -> Result<Json<UserResp
 pub fn login(conn: Connection, creds: Json<LoginRequest>) -> Result<AuthenticatedResponse> {
     let creds = creds.into_inner();
     let user = resolvers::user::login(&creds, &conn)?;
-    let token = crate::tokens::create_token(&creds.email)?;
+    let token = Token::new(&creds.email).to_string()?;
     let response = AuthenticatedResponse {
         data: Json(user),
         header: Header::new("token", token),

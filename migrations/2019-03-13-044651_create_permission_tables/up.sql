@@ -9,9 +9,9 @@ CREATE TYPE action_modifier AS ENUM ('all', 'self');
 CREATE TABLE permissions (
 id SERIAL PRIMARY KEY,
 role_id INTEGER REFERENCES roles(id) NOT NULL,
-resource_name VARCHAR,
-action action_type,
-modifier action_modifier
+resource_name VARCHAR NOT NULL,
+action action_type NOT NULL,
+modifier action_modifier NOT NULL
 );
 
 CREATE TABLE user_roles (
