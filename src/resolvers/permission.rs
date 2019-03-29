@@ -1,6 +1,6 @@
 use crate::schema::{permissions, user_roles};
 use crate::sql_types::*;
-use crate::types::{Permission, UserResponse, UserRole};
+use crate::types::{Permission, User, UserRole};
 use crate::utils::*;
 use diesel::dsl::any;
 use diesel::prelude::*;
@@ -8,7 +8,7 @@ use diesel::BelongingToDsl;
 use rocket_contrib::databases::diesel;
 
 pub fn get_permission(
-    user: &UserResponse,
+    user: &User,
     resource: &Type,
     action: &ActionType,
     modifier: &ActionModifier,

@@ -16,7 +16,7 @@ pub fn validate(
     action: ActionType,
     modifier: ActionModifier,
 ) -> Result<()> {
-    let user = crate::resolvers::user::get_by_email(&token.uid, conn)?;
+    let user = crate::resolvers::user::get_by_email(&token.uid, &conn)?;
     let permissions = permission::get_permission(&user, &resource, &action, &modifier, conn)?;
     if permissions.is_empty() {
         Err(AuthError::NoPermission { action, resource })?

@@ -1,7 +1,6 @@
 use super::Context;
-use crate::resolvers;
 use crate::schema::*;
-use crate::types::{Event, UserResponse};
+use crate::types::{Event, User};
 use diesel::{self, AsChangeset, Queryable};
 use serde_derive::{Deserialize, Serialize};
 use slug::slugify;
@@ -93,8 +92,8 @@ graphql_object!(Project: Context |&self| {
         }
     }
 
-    field contributors(&executor) -> Vec<UserResponse> {
+    field contributors(&executor) -> Vec<User> {
         let database: &diesel::PgConnection = &executor.context().database;
-        resolvers::project::contributors(self, database)
+        self.contributors(database)
     }
 });

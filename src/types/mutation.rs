@@ -29,7 +29,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         project: ProjectRequest,
         token: String
     ) -> FieldResult<Tokenized<Project>> {
-        let token = token.parse::<Token>()?.validate()?;
+        let token = token.parse::<Token>()?;
         let database = &executor.context().database;
         crate::authorization::validate(
             &database,
@@ -38,7 +38,10 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
             ActionType::Create,
             ActionModifier::Own
         )?;
-        let project = crate::resolvers::project::create(&token, ProjectInsert::from_request(project), database)?;
+        let project = crate::resolvers::project::create(
+            &token,
+            ProjectInsert::from_request(project), database
+        )?;
         Ok(Tokenized { payload: project, token: token.to_string()? })
     }
 

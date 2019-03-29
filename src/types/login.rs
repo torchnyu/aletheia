@@ -1,13 +1,13 @@
-use super::{Context, UserResponse};
+use super::{Context, User};
 
 pub struct LoginResponse {
     pub token: String,
-    pub user: UserResponse,
+    pub user: User,
 }
 
 graphql_object!(LoginResponse: Context |&self| {
 
-    field user(&executor) -> &UserResponse {
+    field user(&executor) -> &User {
         &self.user
     }
 

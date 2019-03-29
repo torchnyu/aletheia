@@ -1,33 +1,32 @@
-use crate::schema::*;
-use crate::utils::Result;
 use super::Context;
-use crate::types::{Submission, Project};
+use crate::schema::*;
 use crate::schema::{projects, submissions};
+use crate::types::{Project, Submission};
+use crate::utils::Result;
 use argonautica::input::Salt;
 use argonautica::{Hasher, Verifier};
-use diesel::{self, AsChangeset, Queryable};
-use serde_derive::{Deserialize, Serialize};
-use std::env;
 use diesel::pg::expression::dsl::any;
 use diesel::BelongingToDsl;
 use diesel::ExpressionMethods;
 use diesel::QueryDsl;
 use diesel::RunQueryDsl;
-
+use diesel::{self, AsChangeset, Queryable};
+use serde_derive::{Deserialize, Serialize};
+use std::env;
 
 const SALT_LENGTH: u32 = 16;
 
 #[derive(Queryable, AsChangeset, Serialize, Deserialize)]
 #[table_name = "users"]
-pub struct User {
+pub struct RawUser {
     pub id: i32,
     pub display_name: String,
     pub email: String,
     pub password_digest: String,
 }
 
-impl User {
-    pub fn validate_credentials(self: &User, creds: &LoginRequest) -> Result<bool> {
+impl RawUser {
+    pub fn validate_credentials(self: &RawUser, creds: &LoginRequest) -> Result<bool> {
         let mut verifier = Verifier::default();
 
         Ok(verifier
@@ -73,13 +72,13 @@ pub struct UserRequest {
 
 #[derive(Identifiable, Queryable, AsChangeset, Serialize, Deserialize, Associations)]
 #[table_name = "users"]
-pub struct UserResponse {
+pub struct User {
     pub id: i32,
     pub display_name: String,
     pub email: String,
 }
 
-graphql_object!(UserResponse: Context as "User" |&self| {
+graphql_object!(User: Context |&self| {
     description: "A user"
 
     field id(&executor) -> i32 {
@@ -93,7 +92,7 @@ graphql_object!(UserResponse: Context as "User" |&self| {
     field email(&executor) -> &str {
         &self.email
     }
-    
+
     field projects(&executor) -> Vec<Project> {
         let database: &diesel::PgConnection = &executor.context().database;
         let project_ids = Submission::belonging_to(self).select(submissions::project_id);
@@ -109,9 +108,9 @@ pub struct LoginRequest {
     pub password: String,
 }
 
-impl UserResponse {
-    pub fn from_user(user: User) -> UserResponse {
-        UserResponse {
+impl User {
+    pub fn from_raw_user(user: RawUser) -> User {
+        User {
             id: user.id,
             display_name: user.display_name,
             email: user.email,

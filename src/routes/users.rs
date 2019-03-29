@@ -1,6 +1,6 @@
 use crate::db::Connection;
 use crate::resolvers;
-use crate::types::{LoginRequest, Token, UserRequest, UserResponse};
+use crate::types::{LoginRequest, Token, User, UserRequest};
 use crate::utils::Result;
 use rocket::http::Header;
 use rocket::{get, post, Responder};
@@ -8,17 +8,17 @@ use rocket_contrib::json::Json;
 
 #[derive(Responder)]
 pub struct AuthenticatedResponse {
-    data: Json<UserResponse>,
+    data: Json<User>,
     header: Header<'static>,
 }
 
 #[get("/")]
-pub fn index(conn: Connection) -> Result<Json<Vec<UserResponse>>> {
+pub fn index(conn: Connection) -> Result<Json<Vec<User>>> {
     Ok(Json(resolvers::user::all(&conn)?))
 }
 
 #[post("/", format = "application/json", data = "<user>")]
-pub fn create(conn: Connection, user: Json<UserRequest>) -> Result<Json<UserResponse>> {
+pub fn create(conn: Connection, user: Json<UserRequest>) -> Result<Json<User>> {
     let user = user.into_inner();
     Ok(Json(resolvers::user::create(user, &conn)?))
 }

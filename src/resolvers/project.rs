@@ -1,6 +1,6 @@
 use crate::schema::users::columns;
 use crate::schema::{projects, submissions, users};
-use crate::types::{Project, ProjectInsert, Submission, SubmissionInsert, Token, UserResponse};
+use crate::types::{Project, ProjectInsert, Submission, SubmissionInsert, Token, User};
 use crate::utils::*;
 use diesel::dsl::any;
 use diesel::prelude::*;
@@ -62,11 +62,13 @@ pub fn delete(id: i32, conn: &diesel::PgConnection) -> Result<usize> {
     Ok(diesel::delete(projects::table.find(id)).execute(conn)?)
 }
 
-pub fn contributors(project: &Project, conn: &diesel::PgConnection) -> Vec<UserResponse> {
-    let user_ids = Submission::belonging_to(project).select(submissions::user_id);
-    users::table
-        .filter(users::id.eq(any(user_ids)))
-        .select((columns::id, columns::display_name, columns::email))
-        .load::<UserResponse>(conn)
-        .expect("Could not load contributors")
+impl Project {
+    pub fn contributors(&self, conn: &diesel::PgConnection) -> Vec<User> {
+        let user_ids = Submission::belonging_to(self).select(submissions::user_id);
+        users::table
+            .filter(users::id.eq(any(user_ids)))
+            .select((columns::id, columns::display_name, columns::email))
+            .load::<User>(conn)
+            .expect("Could not load contributors")
+    }
 }
