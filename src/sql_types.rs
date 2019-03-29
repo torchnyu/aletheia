@@ -26,4 +26,7 @@ pub enum Type {
     Role,
     #[db_rename = "user_role"]
     UserRole,
+    Event,
+    #[db_rename = "user_event"]
+    UserEvent,
 }

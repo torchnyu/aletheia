@@ -19,9 +19,9 @@ table! {
     permissions (id) {
         id -> Int4,
         role_id -> Int4,
-        resource_name -> Resource,
         action -> Array<Action_type>,
         modifier -> Array<Action_modifier>,
+        resource_name -> Resource,
     }
 }
 
@@ -65,6 +65,17 @@ table! {
     use diesel::sql_types::*;
     use crate::sql_types::*;
 
+    user_events (id) {
+        id -> Int4,
+        user_id -> Int4,
+        event_id -> Int4,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use crate::sql_types::*;
+
     user_roles (id) {
         id -> Int4,
         user_id -> Int4,
@@ -87,6 +98,8 @@ table! {
 joinable!(permissions -> roles (role_id));
 joinable!(submissions -> projects (project_id));
 joinable!(submissions -> users (user_id));
+joinable!(user_events -> events (event_id));
+joinable!(user_events -> users (user_id));
 joinable!(user_roles -> roles (role_id));
 joinable!(user_roles -> users (user_id));
 
@@ -96,6 +109,7 @@ allow_tables_to_appear_in_same_query!(
     projects,
     roles,
     submissions,
+    user_events,
     user_roles,
     users,
 );

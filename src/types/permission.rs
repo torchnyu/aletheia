@@ -7,7 +7,7 @@ use serde_derive::{Deserialize, Serialize};
 pub struct Permission {
     id: i32,
     role_id: i32,
-    resource_name: Type,
     action: Vec<ActionType>,
     modifier: Vec<ActionModifier>,
+    resource_name: Type,
 }

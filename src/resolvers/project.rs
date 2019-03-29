@@ -1,6 +1,6 @@
 use crate::schema::users::columns;
 use crate::schema::{projects, submissions, users};
-use crate::types::{Project, ProjectInsert, Submission, SubmissionInsert, Token, User};
+use crate::types::{Project, ProjectInsert, Submission, SubmissionInsert, User};
 use crate::utils::*;
 use diesel::dsl::any;
 use diesel::prelude::*;
@@ -21,11 +21,7 @@ pub fn get_by_slug(slug: &str, conn: &diesel::PgConnection) -> Result<Project> {
         .first(conn)?)
 }
 
-pub fn create(
-    token: &Token,
-    project: ProjectInsert,
-    conn: &diesel::PgConnection,
-) -> Result<Project> {
+pub fn create(email: &str, project: ProjectInsert, conn: &diesel::PgConnection) -> Result<Project> {
     conn.transaction::<_, _, _>(|| {
         // Create project
         let project: Project = diesel::insert_into(projects::table)
@@ -35,9 +31,10 @@ pub fn create(
         // resolver. Idk if that's better (could cause circular
         // dependencies)
         let user_id = users::table
-            .filter(users::email.eq(&token.uid))
+            .filter(users::email.eq(email))
             .select(users::id)
             .first(conn)?;
+
         let submission = SubmissionInsert {
             user_id,
             project_id: project.id,

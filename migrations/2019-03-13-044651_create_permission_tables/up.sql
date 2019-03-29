@@ -17,9 +17,9 @@ CREATE TYPE resource AS ENUM (
 CREATE TABLE permissions (
   id                         SERIAL PRIMARY KEY,
   role_id                    INTEGER REFERENCES roles(id) NOT NULL,
-  resource_name              resource NOT NULL,
   action                     action_type[] NOT NULL,
-  modifier                   action_modifier[] NOT NULL
+  modifier                   action_modifier[] NOT NULL,
+  resource_name              resource NOT NULL
 );
 
 CREATE TABLE user_roles (

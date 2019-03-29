@@ -1,5 +1,6 @@
 use super::{
-    Context, LoginRequest, LoginResponse, Project, ProjectInsert, ProjectRequest, Token, Tokenized,
+    Context, Event, EventInsert, EventRequest, LoginRequest, LoginResponse, Project, ProjectInsert,
+    ProjectRequest, Token, Tokenized,
 };
 
 use crate::sql_types::*;
@@ -39,10 +40,33 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
             ActionModifier::Own
         )?;
         let project = crate::resolvers::project::create(
-            &token,
-            ProjectInsert::from_request(project), database
+            &token.uid,
+            ProjectInsert::from_request(project),
+            database
         )?;
         Ok(Tokenized { payload: project, token: token.to_string()? })
+    }
+
+    field create_event(
+        &executor,
+        event: EventRequest,
+        token: String
+    ) -> FieldResult<Tokenized<Event>> {
+        let token = token.parse::<Token>()?;
+        let database = &executor.context().database;
+        crate::authorization::validate(
+            &database,
+            &token,
+            Type::Event,
+            ActionType::Create,
+            ActionModifier::Own
+        )?;
+        let event = crate::resolvers::event::create(
+            &token.uid,
+            EventInsert::from_request(event),
+            database
+        )?;
+        Ok(Tokenized { payload: event, token: token.to_string()? })
     }
 
 });
