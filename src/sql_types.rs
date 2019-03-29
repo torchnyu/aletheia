@@ -13,6 +13,17 @@ pub enum ActionType {
 #[DieselType = "Action_modifier"]
 pub enum ActionModifier {
     All,
-    #[db_rename = "self"]
-    Self_,
+    Own,
+}
+
+#[derive(Debug, DbEnum, Serialize, Deserialize)]
+#[DieselType = "Resource"]
+pub enum Type {
+    Project,
+    Submission,
+    User,
+    Permission,
+    Role,
+    #[db_rename = "user_role"]
+    UserRole,
 }

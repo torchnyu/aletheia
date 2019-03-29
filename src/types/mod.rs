@@ -1,3 +1,4 @@
+mod event;
 mod login;
 mod mutation;
 mod permission;
@@ -9,6 +10,7 @@ mod token;
 mod tokenized;
 mod user;
 mod user_role;
+pub use self::event::*;
 pub use self::login::*;
 pub use self::mutation::*;
 pub use self::permission::*;

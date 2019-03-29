@@ -2,12 +2,26 @@ table! {
     use diesel::sql_types::*;
     use crate::sql_types::*;
 
+    events (id) {
+        id -> Int4,
+        name -> Varchar,
+        start_time -> Timestamp,
+        end_time -> Timestamp,
+        description -> Nullable<Varchar>,
+        slug -> Varchar,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use crate::sql_types::*;
+
     permissions (id) {
         id -> Int4,
         role_id -> Int4,
-        resource_name -> Varchar,
-        action -> Action_type,
-        modifier -> Action_modifier,
+        resource_name -> Resource,
+        action -> Array<Action_type>,
+        modifier -> Array<Action_modifier>,
     }
 }
 
@@ -22,6 +36,7 @@ table! {
         color -> Varchar,
         description -> Nullable<Varchar>,
         slug -> Varchar,
+        event_id -> Int4,
     }
 }
 
@@ -76,6 +91,7 @@ joinable!(user_roles -> roles (role_id));
 joinable!(user_roles -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
+    events,
     permissions,
     projects,
     roles,

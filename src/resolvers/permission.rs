@@ -9,7 +9,7 @@ use rocket_contrib::databases::diesel;
 
 pub fn get_permission(
     user: &UserResponse,
-    resource: &str,
+    resource: &Type,
     action: &ActionType,
     modifier: &ActionModifier,
     conn: &diesel::PgConnection,
@@ -18,7 +18,7 @@ pub fn get_permission(
     Ok(permissions::table
         .filter(permissions::role_id.eq(any(role_ids)))
         .filter(permissions::resource_name.eq(resource))
-        .filter(permissions::action.eq(action))
-        .filter(permissions::modifier.eq(modifier))
+        .filter(permissions::action.contains(vec![action]))
+        .filter(permissions::modifier.contains(vec![modifier]))
         .load::<Permission>(conn)?)
 }

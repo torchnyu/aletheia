@@ -26,24 +26,20 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
 
     field create_project(
         &executor,
-        name: String,
-        repository_url: String,
-        color: String,
-        description: Option<String>,
-        token: String,
+        project: ProjectRequest,
+        token: String
     ) -> FieldResult<Tokenized<Project>> {
         let token = token.parse::<Token>()?.validate()?;
         let database = &executor.context().database;
-        let user = crate::resolvers::user::get_by_email(&token.uid, &database)?;
         crate::authorization::validate(
             &database,
-            &user,
-            "Project".to_string(),
+            &token,
+            Type::Project,
             ActionType::Create,
-            ActionModifier::Self_
+            ActionModifier::Own
         )?;
-        let request = ProjectRequest { name, repository_url, color, description};
-        let project = crate::resolvers::project::create(&token, ProjectInsert::from_request(request), database)?;
+        let project = crate::resolvers::project::create(&token, ProjectInsert::from_request(project), database)?;
         Ok(Tokenized { payload: project, token: token.to_string()? })
     }
+
 });

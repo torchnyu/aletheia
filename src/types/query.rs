@@ -1,4 +1,4 @@
-use super::{Context, Project, UserResponse};
+use super::{Context, Event, Project, UserResponse};
 use juniper::FieldResult;
 
 pub struct QueryRoot {}
@@ -26,6 +26,19 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     ) -> FieldResult<Project> {
         let database = &executor.context().database;
         Ok(crate::resolvers::project::get_by_slug(&slug, database)?)
+    }
+
+    field eventBySlug(
+        &executor,
+        slug: String
+    ) -> FieldResult<Event> {
+        let database = &executor.context().database;
+        Ok(crate::resolvers::event::get_by_slug(&slug, database)?)
+    }
+
+    field events(&executor) -> FieldResult<Vec<Event>> {
+        let database = &executor.context().database;
+        Ok(crate::resolvers::event::all(&database)?)
     }
 
 });

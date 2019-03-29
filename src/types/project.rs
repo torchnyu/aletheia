@@ -1,13 +1,13 @@
-use crate::schema::*;
-use diesel::{self, AsChangeset, Queryable};
 use super::Context;
-use serde_derive::{Deserialize, Serialize};
-use crate::types::{UserResponse};
 use crate::resolvers;
+use crate::schema::*;
+use crate::types::{Event, UserResponse};
+use diesel::{self, AsChangeset, Queryable};
+use serde_derive::{Deserialize, Serialize};
 use slug::slugify;
 
-
 #[derive(Identifiable, Queryable, AsChangeset, Serialize, Deserialize, Associations)]
+#[belongs_to(Event)]
 #[table_name = "projects"]
 pub struct Project {
     pub id: i32,
@@ -15,7 +15,8 @@ pub struct Project {
     pub repository_url: String,
     pub color: String,
     pub description: Option<String>,
-    pub slug: String
+    pub slug: String,
+    pub event_id: i32,
 }
 
 #[derive(Insertable)]
@@ -26,14 +27,16 @@ pub struct ProjectInsert {
     pub color: String,
     pub description: Option<String>,
     pub slug: String,
+    pub event_id: i32,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, GraphQLInputObject)]
 pub struct ProjectRequest {
     pub name: String,
     pub repository_url: String,
     pub color: String,
-    pub description: Option<String>,    
+    pub description: Option<String>,
+    pub event_id: i32,
 }
 
 impl ProjectInsert {
@@ -43,7 +46,8 @@ impl ProjectInsert {
             color: project.color,
             repository_url: project.repository_url,
             description: project.description,
-            slug: project.slug
+            slug: project.slug,
+            event_id: project.event_id,
         }
     }
     pub fn from_request(request: ProjectRequest) -> ProjectInsert {
@@ -53,7 +57,8 @@ impl ProjectInsert {
             color: request.color,
             repository_url: request.repository_url,
             description: request.description,
-            slug
+            event_id: request.event_id,
+            slug,
         }
     }
 }
@@ -87,11 +92,9 @@ graphql_object!(Project: Context |&self| {
             None => None
         }
     }
-    
+
     field contributors(&executor) -> Vec<UserResponse> {
         let database: &diesel::PgConnection = &executor.context().database;
         resolvers::project::contributors(self, database)
     }
 });
-
-
