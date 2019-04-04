@@ -35,7 +35,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         crate::authorization::validate(
             &database,
             &token,
-            Type::Project,
+            "project".to_string(),
             ActionType::Create,
             ActionModifier::Own
         )?;
@@ -57,7 +57,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         crate::authorization::validate(
             &database,
             &token,
-            Type::Event,
+            "event".to_string(),
             ActionType::Create,
             ActionModifier::Own
         )?;

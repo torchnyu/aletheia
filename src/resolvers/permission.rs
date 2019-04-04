@@ -9,7 +9,7 @@ use rocket_contrib::databases::diesel;
 
 pub fn get_permission(
     user: &User,
-    resource: &Type,
+    resource: &str,
     action: &ActionType,
     modifier: &ActionModifier,
     conn: &diesel::PgConnection,
