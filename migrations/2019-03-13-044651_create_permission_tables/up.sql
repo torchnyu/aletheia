@@ -5,21 +5,13 @@ CREATE TABLE roles (
 
 CREATE TYPE action_type AS ENUM ('create', 'read', 'update', 'delete');
 CREATE TYPE action_modifier AS ENUM ('all', 'own');
-CREATE TYPE resource AS ENUM (
-  'project',
-  'submission',
-  'user',
-  'permission',
-  'role',
-  'user_role'
-);
 
 CREATE TABLE permissions (
   id                         SERIAL PRIMARY KEY,
   role_id                    INTEGER REFERENCES roles(id) NOT NULL,
   action                     action_type[] NOT NULL,
   modifier                   action_modifier[] NOT NULL,
-  resource_name              resource NOT NULL
+  resource_name              VARCHAR NOT NULL
 );
 
 CREATE TABLE user_roles (

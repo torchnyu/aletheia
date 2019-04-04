@@ -9,5 +9,5 @@ pub struct Permission {
     role_id: i32,
     action: Vec<ActionType>,
     modifier: Vec<ActionModifier>,
-    resource_name: Type,
+    resource_name: String,
 }

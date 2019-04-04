@@ -7,11 +7,14 @@ extern crate rocket_contrib;
 extern crate diesel;
 #[macro_use]
 extern crate juniper;
+extern crate base64;
 extern crate dotenv;
 extern crate jsonwebtoken as jwt;
 extern crate juniper_rocket;
+extern crate multipart;
 extern crate r2d2;
 extern crate rand;
+extern crate rusoto_core;
 extern crate slug;
 #[macro_use]
 extern crate diesel_derive_enum;
@@ -85,6 +88,7 @@ fn main() -> Result<()> {
             "/submissions",
             routes![routes::submissions::index, routes::submissions::create],
         )
+        .mount("/media", routes![routes::media::create])
         .mount(
             "/",
             routes![index, graphiql, handle_graphql_get, handle_graphql_post],

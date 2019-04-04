@@ -21,7 +21,7 @@ table! {
         role_id -> Int4,
         action -> Array<Action_type>,
         modifier -> Array<Action_modifier>,
-        resource_name -> Resource,
+        resource_name -> Varchar,
     }
 }
 
