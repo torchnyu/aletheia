@@ -1,4 +1,5 @@
 use diesel::pg::PgConnection;
+/*
 use diesel::r2d2::ConnectionManager;
 use diesel::Connection as DieselConnection;
 use r2d2;
@@ -7,7 +8,15 @@ use rocket::request::{self, FromRequest};
 use rocket::{Outcome, Request, State};
 use std::env;
 use std::ops::Deref;
+use rocket_contrib::databases::diesel;
+*/
 
+#[database("DATABASE_URL")]
+pub struct Connection(PgConnection);
+
+// pub struct Connection(r2d2::PooledConnection<ConnectionManager<PgConnection>>);
+
+/*
 pub fn establish_connection() -> PgConnection {
     let database_url = env::var("DATABASE_URL").expect("DATABASE URL must be set");
 
@@ -49,3 +58,4 @@ impl<'a, 'r> FromRequest<'a, 'r> for Connection {
         }
     }
 }
+*/
