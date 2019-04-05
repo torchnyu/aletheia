@@ -1,5 +1,5 @@
 use diesel::pg::PgConnection;
 
-#[database("DATABASE_URL")]
+#[database("postgres")]
 pub struct Connection(PgConnection);
 

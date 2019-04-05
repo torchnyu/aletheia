@@ -94,7 +94,7 @@ fn main() -> Result<()> {
             routes![index, graphiql, handle_graphql_get, handle_graphql_post],
         )
         .attach(cors)
-        .manage(Connection::fairing())
+        .attach(Connection::fairing())
         .launch();
     Ok(())
 }
