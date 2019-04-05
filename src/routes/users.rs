@@ -1,5 +1,6 @@
+use crate::db::Connection;
 use crate::resolvers;
-use crate::types::{LoginRequest, Token, User, UserRequest, Connection};
+use crate::types::{LoginRequest, Token, User, UserRequest};
 use crate::utils::Result;
 use rocket::http::Header;
 use rocket::{get, post, Responder};

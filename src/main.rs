@@ -19,7 +19,7 @@ extern crate slug;
 #[macro_use]
 extern crate diesel_derive_enum;
 
-use crate::types::Connection;
+use crate::db::Connection;
 use crate::types::Context;
 use crate::utils::Result;
 use rocket::response::content;
@@ -35,6 +35,7 @@ mod schema;
 mod sql_types;
 mod types;
 mod utils;
+mod db;
 
 #[get("/")]
 fn index() -> String {
