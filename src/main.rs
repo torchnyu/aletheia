@@ -19,7 +19,7 @@ extern crate slug;
 #[macro_use]
 extern crate diesel_derive_enum;
 
-use crate::db::Connection;
+use crate::types::Connection;
 use crate::types::Context;
 use crate::utils::Result;
 use rocket::response::content;
@@ -27,7 +27,6 @@ use rocket::*;
 use rocket_cors::CorsOptions;
 
 mod authorization;
-mod db;
 mod github;
 mod resolvers;
 mod routes;
@@ -94,7 +93,7 @@ fn main() -> Result<()> {
             routes![index, graphiql, handle_graphql_get, handle_graphql_post],
         )
         .attach(cors)
-        .manage(db::Connection::fairing())
+        .manage(Connection::fairing())
         .launch();
     Ok(())
 }
