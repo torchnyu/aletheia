@@ -27,7 +27,6 @@ use rocket::*;
 use rocket_cors::CorsOptions;
 
 mod authorization;
-mod db;
 mod github;
 mod resolvers;
 mod routes;
@@ -36,6 +35,7 @@ mod schema;
 mod sql_types;
 mod types;
 mod utils;
+mod db;
 
 #[get("/")]
 fn index() -> String {
@@ -94,7 +94,7 @@ fn main() -> Result<()> {
             routes![index, graphiql, handle_graphql_get, handle_graphql_post],
         )
         .attach(cors)
-        .manage(db::init_pool())
+        .attach(Connection::fairing())
         .launch();
     Ok(())
 }

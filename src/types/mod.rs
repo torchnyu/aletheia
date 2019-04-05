@@ -26,8 +26,8 @@ pub use self::tokenized::*;
 pub use self::user::*;
 pub use self::user_event::*;
 pub use self::user_role::*;
+pub use crate::db::Connection;
 
-use crate::db::Connection;
 use juniper::Context as JuniperContext;
 use juniper::RootNode;
 
