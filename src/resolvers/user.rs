@@ -1,10 +1,13 @@
 use crate::schema::{roles, user_roles, users};
 use crate::types::{LoginRequest, RawUser, Role, User, UserInsert, UserRequest, UserRole};
 use crate::utils::{AletheiaError, Result};
+use argonautica::input::Salt;
+use argonautica::{Hasher, Verifier};
 use diesel::dsl::*;
 use diesel::prelude::*;
 use diesel::BelongingToDsl;
 use rocket_contrib::databases::diesel;
+use std::env;
 
 pub fn all(conn: &diesel::PgConnection) -> Result<Vec<User>> {
     Ok(users::table
@@ -13,12 +16,17 @@ pub fn all(conn: &diesel::PgConnection) -> Result<Vec<User>> {
 }
 
 pub fn create(user: UserRequest, conn: &diesel::PgConnection) -> Result<User> {
-    let user_exists = select(exists(
-        users::table
-            .filter(users::email.eq(&(user.email)))
-            .or_filter(users::display_name.eq(&(user.display_name))),
-    ))
-    .get_result(conn)?;
+    let user_exists = match &user.display_name {
+        Some(display_name) => select(exists(
+            users::table
+                .filter(users::email.eq(&(user.email)))
+                .or_filter(users::display_name.eq(&(display_name))),
+        ))
+        .get_result(conn)?,
+        None => {
+            select(exists(users::table.filter(users::email.eq(&(user.email))))).get_result(conn)?
+        }
+    };
     if user_exists {
         return Err(AletheiaError::UserAlreadyExists {
             email: user.email.clone(),
@@ -56,5 +64,35 @@ impl User {
             .filter(roles::id.eq(any(role_ids)))
             .load::<Role>(conn)
             .expect("Could not load contributors")
+    }
+}
+
+impl UserInsert {
+    pub fn from_request(request: UserRequest) -> Result<UserInsert> {
+        let mut hasher = Hasher::default();
+        let salt_length = env::var("SALT_LENGTH")?;
+        let salt = Salt::random(salt_length.parse::<u32>()?);
+        let salt = salt.to_str()?;
+        let password_digest = hasher
+            .with_password(request.password)
+            .with_secret_key(env::var("SECRET_KEY")?)
+            .with_salt(salt)
+            .hash()?;
+        Ok(UserInsert {
+            display_name: request.display_name,
+            email: request.email,
+            password_digest,
+        })
+    }
+}
+
+impl RawUser {
+    pub fn validate_credentials(self: &RawUser, creds: &LoginRequest) -> Result<bool> {
+        let mut verifier = Verifier::default();
+        Ok(verifier
+            .with_hash(self.password_digest.clone())
+            .with_password(creds.password.clone())
+            .with_secret_key(env::var("SECRET_KEY")?)
+            .verify()?)
     }
 }
