@@ -1,4 +1,5 @@
 table! {
+
     use diesel::sql_types::*;
     use crate::db::sql_types::*;
 
@@ -13,6 +14,7 @@ table! {
 }
 
 table! {
+
     use diesel::sql_types::*;
     use crate::db::sql_types::*;
 
@@ -26,6 +28,7 @@ table! {
 }
 
 table! {
+
     use diesel::sql_types::*;
     use crate::db::sql_types::*;
 
@@ -40,6 +43,7 @@ table! {
 }
 
 table! {
+
     use diesel::sql_types::*;
     use crate::db::sql_types::*;
 
@@ -50,6 +54,7 @@ table! {
 }
 
 table! {
+
     use diesel::sql_types::*;
     use crate::db::sql_types::*;
 
@@ -61,6 +66,7 @@ table! {
 }
 
 table! {
+
     use diesel::sql_types::*;
     use crate::db::sql_types::*;
 
@@ -72,6 +78,7 @@ table! {
 }
 
 table! {
+
     use diesel::sql_types::*;
     use crate::db::sql_types::*;
 
@@ -83,6 +90,7 @@ table! {
 }
 
 table! {
+
     use diesel::sql_types::*;
     use crate::db::sql_types::*;
 
