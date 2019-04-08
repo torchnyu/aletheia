@@ -1,6 +1,6 @@
 use super::Context;
 use crate::db::schema::*;
-use crate::types::{Event, User};
+use crate::db::orm::{Event, User};
 use diesel::{self, AsChangeset, Queryable};
 use heck::TitleCase;
 use serde_derive::{Deserialize, Serialize};

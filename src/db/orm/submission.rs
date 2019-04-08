@@ -1,5 +1,5 @@
 use crate::db::schema::*;
-use crate::types::{Project, RawUser, User};
+use crate::db::orm::{Project, RawUser, User};
 use diesel::{self, AsChangeset, Queryable};
 use serde_derive::{Deserialize, Serialize};
 

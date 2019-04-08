@@ -1,5 +1,6 @@
 #[allow(unused_imports)]
 pub mod schema;
+pub mod orm;
 pub mod sql_types;
 
 use diesel::pg::PgConnection;

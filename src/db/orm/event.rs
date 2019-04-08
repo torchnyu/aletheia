@@ -1,6 +1,6 @@
 use super::Context;
 use crate::db::schema::*;
-use crate::types::Project;
+use crate::db::orm::Project;
 use chrono::naive::NaiveDateTime;
 use diesel::{self, AsChangeset, Queryable};
 use juniper::FieldResult;

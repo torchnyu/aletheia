@@ -1,7 +1,8 @@
 use super::{
     Context, Event, EventInsert, EventRequest, LoginRequest, Project, ProjectInsert,
-    ProjectRequest, Token, Tokenized, User, UserRequest,
+    ProjectRequest, Tokenized, User, UserRequest,
 };
+use crate::types::Token;
 
 use crate::db::sql_types::*;
 use juniper::FieldResult;

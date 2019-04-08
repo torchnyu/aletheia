@@ -1,6 +1,7 @@
 use crate::db::Connection;
 use crate::resolvers;
-use crate::types::{Submission, SubmissionInsert, Token, Tokenized};
+use crate::db::orm::{Submission, SubmissionInsert, Tokenized};
+use crate::types::Token;
 use crate::utils::Result;
 use rocket::{get, post};
 use rocket_contrib::json::Json;
