@@ -1,6 +1,6 @@
 use super::Context;
-use crate::schema::*;
-use crate::schema::{projects, submissions};
+use crate::db::schema::*;
+use crate::db::schema::{projects, submissions};
 use crate::types::{Project, Submission};
 use diesel::pg::expression::dsl::any;
 use diesel::BelongingToDsl;

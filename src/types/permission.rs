@@ -1,5 +1,5 @@
-use crate::schema::*;
-use crate::sql_types::*;
+use crate::db::schema::*;
+use crate::db::sql_types::*;
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Identifiable, Queryable, AsChangeset, Serialize, Deserialize, Associations, Debug)]

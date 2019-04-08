@@ -1,5 +1,5 @@
-use crate::schema::{permissions, user_roles};
-use crate::sql_types::*;
+use crate::db::schema::{permissions, user_roles};
+use crate::db::sql_types::*;
 use crate::types::{Permission, User, UserRole};
 use crate::utils::*;
 use diesel::dsl::any;

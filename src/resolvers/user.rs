@@ -1,4 +1,4 @@
-use crate::schema::{roles, user_roles, users};
+use crate::db::schema::{roles, user_roles, users};
 use crate::types::{LoginRequest, RawUser, Role, User, UserInsert, UserRequest, UserRole};
 use crate::utils::{AletheiaError, Result};
 use argonautica::input::Salt;

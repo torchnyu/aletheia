@@ -1,4 +1,4 @@
-use crate::schema::{events, user_events, users};
+use crate::db::schema::{events, user_events, users};
 use crate::types::{Event, EventInsert, Project, UserEvent, UserEventInsert};
 use crate::utils::*;
 use diesel::prelude::*;

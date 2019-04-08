@@ -1,4 +1,4 @@
-use crate::schema::submissions;
+use crate::db::schema::submissions;
 use crate::types::{Submission, SubmissionInsert};
 use crate::utils::*;
 use diesel::prelude::*;
