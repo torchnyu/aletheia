@@ -37,6 +37,7 @@ mod routes;
 #[allow(unused_imports)]
 mod types;
 mod utils;
+mod graphql;
 
 #[get("/")]
 fn index() -> String {

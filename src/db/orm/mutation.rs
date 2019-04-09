@@ -1,6 +1,6 @@
-use super::{
-    Context, Event, EventInsert, EventRequest, LoginRequest, Project, ProjectInsert,
-    ProjectRequest, Tokenized, User, UserRequest,
+use crate::types::{
+    Context, Event, EventInsert, EventRequest, LoginRequest, Project,
+    ProjectInsert, ProjectRequest, Tokenized, User, UserRequest
 };
 use crate::types::Token;
 
