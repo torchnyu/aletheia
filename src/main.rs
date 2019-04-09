@@ -33,8 +33,6 @@ mod github;
 mod resolvers;
 mod routes;
 #[allow(unused_imports)]
-// mod schema;
-// mod sql_types;
 mod types;
 mod utils;
 
