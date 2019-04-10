@@ -2,6 +2,7 @@ use super::Context;
 use crate::schema::*;
 use crate::types::{Event, User};
 use diesel::{self, AsChangeset, Queryable};
+use heck::TitleCase;
 use serde_derive::{Deserialize, Serialize};
 use slug::slugify;
 
@@ -12,7 +13,6 @@ pub struct Project {
     pub id: i32,
     pub name: String,
     pub repository_url: String,
-    pub color: String,
     pub description: Option<String>,
     pub slug: String,
     pub event_id: i32,
@@ -23,7 +23,6 @@ pub struct Project {
 pub struct ProjectInsert {
     pub name: String,
     pub repository_url: String,
-    pub color: String,
     pub description: Option<String>,
     pub slug: String,
     pub event_id: i32,
@@ -33,7 +32,6 @@ pub struct ProjectInsert {
 pub struct ProjectRequest {
     pub name: String,
     pub repository_url: String,
-    pub color: String,
     pub description: Option<String>,
     pub event_id: i32,
 }
@@ -42,7 +40,6 @@ impl ProjectInsert {
     pub fn from_project(project: Project) -> ProjectInsert {
         ProjectInsert {
             name: project.name,
-            color: project.color,
             repository_url: project.repository_url,
             description: project.description,
             slug: project.slug,
@@ -53,7 +50,6 @@ impl ProjectInsert {
         let slug = slugify(&request.name);
         ProjectInsert {
             name: request.name,
-            color: request.color,
             repository_url: request.repository_url,
             description: request.description,
             event_id: request.event_id,
@@ -73,12 +69,12 @@ graphql_object!(Project: Context |&self| {
         &self.name
     }
 
-    field repository_url(&executor) -> &str {
-        &self.repository_url
+    field title(&executor) -> String {
+        self.name.to_title_case()
     }
 
-    field color(&executor) -> &str {
-        &self.color
+    field repository_url(&executor) -> &str {
+        &self.repository_url
     }
 
     field slug(&executor) -> &str {

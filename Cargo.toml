@@ -14,6 +14,7 @@ diesel-derive-enum = { version = "0.4", features = ["postgres"] }
 dotenv = "0.9.0"
 failure = "0.1.5"
 failure_derive = "0.1.5"
+heck = "0.3.1"
 itertools = "0.8"
 jsonwebtoken = "5"
 juniper = "0.11.1"

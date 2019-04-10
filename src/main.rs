@@ -9,6 +9,7 @@ extern crate diesel;
 extern crate juniper;
 extern crate base64;
 extern crate dotenv;
+extern crate heck;
 extern crate jsonwebtoken as jwt;
 extern crate juniper_rocket;
 extern crate multipart;
@@ -27,6 +28,7 @@ use rocket::*;
 use rocket_cors::CorsOptions;
 
 mod authorization;
+mod db;
 mod github;
 mod resolvers;
 mod routes;
@@ -35,7 +37,6 @@ mod schema;
 mod sql_types;
 mod types;
 mod utils;
-mod db;
 
 #[get("/")]
 fn index() -> String {
