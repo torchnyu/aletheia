@@ -1,4 +1,5 @@
-use crate::types::{ Project, User, Context };
+use crate::types::{ Project, User };
+use super::Context;
 
 graphql_object!(Project: Context |&self| {
     description: "A hackathon project"

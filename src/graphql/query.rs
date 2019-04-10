@@ -1,4 +1,5 @@
-use super::{Context, Event, Project, User};
+use super::Context;
+use crate::types::{Event, Project, User};
 use juniper::FieldResult;
 
 pub struct QueryRoot {}

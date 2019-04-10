@@ -1,0 +1,40 @@
+use crate::types::{ Project, Event };
+use chrono::naive::NaiveDateTime;
+use juniper::FieldResult;
+use super::Context;
+
+graphql_object!(Event: Context |&self| {
+    description: "A event, e.g. hackathon, code challenge, etc."
+
+    field id(&executor) -> i32 {
+        self.id
+    }
+
+    field name(&executor) -> &str {
+        &self.name
+    }
+
+    field start_time(&executor) -> &NaiveDateTime {
+        &self.start_time
+    }
+
+    field end_time(&executor) -> &NaiveDateTime {
+        &self.end_time
+    }
+
+    field description(&executor) -> Option<&str> {
+        match &self.description {
+            Some(desc) => Some(desc.as_str()),
+            None => None
+        }
+    }
+
+    field slug(&executor) -> &str {
+        &self.slug
+    }
+
+    field projects(&executor) -> FieldResult<Vec<Project>> {
+        let database: &diesel::PgConnection = &executor.context().database;
+        Ok(self.projects(database)?)
+    }
+});
