@@ -1,4 +1,4 @@
-use crate::db::schema::*;
+use crate::db::schema::events;
 use chrono::naive::NaiveDateTime;
 use diesel::{self, AsChangeset, Queryable};
 use serde_derive::{Deserialize, Serialize};

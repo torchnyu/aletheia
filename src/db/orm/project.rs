@@ -1,4 +1,4 @@
-use crate::db::schema::*;
+use crate::db::schema::{projects};
 use crate::db::orm::{Event};
 use diesel::{self, AsChangeset, Queryable};
 use heck::TitleCase;
