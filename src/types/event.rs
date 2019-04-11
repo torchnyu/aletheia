@@ -1,5 +1,5 @@
 use super::Context;
-use crate::schema::*;
+use crate::db::schema::*;
 use crate::types::Project;
 use chrono::naive::NaiveDateTime;
 use diesel::{self, AsChangeset, Queryable};

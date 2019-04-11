@@ -3,7 +3,7 @@ use super::{
     ProjectRequest, Token, Tokenized, User, UserRequest,
 };
 
-use crate::sql_types::*;
+use crate::db::sql_types::*;
 use juniper::FieldResult;
 
 pub struct MutationRoot {}

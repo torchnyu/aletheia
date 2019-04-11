@@ -1,5 +1,5 @@
-use crate::schema::users::columns;
-use crate::schema::{projects, submissions, users};
+use crate::db::schema::users::columns;
+use crate::db::schema::{projects, submissions, users};
 use crate::types::{Project, ProjectInsert, Submission, SubmissionInsert, User};
 use crate::utils::*;
 use diesel::dsl::any;

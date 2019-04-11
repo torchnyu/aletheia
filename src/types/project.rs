@@ -1,5 +1,5 @@
 use super::Context;
-use crate::schema::*;
+use crate::db::schema::*;
 use crate::types::{Event, User};
 use diesel::{self, AsChangeset, Queryable};
 use heck::TitleCase;

@@ -1,5 +1,5 @@
 use super::{Event, RawUser, User};
-use crate::schema::*;
+use crate::db::schema::*;
 use diesel::{self, AsChangeset, Queryable};
 use serde_derive::{Deserialize, Serialize};
 

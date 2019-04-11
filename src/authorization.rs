@@ -1,5 +1,5 @@
+use crate::db::sql_types::{ActionModifier, ActionType};
 use crate::resolvers::*;
-use crate::sql_types::{ActionModifier, ActionType};
 use crate::types::Token;
 use crate::utils::Result;
 

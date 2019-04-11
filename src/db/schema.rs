@@ -1,6 +1,6 @@
 table! {
     use diesel::sql_types::*;
-    use crate::sql_types::*;
+    use crate::db::sql_types::*;
 
     events (id) {
         id -> Int4,
@@ -14,7 +14,7 @@ table! {
 
 table! {
     use diesel::sql_types::*;
-    use crate::sql_types::*;
+    use crate::db::sql_types::*;
 
     permissions (id) {
         id -> Int4,
@@ -27,7 +27,7 @@ table! {
 
 table! {
     use diesel::sql_types::*;
-    use crate::sql_types::*;
+    use crate::db::sql_types::*;
 
     projects (id) {
         id -> Int4,
@@ -41,7 +41,7 @@ table! {
 
 table! {
     use diesel::sql_types::*;
-    use crate::sql_types::*;
+    use crate::db::sql_types::*;
 
     roles (id) {
         id -> Int4,
@@ -51,7 +51,7 @@ table! {
 
 table! {
     use diesel::sql_types::*;
-    use crate::sql_types::*;
+    use crate::db::sql_types::*;
 
     submissions (id) {
         id -> Int4,
@@ -62,7 +62,7 @@ table! {
 
 table! {
     use diesel::sql_types::*;
-    use crate::sql_types::*;
+    use crate::db::sql_types::*;
 
     user_events (id) {
         id -> Int4,
@@ -73,7 +73,7 @@ table! {
 
 table! {
     use diesel::sql_types::*;
-    use crate::sql_types::*;
+    use crate::db::sql_types::*;
 
     user_roles (id) {
         id -> Int4,
@@ -84,7 +84,7 @@ table! {
 
 table! {
     use diesel::sql_types::*;
-    use crate::sql_types::*;
+    use crate::db::sql_types::*;
 
     users (id) {
         id -> Int4,
