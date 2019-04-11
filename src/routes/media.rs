@@ -5,6 +5,7 @@ use rocket::post;
 
 use multipart::server::save::Entries;
 use multipart::server::save::SaveResult::*;
+use multipart::server::save::SavedData;
 use multipart::server::Multipart;
 
 use rocket::http::{ContentType, Status};
@@ -35,19 +36,16 @@ pub fn create(
             )
         })?;
 
-    match process_file_upload(boundary, data) {
-        Ok(_) => Ok("Processed correctly".into()),
-        Err(err) => Err(err),
-    }
+    process_file_upload(boundary, data)
 }
 
-fn process_file_upload(boundary: &str, data: Data) -> core::result::Result<(), Custom<String>> {
+fn process_file_upload(boundary: &str, data: Data) -> core::result::Result<String, Custom<String>> {
     match Multipart::with_body(data.open(), boundary)
         .save()
         .size_limit(MAX_BYTES)
-        .with_dir("./tmp")
+        .temp()
     {
-        Full(entries) => Ok(process_entries(entries)),
+        Full(entries) => process_entries(entries),
         Partial(partial, reason) => {
             let mut err_msg = format!("Request partially processed: {:?}", reason);
             if let Some(field) = partial.partial {
@@ -62,16 +60,26 @@ fn process_file_upload(boundary: &str, data: Data) -> core::result::Result<(), C
     }
 }
 
-fn process_entries(entries: Entries) {
-    match entries.save_dir {
-        SaveDir::Temp(temp) => println!("SAVE DIR TEMP: {}", temp.path().display()),
-        SaveDir::Perm(path_buf) => println!(
-            "SAVE DIR PERM: {}",
-            path_buf.to_str().unwrap_or("NONE".into())
-        ),
-    }
-
-    for entry in entries.fields.iter() {
-        println!("{:?}", entry);
+fn process_entries(entries: Entries) -> core::result::Result<String, Custom<String>> {
+    match entries.fields.get("file") {
+        Some(field) => match &field[0].data {
+            SavedData::File(path, _) => {
+                match crate::resolvers::medium::upload_image(path.as_path()) {
+                    Ok(s) => Ok(s),
+                    Err(_) => Err(Custom(
+                        Status::InternalServerError,
+                        "Failed to upload file".to_string(),
+                    )),
+                }
+            }
+            _ => Err(Custom(
+                Status::InternalServerError,
+                "Internal error, please check server logs for details".to_string(),
+            )),
+        },
+        None => Err(Custom(
+            Status::InternalServerError,
+            format!("No `file` given!"),
+        )),
     }
 }

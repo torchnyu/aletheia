@@ -16,6 +16,7 @@ extern crate multipart;
 extern crate r2d2;
 extern crate rand;
 extern crate rusoto_core;
+extern crate rusoto_s3;
 extern crate slug;
 #[macro_use]
 extern crate diesel_derive_enum;
