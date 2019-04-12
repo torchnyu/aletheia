@@ -1,4 +1,5 @@
 mod event;
+mod medium;
 mod permission;
 mod project;
 mod role;
@@ -7,6 +8,7 @@ mod user;
 mod user_event;
 mod user_role;
 pub use self::event::*;
+pub use self::medium::*;
 pub use self::permission::*;
 pub use self::project::*;
 pub use self::role::*;
