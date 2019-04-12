@@ -22,7 +22,7 @@ extern crate slug;
 extern crate diesel_derive_enum;
 
 use crate::db::Connection;
-use crate::graphql::Context;
+use crate::db::connection::RequestContext;
 use crate::utils::Result;
 use rocket::response::content;
 use rocket::*;
@@ -54,7 +54,7 @@ fn handle_graphql_get(
     database: Connection,
 ) -> juniper_rocket::GraphQLResponse {
     let schema = graphql::create_schema();
-    let context = Context { database };
+    let context = RequestContext::from_connection(database);
     request.execute(&schema, &context)
 }
 
@@ -64,7 +64,7 @@ fn handle_graphql_post(
     database: Connection,
 ) -> juniper_rocket::GraphQLResponse {
     let schema = graphql::create_schema();
-    let context = Context { database };
+    let context = RequestContext::from_connection(database);
     request.execute(&schema, &context)
 }
 

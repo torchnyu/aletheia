@@ -1,4 +1,4 @@
-use super::Context;
+use super::RequestContext;
 use crate::types::Token;
 use crate::types::{
     Event, EventInsert, EventRequest, LoginRequest, Project, ProjectInsert, ProjectRequest,
@@ -10,7 +10,7 @@ use juniper::FieldResult;
 
 pub struct MutationRoot {}
 
-graphql_object!(MutationRoot: Context as "Mutation" |&self| {
+graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
     description: "The root mutation object of the schema"
 
     field login(
@@ -18,7 +18,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         email: String,
         password: String,
     ) -> FieldResult<Tokenized<User>>  {
-        let database = &executor.context().database;
+        let database = &executor.context().conn;
         let credentials = LoginRequest {
             email, password
         };
@@ -33,7 +33,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         token: String
     ) -> FieldResult<Tokenized<Project>> {
         let token = token.parse::<Token>()?;
-        let database = &executor.context().database;
+        let database = &executor.context().conn;
         crate::authorization::validate(
             &database,
             &token,
@@ -55,7 +55,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         token: String
     ) -> FieldResult<Tokenized<Event>> {
         let token = token.parse::<Token>()?;
-        let database = &executor.context().database;
+        let database = &executor.context().conn;
         crate::authorization::validate(
             &database,
             &token,
@@ -81,7 +81,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
             email,
             password,
         };
-        let database = &executor.context().database;
+        let database = &executor.context().conn;
         let user = crate::resolvers::user::create(user_request, database)?;
         let token = Token::new(&user.email).to_string()?;
         Ok(Tokenized { payload: user, token })
