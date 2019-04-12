@@ -14,15 +14,19 @@ pub struct RequestContext {
 /// The pool type.
 pub struct ConnectionPool(Pool<<PgConnection as Poolable>::Manager>);
 
-impl RequestContext {
-    /// Create a RequestContext Struct
-    pub fn from_connection(conn: Connection) -> Self {
+impl From<Connection> for RequestContext {
+    fn from(conn: Connection) -> Self {
         Self { conn }
     }
-
+}
+impl RequestContext {
     /// Get a DatabaseContext from this struct that can be used to connect
     /// to the db
-    pub fn database(&self, action: ActionType, modifier: ActionModifier) -> DatabaseContext {
+    pub fn database_context(
+        &self,
+        action: ActionType,
+        modifier: ActionModifier,
+    ) -> DatabaseContext {
         return DatabaseContext::from(&self.conn, action, modifier);
     }
 
@@ -55,7 +59,7 @@ impl RequestContext {
         rocket
             .state::<ConnectionPool>()
             .and_then(|pool| pool.0.get().ok())
-            .map(|conn| RequestContext::from_connection(conn))
+            .map(|conn| RequestContext::from(conn))
     }
 }
 
@@ -75,7 +79,7 @@ impl<'a, 'r> rocket::request::FromRequest<'a, 'r> for RequestContext {
         use rocket::{http::Status, Outcome};
         let pool = request.guard::<::rocket::State<ConnectionPool>>()?;
         match pool.0.get() {
-            Ok(conn) => Outcome::Success(RequestContext::from_connection(conn)),
+            Ok(conn) => Outcome::Success(RequestContext::from(conn)),
             Err(_) => Outcome::Failure((Status::ServiceUnavailable, ())),
         }
     }

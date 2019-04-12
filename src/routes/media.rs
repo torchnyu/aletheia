@@ -1,6 +1,6 @@
 use rocket::post;
 
-use crate::db::Connection;
+use crate::db::RequestContext;
 use crate::types::Medium;
 use multipart::server::save::Entries;
 use multipart::server::save::SaveResult::*;
@@ -18,7 +18,7 @@ static MAX_BYTES: u64 = 128_000_000;
 
 #[post("/", data = "<data>")]
 pub fn create(
-    conn: Connection,
+    conn: RequestContext,
     content_type: &ContentType,
     data: Data,
 ) -> core::result::Result<Json<Medium>, Custom<String>> {
@@ -69,7 +69,7 @@ fn process_file_upload(
 
 fn process_entries(
     entries: Entries,
-    conn: Connection,
+    conn: RequestContext,
 ) -> core::result::Result<Medium, Custom<String>> {
     let field = match entries.fields.get("file") {
         Some(field) => field,
