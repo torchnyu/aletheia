@@ -31,12 +31,12 @@ use rocket_cors::CorsOptions;
 mod authorization;
 mod db;
 mod github;
+mod graphql;
 mod resolvers;
 mod routes;
 #[allow(unused_imports)]
 mod types;
 mod utils;
-mod graphql;
 
 #[get("/")]
 fn index() -> String {

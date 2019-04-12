@@ -14,4 +14,3 @@ pub use self::submission::*;
 pub use self::user::*;
 pub use self::user_event::*;
 pub use self::user_role::*;
-

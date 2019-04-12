@@ -1,8 +1,8 @@
-use crate::db::schema::{projects, submissions};
 use super::Context;
-use diesel::BelongingToDsl;
-use crate::types::{ Project, User, Submission };
+use crate::db::schema::{projects, submissions};
+use crate::types::{Project, Submission, User};
 use diesel::pg::expression::dsl::any;
+use diesel::BelongingToDsl;
 use diesel::ExpressionMethods;
 use diesel::QueryDsl;
 use diesel::RunQueryDsl;
@@ -30,4 +30,3 @@ graphql_object!(User: Context |&self| {
             .load::<Project>(database).expect("Could not load projects")
     }
 });
-

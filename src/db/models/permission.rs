@@ -1,4 +1,4 @@
-use crate::db::schema::{permissions};
+use crate::db::schema::permissions;
 use crate::db::sql_types::*;
 use serde_derive::{Deserialize, Serialize};
 

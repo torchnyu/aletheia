@@ -1,5 +1,5 @@
-use crate::types::{Event, Project, User, Tokenized};
 use super::Context;
+use crate::types::{Event, Project, Tokenized, User};
 
 graphql_object!(Tokenized<Project>: Context as "AuthenticatedProject" |&self| {
     field token() -> &str {

@@ -5,19 +5,19 @@
 // GraphQL done with juniper
 
 // There should be an easier way to do this.
-mod project;
-mod tokenized;
-mod mutation;
 mod event;
-mod user;
+mod mutation;
+mod project;
 mod query;
+mod tokenized;
+mod user;
 
+pub use event::*;
 pub use mutation::*;
 pub use project::*;
-pub use tokenized::*;
-pub use event::*;
-pub use user::*;
 pub use query::*;
+pub use tokenized::*;
+pub use user::*;
 
 pub use crate::db::Connection;
 use juniper::Context as JuniperContext;

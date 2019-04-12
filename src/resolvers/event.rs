@@ -1,5 +1,5 @@
-use crate::db::schema::{events, user_events, users};
 use crate::db::models::{Event, EventInsert, Project, UserEvent, UserEventInsert};
+use crate::db::schema::{events, user_events, users};
 use crate::utils::*;
 use diesel::prelude::*;
 use diesel::BelongingToDsl;

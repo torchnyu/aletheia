@@ -1,5 +1,5 @@
-use crate::db::schema::submissions;
 use crate::db::models::{Submission, SubmissionInsert};
+use crate::db::schema::submissions;
 use crate::utils::*;
 use diesel::prelude::*;
 use rocket_contrib::databases::diesel;

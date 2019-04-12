@@ -1,7 +1,7 @@
-use crate::types::{ Project, Event };
+use super::Context;
+use crate::types::{Event, Project};
 use chrono::naive::NaiveDateTime;
 use juniper::FieldResult;
-use super::Context;
 
 graphql_object!(Event: Context |&self| {
     description: "A event, e.g. hackathon, code challenge, etc."

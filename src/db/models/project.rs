@@ -1,5 +1,5 @@
-use crate::db::schema::{projects};
-use crate::db::models::{Event};
+use crate::db::models::Event;
+use crate::db::schema::projects;
 use diesel::{self, AsChangeset, Queryable};
 use heck::TitleCase;
 use serde_derive::{Deserialize, Serialize};
@@ -56,4 +56,3 @@ impl ProjectInsert {
         }
     }
 }
-
