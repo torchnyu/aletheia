@@ -1,5 +1,5 @@
 use crate::db::schema::{projects};
-use crate::db::orm::{Event};
+use crate::db::models::{Event};
 use diesel::{self, AsChangeset, Queryable};
 use heck::TitleCase;
 use serde_derive::{Deserialize, Serialize};

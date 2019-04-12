@@ -1,5 +1,5 @@
 use crate::db::schema::{roles, user_roles, users};
-use crate::db::orm::{LoginRequest, RawUser, Role, User, UserInsert, UserRequest, UserRole};
+use crate::db::models::{LoginRequest, RawUser, Role, User, UserInsert, UserRequest, UserRole};
 use crate::utils::{AletheiaError, Result};
 use argonautica::input::Salt;
 use argonautica::{Hasher, Verifier};
