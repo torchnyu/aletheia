@@ -21,8 +21,7 @@ extern crate slug;
 #[macro_use]
 extern crate diesel_derive_enum;
 
-use crate::db::Connection;
-use crate::db::connection::RequestContext;
+use crate::db::RequestContext;
 use crate::utils::Result;
 use rocket::response::content;
 use rocket::*;
@@ -51,20 +50,20 @@ fn graphiql() -> content::Html<String> {
 #[get("/graphql?<request>")]
 fn handle_graphql_get(
     request: juniper_rocket::GraphQLRequest,
-    database: Connection,
+    database: RequestContext,
 ) -> juniper_rocket::GraphQLResponse {
     let schema = graphql::create_schema();
-    let context = RequestContext::from_connection(database);
+    let context = database;
     request.execute(&schema, &context)
 }
 
 #[post("/graphql", data = "<request>")]
 fn handle_graphql_post(
     request: juniper_rocket::GraphQLRequest,
-    database: Connection,
+    database: RequestContext,
 ) -> juniper_rocket::GraphQLResponse {
     let schema = graphql::create_schema();
-    let context = RequestContext::from_connection(database);
+    let context = database;
     request.execute(&schema, &context)
 }
 
@@ -95,7 +94,7 @@ fn main() -> Result<()> {
             routes![index, graphiql, handle_graphql_get, handle_graphql_post],
         )
         .attach(cors)
-        .attach(Connection::fairing())
+        .attach(RequestContext::fairing())
         .launch();
     Ok(())
 }

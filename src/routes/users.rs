@@ -1,5 +1,5 @@
 use crate::db::models::{LoginRequest, User, UserRequest};
-use crate::db::Connection;
+use crate::db::RequestContext;
 use crate::resolvers;
 use crate::types::Token;
 use crate::utils::Result;
@@ -14,18 +14,18 @@ pub struct AuthenticatedResponse {
 }
 
 #[get("/")]
-pub fn index(conn: Connection) -> Result<Json<Vec<User>>> {
+pub fn index(conn: RequestContext) -> Result<Json<Vec<User>>> {
     Ok(Json(resolvers::user::all(&conn)?))
 }
 
 #[post("/", format = "application/json", data = "<user>")]
-pub fn create(conn: Connection, user: Json<UserRequest>) -> Result<Json<User>> {
+pub fn create(conn: RequestContext, user: Json<UserRequest>) -> Result<Json<User>> {
     let user = user.into_inner();
     Ok(Json(resolvers::user::create(user, &conn)?))
 }
 
 #[post("/login", format = "application/json", data = "<creds>")]
-pub fn login(conn: Connection, creds: Json<LoginRequest>) -> Result<AuthenticatedResponse> {
+pub fn login(conn: RequestContext, creds: Json<LoginRequest>) -> Result<AuthenticatedResponse> {
     let creds = creds.into_inner();
     let user = resolvers::user::login(&creds, &conn)?;
     let token = Token::new(&creds.email).to_string()?;

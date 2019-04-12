@@ -19,9 +19,9 @@ pub use query::*;
 pub use tokenized::*;
 pub use user::*;
 
+pub use crate::db::RequestContext;
 use juniper::Context as JuniperContext;
 use juniper::RootNode;
-pub use crate::db::connection::RequestContext;
 
 pub fn create_schema() -> Schema {
     RootNode::new(QueryRoot {}, MutationRoot {})
