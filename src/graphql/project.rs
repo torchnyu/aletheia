@@ -1,5 +1,6 @@
 use super::RequestContext;
 use crate::types::{Project, User};
+use heck::TitleCase;
 
 graphql_object!(Project: RequestContext |&self| {
     description: "A hackathon project"
@@ -18,6 +19,10 @@ graphql_object!(Project: RequestContext |&self| {
 
     field slug(&executor) -> &str {
         &self.slug
+    }
+
+    field title(&executor) -> String {
+        self.name.to_title_case()
     }
 
     field description(&executor) -> Option<&str> {

@@ -2,7 +2,6 @@ use crate::db::models::Event;
 use crate::db::schema::projects;
 use diesel::{self, AsChangeset, Queryable};
 use serde_derive::{Deserialize, Serialize};
-use slug::slugify;
 
 #[derive(Identifiable, Queryable, AsChangeset, Serialize, Deserialize, Associations)]
 #[belongs_to(Event)]
@@ -31,7 +30,7 @@ pub struct ProjectRequest {
     pub name: String,
     pub repository_url: String,
     pub description: Option<String>,
-    pub event_id: i32,
+    pub event_slug: String,
 }
 
 impl ProjectInsert {
@@ -42,16 +41,6 @@ impl ProjectInsert {
             description: project.description,
             slug: project.slug,
             event_id: project.event_id,
-        }
-    }
-    pub fn from_request(request: ProjectRequest) -> ProjectInsert {
-        let slug = slugify(&request.name);
-        ProjectInsert {
-            name: request.name,
-            repository_url: request.repository_url,
-            description: request.description,
-            event_id: request.event_id,
-            slug,
         }
     }
 }

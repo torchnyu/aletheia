@@ -1,6 +1,6 @@
 use crate::db::RequestContext;
 use crate::resolvers;
-use crate::types::{Project, ProjectInsert, ProjectRequest, Token, Tokenized};
+use crate::types::{Project, ProjectRequest, Token, Tokenized};
 use crate::utils::Result;
 use rocket::{get, post};
 use rocket_contrib::json::Json;
@@ -17,8 +17,7 @@ pub fn create(
     token: Token,
 ) -> Result<Json<Tokenized<Project>>> {
     let project = project.into_inner();
-    let new_project =
-        resolvers::project::create(&token.uid, ProjectInsert::from_request(project), &conn)?;
+    let new_project = resolvers::project::create(&token.uid, project, &conn)?;
     Ok(Json(Tokenized {
         payload: new_project,
         token: token.to_string()?,

@@ -1,11 +1,14 @@
-use crate::db::models::{Project, ProjectInsert, Submission, SubmissionInsert, User};
+use crate::db::models::{
+    Project, ProjectInsert, ProjectRequest, Submission, SubmissionInsert, User,
+};
 use crate::db::schema::users::columns;
-use crate::db::schema::{projects, submissions, users};
+use crate::db::schema::{events, projects, submissions, users};
 use crate::utils::*;
 use diesel::dsl::any;
 use diesel::prelude::*;
 use diesel::BelongingToDsl;
 use rocket_contrib::databases::diesel;
+use slug::slugify;
 
 pub fn all(conn: &diesel::PgConnection) -> Result<Vec<Project>> {
     Ok(projects::table.load::<Project>(&*conn)?)
@@ -21,8 +24,24 @@ pub fn get_by_slug(slug: &str, conn: &diesel::PgConnection) -> Result<Project> {
         .first(conn)?)
 }
 
-pub fn create(email: &str, project: ProjectInsert, conn: &diesel::PgConnection) -> Result<Project> {
+pub fn create(
+    email: &str,
+    project: ProjectRequest,
+    conn: &diesel::PgConnection,
+) -> Result<Project> {
     conn.transaction::<_, _, _>(|| {
+        let event_id = events::table
+            .filter(events::slug.eq(project.event_slug))
+            .select(events::id)
+            .first(conn)?;
+        let slug = slugify(&project.name);
+        let project = ProjectInsert {
+            name: project.name,
+            repository_url: project.repository_url,
+            description: project.description,
+            event_id,
+            slug,
+        };
         // Create project
         let project: Project = diesel::insert_into(projects::table)
             .values(&project)
