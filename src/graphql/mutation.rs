@@ -1,6 +1,8 @@
-use super::{
-    Context, Event, EventInsert, EventRequest, LoginRequest, Project, ProjectInsert,
-    ProjectRequest, Token, Tokenized, User, UserRequest,
+use super::Context;
+use crate::types::Token;
+use crate::types::{
+    Event, EventInsert, EventRequest, LoginRequest, Project, ProjectInsert, ProjectRequest,
+    Tokenized, User, UserRequest,
 };
 
 use crate::db::sql_types::*;

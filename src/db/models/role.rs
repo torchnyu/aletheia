@@ -1,4 +1,4 @@
-use crate::db::schema::*;
+use crate::db::schema::roles;
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Identifiable, Queryable, AsChangeset, Serialize, Deserialize, Associations)]
