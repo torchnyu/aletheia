@@ -1,8 +1,9 @@
 use crate::db::sql_types::*;
 use diesel::pg::PgConnection;
-use rocket::fairing::Fairing;
+use rocket::fairing::{AdHoc, Fairing};
+use rocket::logger::error;
 use rocket_contrib::databases::r2d2::{Pool, PooledConnection};
-use rocket_contrib::databases::Poolable;
+use rocket_contrib::databases::{database_config, Poolable};
 
 type Connection = PooledConnection<<PgConnection as Poolable>::Manager>;
 
@@ -33,23 +34,31 @@ impl RequestContext {
     /// Returns a fairing that initializes the associated database
     /// connection pool.
     pub fn fairing() -> impl Fairing {
-        ::rocket::fairing::AdHoc::on_attach("\'postgres\' Database Pool", |rocket| {
-            let pool = ::rocket_contrib::databases::database_config("postgres", rocket.config())
-                .map(PgConnection::pool);
-            match pool {
-                Ok(Ok(p)) => Ok(rocket.manage(ConnectionPool(p))),
+        AdHoc::on_attach("\'postgres\' Database Pool", |rocket| {
+            let config = match database_config("postgres", rocket.config()) {
+                Ok(cfg) => cfg,
                 Err(config_error) => {
-                    println!(
+                    error(&format!(
                         "Database configuration failure (postgres): {:?}",
                         config_error
-                    );
-                    Err(rocket)
+                    ));
+                    return Err(rocket);
                 }
-                Ok(Err(pool_error)) => {
-                    println!("Failed to initialize pool for 'postgres': {:?}", pool_error);
-                    Err(rocket)
+            };
+            let pool = match PgConnection::pool(config) {
+                Ok(p) => p,
+                Err(pool_error) => {
+                    error(&format!(
+                        "Failed to initialize pool for 'postgres': {:?}",
+                        pool_error
+                    ));
+                    return Err(rocket);
                 }
-            }
+            };
+            Ok(rocket.manage(ConnectionPool(pool)))
+            /*match pool {
+                Ok(Ok(p)) => Ok(rocket.manage(ConnectionPool(p))),
+            }*/
         })
     }
     /// Retrieves a connection of type `Self` from the `rocket`
