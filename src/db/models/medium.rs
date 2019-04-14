@@ -8,6 +8,7 @@ pub struct Medium {
     pub id: i32,
     pub file_name: String,
     pub project_id: Option<i32>,
+    pub user_id: Option<i32>,
 }
 
 #[derive(Insertable)]
@@ -15,4 +16,5 @@ pub struct Medium {
 pub struct MediumInsert {
     pub file_name: String,
     pub project_id: Option<i32>,
+    pub user_id: Option<i32>,
 }

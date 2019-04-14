@@ -1,8 +1,8 @@
 use crate::db::models::{
-    Project, ProjectInsert, ProjectRequest, Submission, SubmissionInsert, User,
+    Medium, Project, ProjectInsert, ProjectRequest, Submission, SubmissionInsert, User,
 };
 use crate::db::schema::users::columns;
-use crate::db::schema::{events, projects, submissions, users};
+use crate::db::schema::{events, media, projects, submissions, users};
 use crate::utils::*;
 use diesel::dsl::any;
 use diesel::prelude::*;
@@ -86,5 +86,12 @@ impl Project {
             .select((columns::id, columns::display_name, columns::email))
             .load::<User>(conn)
             .expect("Could not load contributors")
+    }
+
+    pub fn media(&self, conn: &diesel::PgConnection) -> Vec<Medium> {
+        media::table
+            .filter(media::project_id.eq(self.id))
+            .load::<Medium>(conn)
+            .expect("Could not load media")
     }
 }

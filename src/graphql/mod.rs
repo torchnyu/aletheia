@@ -6,6 +6,7 @@
 
 // There should be an easier way to do this.
 mod event;
+mod medium;
 mod mutation;
 mod project;
 mod query;
@@ -13,6 +14,7 @@ mod tokenized;
 mod user;
 
 pub use event::*;
+pub use medium::*;
 pub use mutation::*;
 pub use project::*;
 pub use query::*;

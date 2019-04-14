@@ -1,5 +1,5 @@
 use super::RequestContext;
-use crate::types::{Project, User};
+use crate::types::{Medium, Project, User};
 use heck::TitleCase;
 
 graphql_object!(Project: RequestContext |&self| {
@@ -30,6 +30,11 @@ graphql_object!(Project: RequestContext |&self| {
             Some(desc) => Some(desc.as_str()),
             None => None
         }
+    }
+
+    field media(&executor) -> Vec<Medium> {
+        let database: &diesel::PgConnection = &executor.context().conn;
+        self.media(database)
     }
 
     field contributors(&executor) -> Vec<User> {

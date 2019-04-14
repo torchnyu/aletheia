@@ -67,6 +67,36 @@ fn process_file_upload(
     }
 }
 
+fn get_foreign_key(
+    key_name: &'static str,
+    entries: &Entries,
+) -> Result<Option<i32>, Custom<String>> {
+    let id_field = entries.fields.get(key_name).map(|field| &field[0].data);
+
+    // This isn't a map because we need to return out if parse fails
+    Ok(match id_field {
+        Some(id_field) => {
+            if let SavedData::Text(id) = id_field {
+                match id.parse::<i32>() {
+                    Ok(id) => Some(id),
+                    Err(_err) => {
+                        return Err(Custom(
+                            Status::BadRequest,
+                            format!("Project_id was not formatted correctly: {}", id),
+                        ))
+                    }
+                }
+            } else {
+                return Err(Custom(
+                    Status::InternalServerError,
+                    format!("Invalid type for {}", key_name),
+                ));
+            }
+        }
+        None => None,
+    })
+}
+
 fn process_entries(
     entries: Entries,
     conn: RequestContext,
@@ -81,31 +111,10 @@ fn process_entries(
         }
     };
 
-    let file_ext = get_file_ext(file_fields)?;
-    let project_id_field = entries.fields.get("project_id").map(|field| &field[0].data);
+    let project_id = get_foreign_key("project_id", &entries)?;
+    let user_id = get_foreign_key("user_id", &entries)?;
 
-    // This isn't a map because we need to return out if parse fails
-    let project_id = match project_id_field {
-        Some(project_id_field) => {
-            if let SavedData::Text(project_id) = project_id_field {
-                match project_id.parse::<i32>() {
-                    Ok(id) => Some(id),
-                    Err(_err) => {
-                        return Err(Custom(
-                            Status::BadRequest,
-                            format!("Project_id was not formatted correctly: {}", project_id),
-                        ))
-                    }
-                }
-            } else {
-                return Err(Custom(
-                    Status::InternalServerError,
-                    format!("Invalid type for project_id"),
-                ));
-            }
-        }
-        None => None,
-    };
+    let file_ext = get_file_ext(file_fields)?;
 
     match &file_fields[0].data {
         SavedData::File(path, _) => {
@@ -113,6 +122,7 @@ fn process_entries(
                 path.as_path(),
                 file_ext.to_owned(),
                 project_id,
+                user_id,
                 &conn,
             ) {
                 Ok(s) => Ok(s),
