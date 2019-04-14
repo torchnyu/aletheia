@@ -1,7 +1,7 @@
-use super::Context;
+use super::RequestContext;
 use crate::types::{Project, User};
 
-graphql_object!(Project: Context |&self| {
+graphql_object!(Project: RequestContext |&self| {
     description: "A hackathon project"
 
     field id(&executor) -> i32 {
@@ -28,7 +28,7 @@ graphql_object!(Project: Context |&self| {
     }
 
     field contributors(&executor) -> Vec<User> {
-        let database: &diesel::PgConnection = &executor.context().database;
+        let database: &diesel::PgConnection = &executor.context().conn;
         self.contributors(database)
     }
 });

@@ -1,9 +1,9 @@
-use super::Context;
+use super::RequestContext;
 use crate::types::{Event, Project};
 use chrono::naive::NaiveDateTime;
 use juniper::FieldResult;
 
-graphql_object!(Event: Context |&self| {
+graphql_object!(Event: RequestContext |&self| {
     description: "A event, e.g. hackathon, code challenge, etc."
 
     field id(&executor) -> i32 {
@@ -34,7 +34,7 @@ graphql_object!(Event: Context |&self| {
     }
 
     field projects(&executor) -> FieldResult<Vec<Project>> {
-        let database: &diesel::PgConnection = &executor.context().database;
+        let database: &diesel::PgConnection = &executor.context().conn;
         Ok(self.projects(database)?)
     }
 });

@@ -1,4 +1,4 @@
-use super::Context;
+use super::RequestContext;
 use crate::db::schema::{projects, submissions};
 use crate::types::{Project, Submission, User};
 use diesel::pg::expression::dsl::any;
@@ -7,7 +7,7 @@ use diesel::ExpressionMethods;
 use diesel::QueryDsl;
 use diesel::RunQueryDsl;
 
-graphql_object!(User: Context |&self| {
+graphql_object!(User: RequestContext |&self| {
     description: "A user"
 
     field id(&executor) -> i32 {
@@ -23,7 +23,7 @@ graphql_object!(User: Context |&self| {
     }
 
     field projects(&executor) -> Vec<Project> {
-        let database: &diesel::PgConnection = &executor.context().database;
+        let database: &diesel::PgConnection = &executor.context().conn;
         let project_ids = Submission::belonging_to(self).select(submissions::project_id);
         projects::table
             .filter(projects::id.eq(any(project_ids)))

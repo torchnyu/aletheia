@@ -1,4 +1,4 @@
-use crate::db::Connection;
+use crate::db::RequestContext;
 use crate::resolvers;
 use crate::types::{Project, ProjectInsert, ProjectRequest, Token, Tokenized};
 use crate::utils::Result;
@@ -6,13 +6,13 @@ use rocket::{get, post};
 use rocket_contrib::json::Json;
 
 #[get("/")]
-pub fn index(conn: Connection) -> Result<Json<Vec<Project>>> {
+pub fn index(conn: RequestContext) -> Result<Json<Vec<Project>>> {
     Ok(Json(resolvers::project::all(&conn)?))
 }
 
 #[post("/", format = "application/json", data = "<project>")]
 pub fn create(
-    conn: Connection,
+    conn: RequestContext,
     project: Json<ProjectRequest>,
     token: Token,
 ) -> Result<Json<Tokenized<Project>>> {

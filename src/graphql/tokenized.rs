@@ -1,7 +1,7 @@
-use super::Context;
+use super::RequestContext;
 use crate::types::{Event, Project, Tokenized, User};
 
-graphql_object!(Tokenized<Project>: Context as "AuthenticatedProject" |&self| {
+graphql_object!(Tokenized<Project>: RequestContext as "AuthenticatedProject" |&self| {
     field token() -> &str {
         &self.token
     }
@@ -11,7 +11,7 @@ graphql_object!(Tokenized<Project>: Context as "AuthenticatedProject" |&self| {
     }
 });
 
-graphql_object!(Tokenized<Event>: Context as "AuthenticatedEvent" |&self| {
+graphql_object!(Tokenized<Event>: RequestContext as "AuthenticatedEvent" |&self| {
     field token() -> &str {
         &self.token
     }
@@ -21,7 +21,7 @@ graphql_object!(Tokenized<Event>: Context as "AuthenticatedEvent" |&self| {
     }
 });
 
-graphql_object!(Tokenized<User>: Context as "AuthenticatedUser" |&self| {
+graphql_object!(Tokenized<User>: RequestContext as "AuthenticatedUser" |&self| {
     field token() -> &str {
         &self.token
     }
