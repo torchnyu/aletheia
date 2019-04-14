@@ -71,7 +71,7 @@ fn process_entries(
     entries: Entries,
     conn: RequestContext,
 ) -> core::result::Result<Medium, Custom<String>> {
-    let field = match entries.fields.get("file") {
+    let file_fields = match entries.fields.get("file") {
         Some(field) => field,
         None => {
             return Err(Custom(
@@ -80,22 +80,41 @@ fn process_entries(
             ))
         }
     };
-    let file_ext = if let Some(filename) = &(field[0].headers.filename) {
-        match Path::new(filename).extension().and_then(OsStr::to_str) {
-            Some(ext) => ext,
-            None => {
+
+    let file_ext = get_file_ext(file_fields)?;
+    let project_id_field = entries.fields.get("project_id").map(|field| &field[0].data);
+
+    // This isn't a map because we need to return out if parse fails
+    let project_id = match project_id_field {
+        Some(project_id_field) => {
+            if let SavedData::Text(project_id) = project_id_field {
+                match project_id.parse::<i32>() {
+                    Ok(id) => Some(id),
+                    Err(_err) => {
+                        return Err(Custom(
+                            Status::BadRequest,
+                            format!("Project_id was not formatted correctly: {}", project_id),
+                        ))
+                    }
+                }
+            } else {
                 return Err(Custom(
-                    Status::BadRequest,
-                    "Invalid file extension".to_string(),
-                ))
+                    Status::InternalServerError,
+                    format!("Invalid type for project_id"),
+                ));
             }
         }
-    } else {
-        return Err(Custom(Status::BadRequest, "No filename given!".to_string()));
+        None => None,
     };
-    match &field[0].data {
+
+    match &file_fields[0].data {
         SavedData::File(path, _) => {
-            match crate::resolvers::medium::create(path.as_path(), file_ext.to_owned(), &conn) {
+            match crate::resolvers::medium::create(
+                path.as_path(),
+                file_ext.to_owned(),
+                project_id,
+                &conn,
+            ) {
                 Ok(s) => Ok(s),
                 Err(_) => Err(Custom(
                     Status::InternalServerError,
@@ -107,5 +126,19 @@ fn process_entries(
             Status::InternalServerError,
             "Internal error, please check server logs for details".to_string(),
         )),
+    }
+}
+
+fn get_file_ext(file_fields: &Vec<multipart::server::SavedField>) -> Result<&str, Custom<String>> {
+    if let Some(filename) = &(file_fields[0].headers.filename) {
+        match Path::new(filename).extension().and_then(OsStr::to_str) {
+            Some(ext) => Ok(ext),
+            None => Err(Custom(
+                Status::BadRequest,
+                "Invalid file extension".to_string(),
+            )),
+        }
+    } else {
+        Err(Custom(Status::BadRequest, "No filename given!".to_string()))
     }
 }
