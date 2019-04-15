@@ -18,8 +18,17 @@ pub fn get(id: i32, conn: &diesel::PgConnection) -> Result<Project> {
     Ok(projects::table.find(id).get_result::<Project>(conn)?)
 }
 
-pub fn get_by_slug(slug: &str, conn: &diesel::PgConnection) -> Result<Project> {
+pub fn get_by_slug_and_event(
+    slug: &str,
+    event_slug: &str,
+    conn: &diesel::PgConnection,
+) -> Result<Project> {
+    let event_id: i32 = events::table
+        .filter(events::slug.eq(event_slug))
+        .select(events::id)
+        .first(conn)?;
     Ok(projects::table
+        .filter(projects::event_id.eq(event_id))
         .filter(projects::slug.eq(slug))
         .first(conn)?)
 }

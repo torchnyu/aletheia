@@ -71,30 +71,27 @@ fn get_foreign_key(
     key_name: &'static str,
     entries: &Entries,
 ) -> Result<Option<i32>, Custom<String>> {
-    let id_field = entries.fields.get(key_name).map(|field| &field[0].data);
-
-    // This isn't a map because we need to return out if parse fails
-    Ok(match id_field {
-        Some(id_field) => {
-            if let SavedData::Text(id) = id_field {
-                match id.parse::<i32>() {
-                    Ok(id) => Some(id),
-                    Err(_err) => {
-                        return Err(Custom(
-                            Status::BadRequest,
-                            format!("Project_id was not formatted correctly: {}", id),
-                        ))
-                    }
-                }
-            } else {
-                return Err(Custom(
-                    Status::InternalServerError,
-                    format!("Invalid type for {}", key_name),
-                ));
-            }
+    let maybe_id_field = entries.fields.get(key_name).map(|field| &field[0].data);
+    let id_field = match maybe_id_field {
+        Some(id_field) => id_field,
+        None => return Ok(None),
+    };
+    let id = match id_field {
+        SavedData::Text(id) => id,
+        _ => {
+            return Err(Custom(
+                Status::InternalServerError,
+                format!("Invalid type for {}", key_name),
+            ))
         }
-        None => None,
-    })
+    };
+    match id.parse::<i32>() {
+        Ok(id) => Ok(Some(id)),
+        Err(_err) => Err(Custom(
+            Status::BadRequest,
+            format!("Project_id was not formatted correctly: {}", id),
+        )),
+    }
 }
 
 fn process_entries(
