@@ -1,6 +1,6 @@
 use super::RequestContext;
+use crate::db::sql_types::{ActionModifier, ActionType};
 use crate::types::{Event, Medium, Project, User};
-use crate::db::sql_types::{ActionType, ActionModifier};
 use juniper::FieldResult;
 
 pub struct QueryRoot {}
@@ -11,15 +11,15 @@ graphql_object!(QueryRoot: RequestContext as "Query" |&self| {
     field users(
         &executor
     ) -> FieldResult<Vec<User>> {
-        let database = &executor.context().conn;
-        Ok(crate::resolvers::user::all(&database)?)
+        let database_context = executor.context().database_context(ActionType::Read, ActionModifier::All);
+        Ok(crate::resolvers::user::all(database_context.conn)?)
     }
 
     field projects(
         &executor
     ) -> FieldResult<Vec<Project>> {
-        let database = &executor.context().conn;
-        Ok(crate::resolvers::project::all(&database)?)
+        let database_context = executor.context().database_context(ActionType::Read, ActionModifier::All);
+        Ok(crate::resolvers::project::all(database_context.conn)?)
     }
 
     field media(
@@ -34,21 +34,21 @@ graphql_object!(QueryRoot: RequestContext as "Query" |&self| {
         slug: String,
         event_slug: String,
     ) -> FieldResult<Project> {
-        let database = &executor.context().conn;
-        Ok(crate::resolvers::project::get_by_slug_and_event(&slug, &event_slug, database)?)
+        let database_context = executor.context().database_context(ActionType::Read, ActionModifier::All);
+        Ok(crate::resolvers::project::get_by_slug_and_event(&slug, &event_slug, database_context.conn)?)
     }
 
     field eventBySlug(
         &executor,
         slug: String
     ) -> FieldResult<Event> {
-        let database = &executor.context().conn;
-        Ok(crate::resolvers::event::get_by_slug(&slug, database)?)
+        let database_context = executor.context().database_context(ActionType::Read, ActionModifier::All);
+        Ok(crate::resolvers::event::get_by_slug(&slug, database_context.conn)?)
     }
 
     field events(&executor) -> FieldResult<Vec<Event>> {
-        let database = &executor.context().conn;
-        Ok(crate::resolvers::event::all(&database)?)
+        let database_context = executor.context().database_context(ActionType::Read, ActionModifier::All);
+        Ok(crate::resolvers::event::all(&database_context.conn)?)
     }
 
 });

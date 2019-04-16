@@ -1,4 +1,5 @@
 use crate::db::models::{LoginRequest, User, UserRequest};
+use crate::db::sql_types::{ActionModifier, ActionType};
 use crate::db::RequestContext;
 use crate::resolvers;
 use crate::types::Token;
@@ -14,20 +15,23 @@ pub struct AuthenticatedResponse {
 }
 
 #[get("/")]
-pub fn index(conn: RequestContext) -> Result<Json<Vec<User>>> {
-    Ok(Json(resolvers::user::all(&conn)?))
+pub fn index(context: RequestContext) -> Result<Json<Vec<User>>> {
+    let database_context = context.database_context(ActionType::Read, ActionModifier::All);
+    Ok(Json(resolvers::user::all(database_context.conn)?))
 }
 
 #[post("/", format = "application/json", data = "<user>")]
-pub fn create(conn: RequestContext, user: Json<UserRequest>) -> Result<Json<User>> {
+pub fn create(context: RequestContext, user: Json<UserRequest>) -> Result<Json<User>> {
     let user = user.into_inner();
-    Ok(Json(resolvers::user::create(user, &conn)?))
+    let database_context = context.database_context(ActionType::Create, ActionModifier::One);
+    Ok(Json(resolvers::user::create(user, database_context.conn)?))
 }
 
 #[post("/login", format = "application/json", data = "<creds>")]
-pub fn login(conn: RequestContext, creds: Json<LoginRequest>) -> Result<AuthenticatedResponse> {
+pub fn login(context: RequestContext, creds: Json<LoginRequest>) -> Result<AuthenticatedResponse> {
     let creds = creds.into_inner();
-    let user = resolvers::user::login(&creds, &conn)?;
+    let database_context = context.database_context(ActionType::Read, ActionModifier::One);
+    let user = resolvers::user::login(&creds, database_context.conn)?;
     let token = Token::new(&creds.email).to_string()?;
     let response = AuthenticatedResponse {
         data: Json(user),

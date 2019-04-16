@@ -9,11 +9,14 @@ pub enum ActionType {
     Delete,
 }
 
+/// What kind of data are we acting on? i.e. all
+/// data, our own data, some row?
 #[derive(Debug, DbEnum, Serialize, Deserialize)]
 #[DieselType = "Action_modifier"]
 pub enum ActionModifier {
     All,
     Own,
+    One,
 }
 
 #[derive(Debug, DbEnum, Serialize, Deserialize)]

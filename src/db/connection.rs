@@ -9,7 +9,7 @@ type Connection = PooledConnection<<PgConnection as Poolable>::Manager>;
 
 /// The request guard type.
 pub struct RequestContext {
-    pub conn: Connection,
+    conn: Connection,
 }
 
 /// The pool type.
@@ -69,14 +69,6 @@ impl RequestContext {
             .state::<ConnectionPool>()
             .and_then(|pool| pool.0.get().ok())
             .map(|conn| RequestContext::from(conn))
-    }
-}
-
-impl std::ops::Deref for RequestContext {
-    type Target = PgConnection;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.conn
     }
 }
 
