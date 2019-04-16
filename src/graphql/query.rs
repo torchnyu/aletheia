@@ -12,14 +12,14 @@ graphql_object!(QueryRoot: RequestContext as "Query" |&self| {
         &executor
     ) -> FieldResult<Vec<User>> {
         let database_context = executor.context().database_context(ActionType::Read, ActionModifier::All);
-        Ok(crate::resolvers::user::all(database_context.conn)?)
+        Ok(crate::resolvers::user::all(&database_context)?)
     }
 
     field projects(
         &executor
     ) -> FieldResult<Vec<Project>> {
         let database_context = executor.context().database_context(ActionType::Read, ActionModifier::All);
-        Ok(crate::resolvers::project::all(database_context.conn)?)
+        Ok(crate::resolvers::project::all(&database_context)?)
     }
 
     field media(
@@ -35,7 +35,7 @@ graphql_object!(QueryRoot: RequestContext as "Query" |&self| {
         event_slug: String,
     ) -> FieldResult<Project> {
         let database_context = executor.context().database_context(ActionType::Read, ActionModifier::All);
-        Ok(crate::resolvers::project::get_by_slug_and_event(&slug, &event_slug, database_context.conn)?)
+        Ok(crate::resolvers::project::get_by_slug_and_event(&slug, &event_slug, &database_context)?)
     }
 
     field eventBySlug(
@@ -43,12 +43,12 @@ graphql_object!(QueryRoot: RequestContext as "Query" |&self| {
         slug: String
     ) -> FieldResult<Event> {
         let database_context = executor.context().database_context(ActionType::Read, ActionModifier::All);
-        Ok(crate::resolvers::event::get_by_slug(&slug, database_context.conn)?)
+        Ok(crate::resolvers::event::get_by_slug(&slug, &database_context)?)
     }
 
     field events(&executor) -> FieldResult<Vec<Event>> {
         let database_context = executor.context().database_context(ActionType::Read, ActionModifier::All);
-        Ok(crate::resolvers::event::all(&database_context.conn)?)
+        Ok(crate::resolvers::event::all(&database_context)?)
     }
 
 });

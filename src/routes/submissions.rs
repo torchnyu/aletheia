@@ -9,7 +9,7 @@ use rocket_contrib::json::Json;
 #[get("/")]
 pub fn index(context: RequestContext) -> Result<Json<Vec<Submission>>> {
     let database_context = context.database_context(ActionType::Read, ActionModifier::All);
-    Ok(Json(resolvers::submission::all(database_context.conn)?))
+    Ok(Json(resolvers::submission::all(&database_context)?))
 }
 
 #[post("/", format = "application/json", data = "<submission>")]
@@ -21,7 +21,7 @@ pub fn create(
     let submission = submission.into_inner();
     let database_context = context.database_context(ActionType::Create, ActionModifier::Own);
     Ok(Json(Tokenized {
-        payload: resolvers::submission::insert(submission, database_context.conn)?,
+        payload: resolvers::submission::insert(submission, &database_context)?,
         token: token.to_string()?,
     }))
 }

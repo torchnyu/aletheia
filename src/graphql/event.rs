@@ -36,6 +36,6 @@ graphql_object!(Event: RequestContext |&self| {
 
     field projects(&executor) -> FieldResult<Vec<Project>> {
         let database_context = executor.context().database_context(ActionType::Read, ActionModifier::All);
-        Ok(self.projects(database_context.conn)?)
+        Ok(self.projects(&database_context)?)
     }
 });

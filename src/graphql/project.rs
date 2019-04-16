@@ -35,11 +35,11 @@ graphql_object!(Project: RequestContext |&self| {
 
     field media(&executor) -> Vec<Medium> {
         let database_context = executor.context().database_context(ActionType::Read, ActionModifier::All);
-        self.media(database_context.conn)
+        self.media(&database_context)
     }
 
     field contributors(&executor) -> Vec<User> {
         let database_context = executor.context().database_context(ActionType::Read, ActionModifier::All);
-        self.contributors(database_context.conn)
+        self.contributors(&database_context)
     }
 });

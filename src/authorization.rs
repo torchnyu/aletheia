@@ -1,3 +1,4 @@
+use crate::db::connection::DatabaseContext;
 use crate::db::sql_types::{ActionModifier, ActionType};
 use crate::resolvers::*;
 use crate::types::Token;
@@ -13,14 +14,14 @@ pub enum AuthError {
 }
 
 pub fn validate(
-    conn: &diesel::PgConnection,
+    db: &DatabaseContext,
     token: &Token,
     resource: String,
     action: ActionType,
     modifier: ActionModifier,
 ) -> Result<()> {
-    let user = crate::resolvers::user::get_by_email(&token.uid, &conn)?;
-    let permissions = permission::get_permission(&user, &resource, &action, &modifier, conn)?;
+    let user = crate::resolvers::user::get_by_email(&token.uid, db)?;
+    let permissions = permission::get_permission(&user, &resource, &action, &modifier, db)?;
     if permissions.is_empty() {
         Err(AuthError::NoPermission { action, resource })?
     } else {

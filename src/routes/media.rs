@@ -122,7 +122,7 @@ fn process_entries(
                 file_ext.to_owned(),
                 project_id,
                 user_id,
-                database_context.conn,
+                &database_context,
             ) {
                 Ok(s) => Ok(s),
                 Err(_) => Err(Custom(

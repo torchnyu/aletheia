@@ -1,3 +1,4 @@
+use crate::db::connection::DatabaseContext;
 use crate::db::models::{Permission, User, UserRole};
 use crate::db::schema::{permissions, user_roles};
 use crate::db::sql_types::*;
@@ -12,7 +13,7 @@ pub fn get_permission(
     resource: &str,
     action: &ActionType,
     modifier: &ActionModifier,
-    conn: &diesel::PgConnection,
+    db: &DatabaseContext,
 ) -> Result<Vec<Permission>> {
     let role_ids = UserRole::belonging_to(user).select(user_roles::role_id);
     Ok(permissions::table
@@ -20,5 +21,5 @@ pub fn get_permission(
         .filter(permissions::resource_name.eq(resource))
         .filter(permissions::action.contains(vec![action]))
         .filter(permissions::modifier.contains(vec![modifier]))
-        .load::<Permission>(conn)?)
+        .load::<Permission>(db.conn)?)
 }

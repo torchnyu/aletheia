@@ -1,3 +1,4 @@
+use crate::db::connection::DatabaseContext;
 use crate::db::models::{Medium, MediumInsert};
 use crate::db::schema::media;
 use crate::diesel::RunQueryDsl;
@@ -15,7 +16,7 @@ pub fn create(
     file_ext: String,
     project_id: Option<i32>,
     user_id: Option<i32>,
-    conn: &diesel::PgConnection,
+    db: &DatabaseContext,
 ) -> Result<Medium> {
     let file_names = image::resize(&local_filename.to_path_buf(), &file_ext)?;
     let folder_name = image::upload(file_names)?;
@@ -26,5 +27,5 @@ pub fn create(
     };
     Ok(diesel::insert_into(media::table)
         .values(&medium)
-        .get_result(conn)?)
+        .get_result(db.conn)?)
 }
