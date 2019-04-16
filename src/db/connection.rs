@@ -56,9 +56,6 @@ impl RequestContext {
                 }
             };
             Ok(rocket.manage(ConnectionPool(pool)))
-            /*match pool {
-                Ok(Ok(p)) => Ok(rocket.manage(ConnectionPool(p))),
-            }*/
         })
     }
     /// Retrieves a connection of type `Self` from the `rocket`
