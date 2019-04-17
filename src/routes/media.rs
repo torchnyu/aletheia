@@ -67,11 +67,38 @@ fn process_file_upload(
     }
 }
 
+fn get_foreign_key(
+    key_name: &'static str,
+    entries: &Entries,
+) -> Result<Option<i32>, Custom<String>> {
+    let maybe_id_field = entries.fields.get(key_name).map(|field| &field[0].data);
+    let id_field = match maybe_id_field {
+        Some(id_field) => id_field,
+        None => return Ok(None),
+    };
+    let id = match id_field {
+        SavedData::Text(id) => id,
+        _ => {
+            return Err(Custom(
+                Status::InternalServerError,
+                format!("Invalid type for {}", key_name),
+            ))
+        }
+    };
+    match id.parse::<i32>() {
+        Ok(id) => Ok(Some(id)),
+        Err(_err) => Err(Custom(
+            Status::BadRequest,
+            format!("Project_id was not formatted correctly: {}", id),
+        )),
+    }
+}
+
 fn process_entries(
     entries: Entries,
     conn: RequestContext,
 ) -> core::result::Result<Medium, Custom<String>> {
-    let field = match entries.fields.get("file") {
+    let file_fields = match entries.fields.get("file") {
         Some(field) => field,
         None => {
             return Err(Custom(
@@ -80,22 +107,21 @@ fn process_entries(
             ))
         }
     };
-    let file_ext = if let Some(filename) = &(field[0].headers.filename) {
-        match Path::new(filename).extension().and_then(OsStr::to_str) {
-            Some(ext) => ext,
-            None => {
-                return Err(Custom(
-                    Status::BadRequest,
-                    "Invalid file extension".to_string(),
-                ))
-            }
-        }
-    } else {
-        return Err(Custom(Status::BadRequest, "No filename given!".to_string()));
-    };
-    match &field[0].data {
+
+    let project_id = get_foreign_key("project_id", &entries)?;
+    let user_id = get_foreign_key("user_id", &entries)?;
+
+    let file_ext = get_file_ext(file_fields)?;
+
+    match &file_fields[0].data {
         SavedData::File(path, _) => {
-            match crate::resolvers::medium::create(path.as_path(), file_ext.to_owned(), &conn) {
+            match crate::resolvers::medium::create(
+                path.as_path(),
+                file_ext.to_owned(),
+                project_id,
+                user_id,
+                &conn,
+            ) {
                 Ok(s) => Ok(s),
                 Err(_) => Err(Custom(
                     Status::InternalServerError,
@@ -107,5 +133,19 @@ fn process_entries(
             Status::InternalServerError,
             "Internal error, please check server logs for details".to_string(),
         )),
+    }
+}
+
+fn get_file_ext(file_fields: &Vec<multipart::server::SavedField>) -> Result<&str, Custom<String>> {
+    if let Some(filename) = &(file_fields[0].headers.filename) {
+        match Path::new(filename).extension().and_then(OsStr::to_str) {
+            Some(ext) => Ok(ext),
+            None => Err(Custom(
+                Status::BadRequest,
+                "Invalid file extension".to_string(),
+            )),
+        }
+    } else {
+        Err(Custom(Status::BadRequest, "No filename given!".to_string()))
     }
 }

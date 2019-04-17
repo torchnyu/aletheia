@@ -20,6 +20,7 @@ table! {
         id -> Int4,
         file_name -> Varchar,
         project_id -> Nullable<Int4>,
+        user_id -> Nullable<Int4>,
     }
 }
 
@@ -106,6 +107,7 @@ table! {
 }
 
 joinable!(media -> projects (project_id));
+joinable!(media -> users (user_id));
 joinable!(permissions -> roles (role_id));
 joinable!(submissions -> projects (project_id));
 joinable!(submissions -> users (user_id));

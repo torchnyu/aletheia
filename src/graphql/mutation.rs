@@ -1,8 +1,8 @@
 use super::RequestContext;
 use crate::types::Token;
 use crate::types::{
-    Event, EventInsert, EventRequest, LoginRequest, Project, ProjectInsert, ProjectRequest,
-    Tokenized, User, UserRequest,
+    Event, EventInsert, EventRequest, LoginRequest, Project, ProjectRequest, Tokenized, User,
+    UserRequest,
 };
 
 use crate::db::sql_types::*;
@@ -43,7 +43,7 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         )?;
         let project = crate::resolvers::project::create(
             &token.uid,
-            ProjectInsert::from_request(project),
+            project,
             database
         )?;
         Ok(Tokenized { payload: project, token: token.to_string()? })

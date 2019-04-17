@@ -21,12 +21,13 @@ graphql_object!(QueryRoot: RequestContext as "Query" |&self| {
         Ok(crate::resolvers::project::all(&database)?)
     }
 
-    field projectBySlug(
+    field projectBySlugAndEvent(
         &executor,
-        slug: String
+        slug: String,
+        event_slug: String,
     ) -> FieldResult<Project> {
         let database = &executor.context().conn;
-        Ok(crate::resolvers::project::get_by_slug(&slug, database)?)
+        Ok(crate::resolvers::project::get_by_slug_and_event(&slug, &event_slug, database)?)
     }
 
     field eventBySlug(

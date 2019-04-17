@@ -13,6 +13,8 @@ use std::path::Path;
 pub fn create(
     local_filename: &Path,
     file_ext: String,
+    project_id: Option<i32>,
+    user_id: Option<i32>,
     conn: &diesel::PgConnection,
 ) -> Result<Medium> {
     let datetime = Utc::now();
@@ -35,7 +37,8 @@ pub fn create(
     };
     let medium = MediumInsert {
         file_name: dest_filename,
-        project_id: None,
+        user_id,
+        project_id,
     };
     Ok(diesel::insert_into(media::table)
         .values(&medium)

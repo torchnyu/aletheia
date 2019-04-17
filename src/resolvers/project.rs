@@ -1,11 +1,14 @@
-use crate::db::models::{Project, ProjectInsert, Submission, SubmissionInsert, User};
+use crate::db::models::{
+    Medium, Project, ProjectInsert, ProjectRequest, Submission, SubmissionInsert, User,
+};
 use crate::db::schema::users::columns;
-use crate::db::schema::{projects, submissions, users};
+use crate::db::schema::{events, media, projects, submissions, users};
 use crate::utils::*;
 use diesel::dsl::any;
 use diesel::prelude::*;
 use diesel::BelongingToDsl;
 use rocket_contrib::databases::diesel;
+use slug::slugify;
 
 pub fn all(conn: &diesel::PgConnection) -> Result<Vec<Project>> {
     Ok(projects::table.load::<Project>(&*conn)?)
@@ -15,14 +18,39 @@ pub fn get(id: i32, conn: &diesel::PgConnection) -> Result<Project> {
     Ok(projects::table.find(id).get_result::<Project>(conn)?)
 }
 
-pub fn get_by_slug(slug: &str, conn: &diesel::PgConnection) -> Result<Project> {
+pub fn get_by_slug_and_event(
+    slug: &str,
+    event_slug: &str,
+    conn: &diesel::PgConnection,
+) -> Result<Project> {
+    let event_id: i32 = events::table
+        .filter(events::slug.eq(event_slug))
+        .select(events::id)
+        .first(conn)?;
     Ok(projects::table
+        .filter(projects::event_id.eq(event_id))
         .filter(projects::slug.eq(slug))
         .first(conn)?)
 }
 
-pub fn create(email: &str, project: ProjectInsert, conn: &diesel::PgConnection) -> Result<Project> {
+pub fn create(
+    email: &str,
+    project: ProjectRequest,
+    conn: &diesel::PgConnection,
+) -> Result<Project> {
     conn.transaction::<_, _, _>(|| {
+        let event_id = events::table
+            .filter(events::slug.eq(project.event_slug))
+            .select(events::id)
+            .first(conn)?;
+        let slug = slugify(&project.name);
+        let project = ProjectInsert {
+            name: project.name,
+            repository_url: project.repository_url,
+            description: project.description,
+            event_id,
+            slug,
+        };
         // Create project
         let project: Project = diesel::insert_into(projects::table)
             .values(&project)
@@ -67,5 +95,12 @@ impl Project {
             .select((columns::id, columns::display_name, columns::email))
             .load::<User>(conn)
             .expect("Could not load contributors")
+    }
+
+    pub fn media(&self, conn: &diesel::PgConnection) -> Vec<Medium> {
+        media::table
+            .filter(media::project_id.eq(self.id))
+            .load::<Medium>(conn)
+            .expect("Could not load media")
     }
 }

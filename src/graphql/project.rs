@@ -1,5 +1,6 @@
 use super::RequestContext;
-use crate::types::{Project, User};
+use crate::types::{Medium, Project, User};
+use heck::TitleCase;
 
 graphql_object!(Project: RequestContext |&self| {
     description: "A hackathon project"
@@ -20,11 +21,20 @@ graphql_object!(Project: RequestContext |&self| {
         &self.slug
     }
 
+    field title(&executor) -> String {
+        self.name.to_title_case()
+    }
+
     field description(&executor) -> Option<&str> {
         match &self.description {
             Some(desc) => Some(desc.as_str()),
             None => None
         }
+    }
+
+    field media(&executor) -> Vec<Medium> {
+        let database: &diesel::PgConnection = &executor.context().conn;
+        self.media(database)
     }
 
     field contributors(&executor) -> Vec<User> {
