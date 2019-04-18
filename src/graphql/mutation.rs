@@ -13,6 +13,7 @@ pub struct MutationRoot {}
 graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
     description: "The root mutation object of the schema"
 
+    // Tbh idk why this is in mutations
     field login(
         &executor,
         email: String,
@@ -25,6 +26,18 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         let user = crate::resolvers::user::login(&credentials, &database)?;
         let token = Token::new(&user.email).to_string()?;
         Ok(Tokenized { payload: user, token })
+    }
+
+    field validate_token(
+        &executor,
+        token: String
+    ) -> FieldResult<Tokenized<User>> {
+        let token = token.parse::<Token>()?;
+        let database = &executor.context().conn;
+        token.validate()?;
+        let new_token = Token::new(&token.uid).to_string()?;
+        let user = crate::resolvers::user::get_by_email(&token.uid, &database)?;
+        Ok(Tokenized { payload: user, token: new_token})
     }
 
     field create_project(
