@@ -14,6 +14,7 @@ extern crate image;
 extern crate jsonwebtoken as jwt;
 extern crate juniper_rocket;
 extern crate multipart;
+extern crate phf;
 extern crate r2d2;
 extern crate rand;
 extern crate rusoto_core;

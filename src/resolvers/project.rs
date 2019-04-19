@@ -1,14 +1,12 @@
-use crate::db::models::{
-    Medium, Project, ProjectInsert, ProjectRequest, Submission, SubmissionInsert, User,
-};
+use crate::db::models::{Medium, Project, ProjectRequest, Submission, SubmissionInsert, User};
 use crate::db::schema::users::columns;
 use crate::db::schema::{events, media, projects, submissions, users};
+use crate::services::project::*;
 use crate::utils::*;
 use diesel::dsl::any;
 use diesel::prelude::*;
 use diesel::BelongingToDsl;
 use rocket_contrib::databases::diesel;
-use slug::slugify;
 
 pub fn all(conn: &diesel::PgConnection) -> Result<Vec<Project>> {
     Ok(projects::table.load::<Project>(&*conn)?)
@@ -39,18 +37,7 @@ pub fn create(
     conn: &diesel::PgConnection,
 ) -> Result<Project> {
     conn.transaction::<_, _, _>(|| {
-        let event_id = events::table
-            .filter(events::slug.eq(project.event_slug))
-            .select(events::id)
-            .first(conn)?;
-        let slug = slugify(&project.name);
-        let project = ProjectInsert {
-            name: project.name,
-            repository_url: project.repository_url,
-            description: project.description,
-            event_id,
-            slug,
-        };
+        let project = validate::call(project, conn)?;
         // Create project
         let project: Project = diesel::insert_into(projects::table)
             .values(&project)
