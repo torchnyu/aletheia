@@ -2,8 +2,8 @@
 CREATE TYPE action_modifier_new AS ENUM ('all', 'own');
 
 ALTER TABLE permissions
-  ALTER COLUMN modifier TYPE action_modifier_new
-    USING (action_modifier::text::admin_level1_new);
+  ALTER COLUMN modifier TYPE action_modifier_new[]
+    USING (modifier::text::action_modifier_new[]);
 
 -- and swap the types
 DROP TYPE action_modifier;
