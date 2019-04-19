@@ -5,6 +5,10 @@ use crate::services::image::*;
 use crate::utils::Result;
 use std::path::Path;
 
+pub fn all(conn: &diesel::PgConnection) -> Result<Vec<Medium>> {
+    Ok(media::table.load::<Medium>(&*conn)?)
+}
+
 pub fn create(
     local_filename: &Path,
     file_ext: String,
