@@ -45,7 +45,6 @@ table! {
         id -> Int4,
         name -> Varchar,
         repository_url -> Varchar,
-        color -> Varchar,
         description -> Nullable<Varchar>,
         slug -> Varchar,
         event_id -> Int4,
