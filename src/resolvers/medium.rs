@@ -1,7 +1,7 @@
 use crate::db::models::{Medium, MediumInsert};
 use crate::db::schema::media;
 use crate::diesel::RunQueryDsl;
-use crate::services::image::*;
+use crate::services::*;
 use crate::utils::Result;
 use std::path::Path;
 
@@ -16,8 +16,8 @@ pub fn create(
     user_id: Option<i32>,
     conn: &diesel::PgConnection,
 ) -> Result<Medium> {
-    let file_names = resize::call(&local_filename.to_path_buf(), &file_ext)?;
-    let folder_name = upload::call(file_names)?;
+    let file_names = image::resize(&local_filename.to_path_buf(), &file_ext)?;
+    let folder_name = image::upload(file_names)?;
     let medium = MediumInsert {
         folder_name,
         user_id,
