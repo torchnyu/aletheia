@@ -1,5 +1,6 @@
 use super::RequestContext;
-use crate::types::{Event, Project, User};
+use crate::types::{Event, Medium, Project, User};
+use crate::db::sql_types::{ActionType, ActionModifier};
 use juniper::FieldResult;
 
 pub struct QueryRoot {}
@@ -19,6 +20,13 @@ graphql_object!(QueryRoot: RequestContext as "Query" |&self| {
     ) -> FieldResult<Vec<Project>> {
         let database = &executor.context().conn;
         Ok(crate::resolvers::project::all(&database)?)
+    }
+
+    field media(
+        &executor
+    ) -> FieldResult<Vec<Medium>> {
+        let database = &executor.context().database_context(ActionType::Read, ActionModifier::All);
+        Ok(crate::resolvers::medium::all(&database)?)
     }
 
     field projectBySlugAndEvent(

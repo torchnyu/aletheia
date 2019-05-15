@@ -1,14 +1,14 @@
 use crate::db::models::{Medium, MediumInsert};
 use crate::db::schema::media;
 use crate::diesel::RunQueryDsl;
+use crate::services::*;
+use crate::db::connection::DatabaseContext;
 use crate::utils::Result;
-use chrono::prelude::*;
-use rusoto_core::Region;
-use rusoto_s3::{PutObjectRequest, S3Client, S3};
-use std::env;
-use std::fs::File;
-use std::io::Read;
 use std::path::Path;
+
+pub fn all(db: &DatabaseContext) -> Result<Vec<Medium>> {
+    Ok(media::table.load::<Medium>(db.conn)?)
+}
 
 pub fn create(
     local_filename: &Path,
@@ -17,26 +17,10 @@ pub fn create(
     user_id: Option<i32>,
     conn: &diesel::PgConnection,
 ) -> Result<Medium> {
-    let datetime = Utc::now();
-    let dest_filename = format!("{}.{}", datetime.format("%Y-%m-%d-%H%M%S"), file_ext);
-    let client = S3Client::new(Region::UsEast1);
-    let bucket = env::var("BUCKET_NAME")?;
-    let mut f = File::open(local_filename)?;
-    let mut contents: Vec<u8> = Vec::new();
-    match f.read_to_end(&mut contents) {
-        Err(err) => panic!("Error opening file to send to S3: {}", err),
-        Ok(_) => {
-            let req = PutObjectRequest {
-                bucket: bucket.to_owned(),
-                key: dest_filename.to_owned(),
-                body: Some(contents.into()),
-                ..Default::default()
-            };
-            client.put_object(req).sync()?;
-        }
-    };
+    let file_names = image::resize(&local_filename.to_path_buf(), &file_ext)?;
+    let folder_name = image::upload(file_names)?;
     let medium = MediumInsert {
-        file_name: dest_filename,
+        folder_name,
         user_id,
         project_id,
     };
