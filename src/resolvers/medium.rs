@@ -2,11 +2,12 @@ use crate::db::models::{Medium, MediumInsert};
 use crate::db::schema::media;
 use crate::diesel::RunQueryDsl;
 use crate::services::*;
+use crate::db::connection::DatabaseContext;
 use crate::utils::Result;
 use std::path::Path;
 
-pub fn all(conn: &diesel::PgConnection) -> Result<Vec<Medium>> {
-    Ok(media::table.load::<Medium>(&*conn)?)
+pub fn all(db: &DatabaseContext) -> Result<Vec<Medium>> {
+    Ok(media::table.load::<Medium>(db.conn)?)
 }
 
 pub fn create(
