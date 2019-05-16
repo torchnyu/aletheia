@@ -45,6 +45,17 @@ impl Token {
         }
     }
 
+    pub fn new_invalid() -> Self {
+        let time = Local::now() - Duration::hours(EXPIRY_DURATION);
+        Token {
+            iss: "".into(),
+            sub: "noauth".into(),
+            uid: "".into(),
+            iua: (time - Duration::hours(EXPIRY_DURATION)).timestamp(),
+            exp: time.timestamp(),
+        }
+    }
+
     pub fn validate(&self) -> Result<Self> {
         let is_expired = Local::now().timestamp() > self.exp;
         if is_expired {

@@ -1,4 +1,5 @@
 use crate::db::sql_types::*;
+use crate::types::Token;
 use diesel::pg::PgConnection;
 use rocket::fairing::{AdHoc, Fairing};
 use rocket::logger::error;
@@ -25,10 +26,11 @@ impl RequestContext {
     /// to the db
     pub fn database_context(
         &self,
+        token: Option<Token>,
         action: ActionType,
         modifier: ActionModifier,
     ) -> DatabaseContext {
-        return DatabaseContext::from(&self.conn, action, modifier);
+        return DatabaseContext::from(&self.conn, token, action, modifier);
     }
 
     /// Returns a fairing that initializes the associated database
@@ -88,15 +90,26 @@ impl<'a, 'r> rocket::request::FromRequest<'a, 'r> for RequestContext {
 pub struct DatabaseContext<'a> {
     // Eventually make this private
     pub conn: &'a PgConnection,
-    action: ActionType,
-    modifier: ActionModifier,
+    pub token: Token,
+    pub action: ActionType,
+    pub modifier: ActionModifier,
 }
 
 impl<'a> DatabaseContext<'a> {
     /// Create a DatabaseContext Struct from a connection and modifier information
-    fn from(conn: &'a PgConnection, action: ActionType, modifier: ActionModifier) -> Self {
+    fn from(
+        conn: &'a PgConnection,
+        token: Option<Token>,
+        action: ActionType,
+        modifier: ActionModifier,
+    ) -> Self {
+        let token = match token {
+            Some(token) => token,
+            None => Token::new_invalid(),
+        };
         Self {
             conn,
+            token,
             action,
             modifier,
         }

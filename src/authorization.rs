@@ -13,17 +13,14 @@ pub enum AuthError {
     },
 }
 
-pub fn validate(
-    db: &DatabaseContext,
-    token: &Token,
-    resource: String,
-    action: ActionType,
-    modifier: ActionModifier,
-) -> Result<()> {
-    let user = crate::resolvers::user::get_by_email(&token.uid, db)?;
-    let permissions = permission::get_permission(&user, &resource, &action, &modifier, db)?;
+pub fn validate(db: &DatabaseContext, resource: String) -> Result<()> {
+    let user = crate::resolvers::user::get_by_email(&db.token.uid, db)?;
+    let permissions = permission::get_permission(&user, &resource, &db.action, &db.modifier, db)?;
     if permissions.is_empty() {
-        Err(AuthError::NoPermission { action, resource })?
+        Err(AuthError::NoPermission {
+            action: db.action,
+            resource,
+        })?
     } else {
         Ok(())
     }
