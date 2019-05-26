@@ -1,7 +1,6 @@
 use crate::db::connection::DatabaseContext;
-use crate::db::sql_types::{ActionModifier, ActionType};
+use crate::db::sql_types::ActionType;
 use crate::resolvers::*;
-use crate::types::Token;
 use crate::utils::Result;
 
 #[derive(Debug, Fail)]
@@ -15,7 +14,7 @@ pub enum AuthError {
 
 pub fn validate(db: &DatabaseContext, resource: String) -> Result<()> {
     let user = crate::resolvers::user::get_by_email(&db.token.uid, db)?;
-    let permissions = permission::get_permission(&user, &resource, &db.action, &db.modifier, db)?;
+    let permissions = permission::get_permission(&user, &resource, db)?;
     if permissions.is_empty() {
         Err(AuthError::NoPermission {
             action: db.action,

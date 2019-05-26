@@ -3,7 +3,6 @@ use crate::db::models::{Medium, MediumInsert};
 use crate::db::schema::media;
 use crate::diesel::RunQueryDsl;
 use crate::services::*;
-use crate::db::connection::DatabaseContext;
 use crate::utils::Result;
 use std::path::Path;
 

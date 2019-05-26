@@ -25,7 +25,7 @@ graphql_object!(QueryRoot: RequestContext as "Query" |&self| {
     field media(
         &executor
     ) -> FieldResult<Vec<Medium>> {
-        let database = &executor.context().database_context(ActionType::Read, ActionModifier::All);
+        let database = &executor.context().database_context(None, ActionType::Read, ActionModifier::All);
         Ok(crate::resolvers::medium::all(&database)?)
     }
 
