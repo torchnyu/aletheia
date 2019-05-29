@@ -1,3 +1,4 @@
+use crate::db::models::User;
 use crate::db::sql_types::*;
 use crate::types::Token;
 use diesel::pg::PgConnection;
@@ -90,7 +91,7 @@ impl<'a, 'r> rocket::request::FromRequest<'a, 'r> for RequestContext {
 pub struct DatabaseContext<'a> {
     // Eventually make this private
     pub conn: &'a PgConnection,
-    pub token: Token,
+    pub user: Option<User>,
     pub action: ActionType,
     pub modifier: ActionModifier,
 }
@@ -103,15 +104,19 @@ impl<'a> DatabaseContext<'a> {
         action: ActionType,
         modifier: ActionModifier,
     ) -> Self {
-        let token = match token {
-            Some(token) => token,
-            None => Token::new_invalid(),
+        let user = match token {
+            Some(token) => match crate::resolvers::user::get_by_email(&token.uid, conn) {
+                Ok(x) => Some(x),
+                Err(_) => None,
+            },
+            None => None,
         };
-        Self {
+        let conn = Self {
             conn,
-            token,
+            user,
             action,
             modifier,
-        }
+        };
+        conn
     }
 }

@@ -33,17 +33,18 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         token: String
     ) -> FieldResult<Tokenized<Project>> {
         let token = token.parse::<Token>()?;
+        let token_string = token.to_string()?;
         let database_context = executor.context().database_context(Some(token), ActionType::Create, ActionModifier::Own);
         crate::authorization::validate(
             &database_context,
             "project".to_string(),
         )?;
         let project = crate::resolvers::project::create(
-            &database_context.token.uid,
+            &database_context.user.as_ref().unwrap().email,
             project,
             &database_context
         )?;
-        Ok(Tokenized { payload: project, token: database_context.token.to_string()? })
+        Ok(Tokenized { payload: project, token: token_string })
     }
 
     field create_event(
@@ -52,17 +53,18 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         token: String
     ) -> FieldResult<Tokenized<Event>> {
         let token = token.parse::<Token>()?;
+        let token_string = token.to_string()?;
         let database_context = executor.context().database_context(Some(token), ActionType::Create, ActionModifier::Own);
         crate::authorization::validate(
             &database_context,
             "event".to_string(),
         )?;
         let event = crate::resolvers::event::create(
-            &database_context.token.uid,
+            &database_context.user.as_ref().unwrap().email,
             EventInsert::from_request(event),
             &database_context
         )?;
-        Ok(Tokenized { payload: event, token: database_context.token.to_string()? })
+        Ok(Tokenized { payload: event, token: token_string })
     }
 
     field register(

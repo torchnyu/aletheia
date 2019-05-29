@@ -5,6 +5,7 @@ use crate::utils::{AletheiaError, Result};
 use argonautica::input::Salt;
 use argonautica::{Hasher, Verifier};
 use diesel::dsl::*;
+use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use diesel::BelongingToDsl;
 use rocket_contrib::databases::diesel;
@@ -52,8 +53,8 @@ pub fn login(credentials: &LoginRequest, db: &DatabaseContext) -> Result<User> {
     }
 }
 
-pub fn get_by_email(email: &str, db: &DatabaseContext) -> Result<User> {
-    let user: RawUser = users::table.filter(users::email.eq(email)).first(db.conn)?;
+pub fn get_by_email(email: &str, conn: &PgConnection) -> Result<User> {
+    let user: RawUser = users::table.filter(users::email.eq(email)).first(conn)?;
     Ok(User::from_raw_user(user))
 }
 
