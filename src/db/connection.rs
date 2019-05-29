@@ -104,19 +104,19 @@ impl<'a> DatabaseContext<'a> {
         action: ActionType,
         modifier: ActionModifier,
     ) -> Self {
+        use crate::resolvers::user;
         let user = match token {
-            Some(token) => match crate::resolvers::user::get_by_email(&token.uid, conn) {
+            Some(token) => match user::get_by_email(&token.uid, conn) {
                 Ok(x) => Some(x),
                 Err(_) => None,
             },
             None => None,
         };
-        let conn = Self {
+        Self {
             conn,
             user,
             action,
             modifier,
-        };
-        conn
+        }
     }
 }
