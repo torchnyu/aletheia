@@ -2,7 +2,7 @@
 CREATE TYPE action_modifier_new AS ENUM ('all', 'own');
 
 -- Remove all instances of 'one'
-UPDATE permissions SET modifier = array_remove(modifier, 'one') where modifier @> ARRAY['one']::action_modifier[];
+UPDATE permissions SET modifier = array_remove(modifier, 'one'::action_modifier) WHERE modifier @> ARRAY['one']::action_modifier[];
 
 ALTER TABLE permissions
   ALTER COLUMN modifier TYPE action_modifier_new[]
