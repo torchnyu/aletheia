@@ -1,6 +1,6 @@
 use super::RequestContext;
 use crate::db::schema::{projects, submissions};
-use crate::types::{Project, Submission, User};
+use crate::types::{Medium, Project, Submission, User};
 use diesel::pg::expression::dsl::any;
 use diesel::BelongingToDsl;
 use diesel::ExpressionMethods;
@@ -20,6 +20,11 @@ graphql_object!(User: RequestContext |&self| {
 
     field email(&executor) -> &str {
         &self.email
+    }
+
+    field profile_picture(&executor) -> Option<Medium> {
+        let database: &diesel::PgConnection = &executor.context().conn;
+        self.profile_picture(database)
     }
 
     field projects(&executor) -> Vec<Project> {
