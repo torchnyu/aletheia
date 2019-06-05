@@ -27,6 +27,7 @@ use crate::utils::Result;
 use rocket::response::content;
 use rocket::*;
 use rocket_cors::CorsOptions;
+use std::collections::HashSet;
 
 mod db;
 mod github;
@@ -69,7 +70,10 @@ fn handle_graphql_post(
 }
 
 fn main() -> Result<()> {
-    let default = CorsOptions::default();
+    let mut default = CorsOptions::default();
+    let mut exposed_headers = HashSet::new();
+    exposed_headers.insert("token".to_string());
+    default.expose_headers = exposed_headers;
     let cors = CorsOptions::to_cors(&default)?;
     dotenv::dotenv().expect("Failed to read .env file");
     rocket::ignite()

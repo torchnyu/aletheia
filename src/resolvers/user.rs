@@ -1,6 +1,8 @@
 use crate::db::connection::DatabaseContext;
-use crate::db::models::{LoginRequest, RawUser, Role, User, UserInsert, UserRequest, UserRole};
-use crate::db::schema::{roles, user_roles, users};
+use crate::db::models::{
+    LoginRequest, Medium, RawUser, Role, User, UserInsert, UserRequest, UserRole,
+};
+use crate::db::schema::{media, roles, user_roles, users};
 use crate::utils::{AletheiaError, Result};
 use argonautica::input::Salt;
 use argonautica::{Hasher, Verifier};
@@ -65,6 +67,14 @@ impl User {
             .filter(roles::id.eq(any(role_ids)))
             .load::<Role>(db.conn)
             .expect("Could not load contributors")
+    }
+
+    pub fn profile_picture(&self, conn: &diesel::PgConnection) -> Option<Medium> {
+        media::table
+            .filter(media::user_id.eq(self.id))
+            .first::<Medium>(conn)
+            .optional()
+            .expect("Could not load profile picture")
     }
 }
 
