@@ -9,6 +9,7 @@ pub struct Medium {
     pub folder_name: String,
     pub project_id: Option<i32>,
     pub user_id: Option<i32>,
+    pub file_ext: String,
 }
 
 #[derive(Insertable)]
@@ -17,4 +18,5 @@ pub struct MediumInsert {
     pub folder_name: String,
     pub project_id: Option<i32>,
     pub user_id: Option<i32>,
+    pub file_ext: String,
 }

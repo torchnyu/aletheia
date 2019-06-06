@@ -23,6 +23,7 @@ pub fn create(
         folder_name,
         user_id,
         project_id,
+        file_ext,
     };
     Ok(diesel::insert_into(media::table)
         .values(&medium)
