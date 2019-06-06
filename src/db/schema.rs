@@ -21,6 +21,7 @@ table! {
         folder_name -> Varchar,
         project_id -> Nullable<Int4>,
         user_id -> Nullable<Int4>,
+        file_ext -> Varchar,
     }
 }
 
