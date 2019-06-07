@@ -1,5 +1,6 @@
+use rocket::post;
 use crate::db::RequestContext;
-use crate::types::Medium;
+use crate::types::{Medium, Token};
 use multipart::server::save::Entries;
 use multipart::server::save::SaveResult::*;
 use multipart::server::save::SavedData;
@@ -11,23 +12,30 @@ use std::path::Path;
 use rocket::http::{ContentType, Status};
 use rocket::response::status::Custom;
 use rocket::Data;
-use rocket_contrib::json::Json;
 
 static MAX_BYTES: u64 = 128_000_000;
 
-#[post("/", data = "<data>")]
-pub fn create(
-    conn: RequestContext,
-    content_type: &ContentType,
-    data: Data,
-) -> core::result::Result<Json<Medium>, Custom<String>> {
+pub fn validate_medium_upload<'a>(
+    conn: &RequestContext,
+    content_type: &'a ContentType,
+    token: &Token,
+) -> core::result::Result<&'a str, Custom<String>> {
+    match crate::authorization::validate(
+        conn,
+        token,
+        Resource::Medium,
+        ActionType::Create,
+        ActionModifier::Own,
+    ) {
+        Ok(_) => (),
+        Err(err) => return Err(Custom(Status::BadRequest, err.to_string())),
+    }
     if !content_type.is_form_data() {
         Err(Custom(
             Status::BadRequest,
             "Content-Type not multipart/form-data".into(),
         ))?;
     }
-
     let (_, boundary) = content_type
         .params()
         .find(|&(key, _)| key == "boundary")
@@ -37,12 +45,10 @@ pub fn create(
                 "`Content-Type: multipart/form-data` boundary param not provided".into(),
             )
         })?;
-
-    let entries = process_file_upload(boundary, data)?;
-    Ok(Json(process_entries(entries, conn)?))
+    return Ok(boundary);
 }
 
-fn process_file_upload(
+pub fn process_file_upload(
     boundary: &str,
     data: Data,
 ) -> core::result::Result<Entries, Custom<String>> {
@@ -66,7 +72,7 @@ fn process_file_upload(
     }
 }
 
-fn get_foreign_key(
+pub fn get_foreign_key(
     key_name: &'static str,
     entries: &Entries,
 ) -> Result<Option<i32>, Custom<String>> {
@@ -93,9 +99,15 @@ fn get_foreign_key(
     }
 }
 
-fn process_entries(
+pub fn process_entries(
     entries: Entries,
+<<<<<<< HEAD
     context: RequestContext,
+=======
+    conn: RequestContext,
+    project_id: Option<i32>,
+    user_id: Option<i32>,
+>>>>>>> Probably should have broken these commits up.
 ) -> core::result::Result<Medium, Custom<String>> {
     let file_fields = match entries.fields.get("file") {
         Some(field) => field,
@@ -106,9 +118,6 @@ fn process_entries(
             ))
         }
     };
-
-    let project_id = get_foreign_key("project_id", &entries)?;
-    let user_id = get_foreign_key("user_id", &entries)?;
 
     let file_ext = get_file_ext(file_fields)?;
     match &file_fields[0].data {
