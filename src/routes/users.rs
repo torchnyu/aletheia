@@ -1,11 +1,16 @@
 use crate::db::models::{LoginRequest, User, UserRequest};
 use crate::db::RequestContext;
 use crate::resolvers;
-use crate::types::Token;
+use crate::routes::media::*;
+use crate::types::{MediumResponse, Token};
 use crate::utils::Result;
 use rocket::http::Header;
+use rocket::http::{ContentType, Status};
+use rocket::response::status::Custom;
+use rocket::Data;
 use rocket::{get, post, Responder};
 use rocket_contrib::json::Json;
+use std::convert::TryInto;
 
 #[derive(Responder)]
 pub struct AuthenticatedResponse {
@@ -34,4 +39,21 @@ pub fn login(context: RequestContext, creds: Json<LoginRequest>) -> Result<Authe
         header: Header::new("token", token),
     };
     Ok(response)
+}
+
+#[post("/images", data = "<data>")]
+pub fn upload_image(
+    conn: RequestContext,
+    content_type: &ContentType,
+    token: Token,
+    data: Data,
+) -> core::result::Result<Json<MediumResponse>, Custom<String>> {
+    let boundary = validate_medium_upload(&conn, content_type, &token)?;
+    let entries = process_file_upload(boundary, data)?;
+    let user = crate::resolvers::user::get_by_email(&token.uid, &conn).unwrap();
+    let medium = process_entries(entries, conn, None, Some(user.id))?;
+    match medium.try_into() {
+        Ok(response) => Ok(Json(response)),
+        Err(err) => Err(Custom(Status::InternalServerError, err.to_string())),
+    }
 }

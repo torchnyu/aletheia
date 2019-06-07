@@ -90,7 +90,8 @@ fn main() -> Result<()> {
             routes![
                 routes::users::index,
                 routes::users::create,
-                routes::users::login
+                routes::users::login,
+                routes::projects::upload_image
             ],
         )
         .mount(
