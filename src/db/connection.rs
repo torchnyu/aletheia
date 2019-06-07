@@ -51,7 +51,7 @@ impl RequestContext {
     /// to the db
     pub fn database_context<'a>(
         &'a self,
-        resource: &'a str,
+        resource: Resource,
         token: Option<Token>,
         action: ActionType,
         modifier: ActionModifier,
@@ -64,7 +64,7 @@ impl RequestContext {
         action: ActionType,
         modifier: ActionModifier,
     ) -> DatabaseContext {
-        DatabaseContext::from(&self.conn, &"none", None, action, modifier)
+        DatabaseContext::from(&self.conn, Resource::None, None, action, modifier)
             .expect("Error is unreachable")
     }
 
@@ -134,7 +134,7 @@ pub struct DatabaseContext<'a> {
 impl<'a> DatabaseContext<'a> {
     fn try_get_permissions(
         conn: &'a PgConnection,
-        resource: &'a str,
+        resource: Resource,
         token: Option<Token>,
         action: ActionType,
         modifier: ActionModifier,
@@ -143,7 +143,7 @@ impl<'a> DatabaseContext<'a> {
         use crate::resolvers::user;
         if let Some(token) = token {
             let user = user::get_by_email(&token.uid, conn)?;
-            let permissions = permission::get_permission(conn, &user, resource, action, modifier)?;
+            let permissions = permission::get_permission(conn, &user, &resource, action, modifier)?;
             if permissions.is_empty() {
                 Ok(AuthState::Invalid { user })
             } else {
@@ -156,7 +156,7 @@ impl<'a> DatabaseContext<'a> {
     /// Create a DatabaseContext Struct from a connection and modifier information
     fn from(
         conn: &'a PgConnection,
-        resource: &'a str,
+        resource: Resource,
         token: Option<Token>,
         action: ActionType,
         modifier: ActionModifier,

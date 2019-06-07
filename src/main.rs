@@ -79,7 +79,11 @@ fn main() -> Result<()> {
     rocket::ignite()
         .mount(
             "/projects",
-            routes![routes::projects::index, routes::projects::create],
+            routes![
+                routes::projects::index,
+                routes::projects::create,
+                routes::projects::upload_image
+            ],
         )
         .mount(
             "/users",
@@ -93,7 +97,6 @@ fn main() -> Result<()> {
             "/submissions",
             routes![routes::submissions::index, routes::submissions::create],
         )
-        .mount("/media", routes![routes::media::create])
         .mount(
             "/",
             routes![index, graphiql, handle_graphql_get, handle_graphql_post],

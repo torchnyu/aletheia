@@ -56,6 +56,17 @@ table! {
     use diesel::sql_types::*;
     use crate::db::sql_types::*;
 
+    registrations (id) {
+        id -> Int4,
+        application -> Varchar,
+        confirmation -> Nullable<Varchar>,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use crate::db::sql_types::*;
+
     roles (id) {
         id -> Int4,
         name -> Varchar,
@@ -122,6 +133,7 @@ allow_tables_to_appear_in_same_query!(
     media,
     permissions,
     projects,
+    registrations,
     roles,
     submissions,
     user_events,

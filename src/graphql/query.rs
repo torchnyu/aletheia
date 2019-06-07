@@ -1,6 +1,6 @@
 use super::RequestContext;
-use crate::db::sql_types::{ActionModifier, ActionType};
-use crate::types::{Event, Medium, Project, User};
+use crate::db::sql_types::{ActionModifier, ActionType, Resource};
+use crate::types::{Event, Medium, Project, Token, User};
 use juniper::FieldResult;
 
 pub struct QueryRoot {}
@@ -27,6 +27,26 @@ graphql_object!(QueryRoot: RequestContext as "Query" |&self| {
     ) -> FieldResult<Vec<Medium>> {
         let database = &executor.context().db_context_for_anon_user(ActionType::Read, ActionModifier::All);
         Ok(crate::resolvers::medium::all(&database)?)
+    }
+
+    field userByToken(
+        &executor,
+        token: String,
+    ) -> FieldResult<User> {
+        let database = &executor.context().conn;
+        let token = token.parse::<Token>()?;
+        crate::authorization::validate(
+            &database,
+            &token,
+            Resource::User,
+            ActionType::Read,
+            ActionModifier::Own
+        )?;
+        // We're fetching the user in the validation, so this is
+        // technically a second fetch, but I don't want to break the
+        // conceptual integrity of validate
+        let user = crate::resolvers::user::get_by_email(&token.uid, database)?;
+        Ok(user)
     }
 
     field projectBySlugAndEvent(
