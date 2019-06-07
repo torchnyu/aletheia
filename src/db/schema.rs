@@ -58,8 +58,8 @@ table! {
 
     registrations (id) {
         id -> Int4,
-        application -> Varchar,
-        confirmation -> Nullable<Varchar>,
+        application -> Jsonb,
+        confirmation -> Nullable<Jsonb>,
     }
 }
 
