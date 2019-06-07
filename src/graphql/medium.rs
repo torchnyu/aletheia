@@ -18,6 +18,10 @@ graphql_object!(Medium: RequestContext |&self| {
         Ok(self.large_url()?)
     }
 
+    field medium_url(&executor) -> FieldResult<String> {
+        Ok(self.medium_url()?)
+    }
+    
     field thumbnail_url(&executor) -> FieldResult<String> {
         Ok(self.thumbnail_url()?)
     }

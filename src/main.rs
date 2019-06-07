@@ -91,7 +91,8 @@ fn main() -> Result<()> {
                 routes::users::index,
                 routes::users::create,
                 routes::users::login,
-                routes::projects::upload_image
+                routes::users::upload_profile_picture,
+                routes::users::get_profile_picture
             ],
         )
         .mount(

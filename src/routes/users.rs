@@ -41,8 +41,8 @@ pub fn login(context: RequestContext, creds: Json<LoginRequest>) -> Result<Authe
     Ok(response)
 }
 
-#[post("/images", data = "<data>")]
-pub fn upload_image(
+#[post("/profile-picture", data = "<data>")]
+pub fn upload_profile_picture(
     conn: RequestContext,
     content_type: &ContentType,
     token: Token,
@@ -50,10 +50,24 @@ pub fn upload_image(
 ) -> core::result::Result<Json<MediumResponse>, Custom<String>> {
     let boundary = validate_medium_upload(&conn, content_type, &token)?;
     let entries = process_file_upload(boundary, data)?;
+    // Unwrap cause we know user exists due to validate_medium_upload
     let user = crate::resolvers::user::get_by_email(&token.uid, &conn).unwrap();
     let medium = process_entries(entries, conn, None, Some(user.id))?;
     match medium.try_into() {
         Ok(response) => Ok(Json(response)),
         Err(err) => Err(Custom(Status::InternalServerError, err.to_string())),
     }
+}
+
+#[get("/profile-picture")]
+pub fn get_profile_picture(
+    conn: RequestContext,
+    token: Token,
+) -> Result<Json<Option<MediumResponse>>> {
+    let user = crate::resolvers::user::get_by_email(&token.uid, &conn)?;
+    let profile_picture = match user.profile_picture(&conn) {
+        Some(pfp) => Some(pfp.try_into()?),
+        None => None,
+    };
+    Ok(Json(profile_picture))
 }

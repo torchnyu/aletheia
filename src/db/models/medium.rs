@@ -25,6 +25,7 @@ pub struct MediumInsert {
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MediumResponse {
     pub id: i32,
     pub folder_name: String,
