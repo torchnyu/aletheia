@@ -11,7 +11,6 @@ WORKDIR /aletheia
 # copy over manifests
 COPY ./Cargo.lock ./Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
-COPY ./Rocket.toml ./Rocket.toml
 COPY ./diesel.toml ./diesel.toml
 
 # copy over reset db script
@@ -37,7 +36,6 @@ FROM rustlang/rust:nightly
 
 # copy the build artifact from the build stage
 COPY --from=build /aletheia/target/release/aletheia .
-COPY --from=build /aletheia/Rocket.toml .
 
 # set the startup command to run your binary
 CMD ["./aletheia"]
