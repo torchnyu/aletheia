@@ -4,6 +4,8 @@ services:
   db:
     image: "postgres"
     restart: always
+    volumes:
+      - data:/var/lib/postgresql/data
     ports:
       - "5431:5432"
     environment:
@@ -11,6 +13,7 @@ services:
 
   web:
     build: .
+    restart: always
     ports:
       - "8000:8000"
     environment:
@@ -21,3 +24,6 @@ services:
       AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
       BUCKET_NAME: "${BUCKET_NAME}"
       AWS_REGION: "${AWS_REGION}"
+
+volumes:
+  data:
