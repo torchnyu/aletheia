@@ -1,0 +1,23 @@
+version: '3'
+    
+services:
+  db:
+    image: "postgres"
+    restart: always
+    ports:
+      - "5431:5432"
+    environment:
+      POSTGRES_DB: aletheia
+
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      ROCKET_DATABASES: "{postgres={url=\"postgres://postgres:${POSTGRES_PASSWORD}@db/aletheia\"}}"
+      SECRET_KEY: "${SECRET_KEY}"
+      SALT_LENGTH: "${SALT_LENGTH}"
+      AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}"
+      AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
+      BUCKET_NAME: "${BUCKET_NAME}"
+      AWS_REGION: "${AWS_REGION}"
