@@ -1,21 +1,36 @@
 version: '3'
     
 services:
+
   db:
     image: "postgres"
     restart: always
     volumes:
       - data:/var/lib/postgresql/data
-    ports:
-      - "5431:5432"
+    expose:
+      - "5432"
+    networks:
+      - internal
+    labels:
+      - "traefik.enable=false"
     environment:
       POSTGRES_DB: aletheia
 
-  web:
+  app:
     build: .
     restart: always
-    ports:
-      - "8000:8000"
+    networks:
+      - proxy
+      - internal
+    expose:
+      - "8000"
+    labels:
+      - "traefik.backend=aletheia"
+      - "traefik.docker.network=proxy"
+      - "traefik.frontend.rule=Host:aletheia.atibon.com"
+      - "traefik.protocol=https"
+      - "traefik.port=8000"
+
     environment:
       ROCKET_DATABASES: "{postgres={url=\"postgres://postgres:${POSTGRES_PASSWORD}@db/aletheia\"}}"
       SECRET_KEY: "${SECRET_KEY}"
@@ -27,3 +42,9 @@ services:
 
 volumes:
   data:
+
+networks:
+  proxy:
+    external: true
+  internal:
+    external: false
