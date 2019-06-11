@@ -25,8 +25,6 @@ RUN rm src/*.rs
 COPY ./src ./src
 COPY ./migrations ./migrations
 
-RUN cargo install diesel_cli
-
 # Not sure about this one; apparently cargo doesn't rebuild, but
 RUN rm ./target/release/deps/aletheia*
 RUN cargo build --release

@@ -28,7 +28,7 @@ services:
       - "traefik.backend=aletheia"
       - "traefik.docker.network=proxy"
       - "traefik.frontend.rule=Host:aletheia.atibon.com"
-      - "traefik.protocol=https"
+      - "traefik.protocol=http"
       - "traefik.port=8000"
 
     environment:
