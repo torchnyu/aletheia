@@ -18,7 +18,7 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         email: String,
         password: String,
     ) -> FieldResult<Tokenized<User>>  {
-        let database_context = executor.context().database_context(None, ActionType::Read, ActionModifier::One);
+        let database_context = executor.context().db_context_anon(ActionType::Read, ActionModifier::One);
         let credentials = LoginRequest {
             email, password
         };
@@ -34,13 +34,9 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
     ) -> FieldResult<Tokenized<Project>> {
         let token = token.parse::<Token>()?;
         let token_string = token.to_string()?;
-        let database_context = executor.context().database_context(Some(token), ActionType::Create, ActionModifier::Own);
-        crate::authorization::validate(
-            &database_context,
-            "project".to_string(),
-        )?;
+        let database_context = executor.context().database_context(&"project", Some(token), ActionType::Create, ActionModifier::Own)?;
         let project = crate::resolvers::project::create(
-            &database_context.user.as_ref().unwrap().email,
+            &(database_context.get_user()?).email,
             project,
             &database_context
         )?;
@@ -54,13 +50,9 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
     ) -> FieldResult<Tokenized<Event>> {
         let token = token.parse::<Token>()?;
         let token_string = token.to_string()?;
-        let database_context = executor.context().database_context(Some(token), ActionType::Create, ActionModifier::Own);
-        crate::authorization::validate(
-            &database_context,
-            "event".to_string(),
-        )?;
+        let database_context = executor.context().database_context(&"event", Some(token), ActionType::Create, ActionModifier::Own)?;
         let event = crate::resolvers::event::create(
-            &database_context.user.as_ref().unwrap().email,
+            &(database_context.get_user()?).email,
             EventInsert::from_request(event),
             &database_context
         )?;
@@ -77,7 +69,7 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
             email,
             password,
         };
-        let database_context = executor.context().database_context(None, ActionType::Create, ActionModifier::One);
+        let database_context = executor.context().db_context_anon(ActionType::Create, ActionModifier::One);
         let user = crate::resolvers::user::create(user_request, &database_context)?;
         let token = Token::new(&user.email).to_string()?;
         Ok(Tokenized { payload: user, token })

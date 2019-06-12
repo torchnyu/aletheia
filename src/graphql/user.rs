@@ -24,7 +24,7 @@ graphql_object!(User: RequestContext |&self| {
     }
 
     field projects(&executor) -> Vec<Project> {
-        let database_context = &executor.context().database_context(None, ActionType::Read, ActionModifier::Own);
+        let database_context = &executor.context().db_context_anon(ActionType::Read, ActionModifier::Own);
         let project_ids = Submission::belonging_to(self).select(submissions::project_id);
         projects::table
             .filter(projects::id.eq(any(project_ids)))

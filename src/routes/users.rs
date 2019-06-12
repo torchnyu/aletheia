@@ -16,21 +16,21 @@ pub struct AuthenticatedResponse {
 
 #[get("/")]
 pub fn index(context: RequestContext) -> Result<Json<Vec<User>>> {
-    let database_context = context.database_context(None, ActionType::Read, ActionModifier::All);
+    let database_context = context.db_context_anon(ActionType::Read, ActionModifier::All);
     Ok(Json(resolvers::user::all(&database_context)?))
 }
 
 #[post("/", format = "application/json", data = "<user>")]
 pub fn create(context: RequestContext, user: Json<UserRequest>) -> Result<Json<User>> {
     let user = user.into_inner();
-    let database_context = context.database_context(None, ActionType::Create, ActionModifier::One);
+    let database_context = context.db_context_anon(ActionType::Create, ActionModifier::One);
     Ok(Json(resolvers::user::create(user, &database_context)?))
 }
 
 #[post("/login", format = "application/json", data = "<creds>")]
 pub fn login(context: RequestContext, creds: Json<LoginRequest>) -> Result<AuthenticatedResponse> {
     let creds = creds.into_inner();
-    let database_context = context.database_context(None, ActionType::Read, ActionModifier::One);
+    let database_context = context.db_context_anon(ActionType::Read, ActionModifier::One);
     let user = resolvers::user::login(&creds, &database_context)?;
     let token = Token::new(&creds.email).to_string()?;
     let response = AuthenticatedResponse {
