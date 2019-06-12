@@ -1,11 +1,33 @@
+use crate::db::models::Permission;
 use crate::db::models::User;
 use crate::db::sql_types::*;
-use crate::types::Token;
+use crate::types::{Token, TokenError};
+use crate::utils::*;
 use diesel::pg::PgConnection;
 use rocket::fairing::{AdHoc, Fairing};
 use rocket::logger::error;
 use rocket_contrib::databases::r2d2::{Pool, PooledConnection};
 use rocket_contrib::databases::{database_config, Poolable};
+
+pub enum Authorization {
+    Authorized {
+        user: User,
+        permissions: Vec<Permission>,
+    },
+    UnAuthorized {
+        user: User,
+    },
+    Anon,
+}
+
+#[derive(Debug, Fail)]
+pub enum AuthError {
+    #[fail(display = "You are not authorized to {:?} {}", action, resource)]
+    NoPermission {
+        action: ActionType,
+        resource: String,
+    },
+}
 
 type Connection = PooledConnection<<PgConnection as Poolable>::Manager>;
 
@@ -25,13 +47,22 @@ impl From<Connection> for RequestContext {
 impl RequestContext {
     /// Get a DatabaseContext from this struct that can be used to connect
     /// to the db
-    pub fn database_context(
-        &self,
+    pub fn database_context<'a, 'b>(
+        &'b self,
+        resource: &'a str,
         token: Option<Token>,
         action: ActionType,
         modifier: ActionModifier,
-    ) -> DatabaseContext {
-        return DatabaseContext::from(&self.conn, token, action, modifier);
+    ) -> Result<DatabaseContext<'a>>
+    where
+        'b: 'a,
+    {
+        DatabaseContext::from(&self.conn, resource, token, action, modifier)
+    }
+
+    pub fn db_context_anon(&self, action: ActionType, modifier: ActionModifier) -> DatabaseContext {
+        DatabaseContext::from(&self.conn, &"none", None, action, modifier)
+            .expect("Error is unreachable")
     }
 
     /// Returns a fairing that initializes the associated database
@@ -91,32 +122,89 @@ impl<'a, 'r> rocket::request::FromRequest<'a, 'r> for RequestContext {
 pub struct DatabaseContext<'a> {
     // Eventually make this private
     pub conn: &'a PgConnection,
-    pub user: Option<User>,
+    pub resource: &'a str,
+    pub auth: Authorization,
     pub action: ActionType,
     pub modifier: ActionModifier,
 }
 
 impl<'a> DatabaseContext<'a> {
-    /// Create a DatabaseContext Struct from a connection and modifier information
-    fn from(
+    fn try_get_permissions(
         conn: &'a PgConnection,
+        resource: &str,
         token: Option<Token>,
         action: ActionType,
         modifier: ActionModifier,
-    ) -> Self {
+    ) -> Result<Authorization> {
+        use crate::resolvers::permission;
         use crate::resolvers::user;
-        let user = match token {
-            Some(token) => match user::get_by_email(&token.uid, conn) {
-                Ok(x) => Some(x),
-                Err(_) => None,
-            },
-            None => None,
-        };
-        Self {
+        if let Some(token) = token {
+            let user = user::get_by_email(&token.uid, conn)?;
+            let permissions = permission::get_permission(conn, &user, resource, action, modifier)?;
+            if permissions.is_empty() {
+                Ok(Authorization::UnAuthorized { user })
+            } else {
+                Ok(Authorization::Authorized { user, permissions })
+            }
+        } else {
+            Ok(Authorization::Anon)
+        }
+    }
+    /// Create a DatabaseContext Struct from a connection and modifier information
+    fn from(
+        conn: &'a PgConnection,
+        resource: &'a str,
+        token: Option<Token>,
+        action: ActionType,
+        modifier: ActionModifier,
+    ) -> Result<Self> {
+        let auth = Self::try_get_permissions(conn, resource, token, action, modifier)?;
+        Ok(Self {
             conn,
-            user,
+            auth,
+            resource,
             action,
             modifier,
+        })
+    }
+
+    pub fn get_user(&self) -> Result<&User> {
+        match &self.auth {
+            &Authorization::Anon => Err(TokenError::Expired)?,
+            &Authorization::Authorized {
+                ref user,
+                permissions: _,
+            } => Ok(user),
+            &Authorization::UnAuthorized { ref user } => Ok(user),
         }
+    }
+
+    pub fn get_permissions(&self) -> Result<&Vec<Permission>> {
+        match &self.auth {
+            &Authorization::Anon => Err(AuthError::NoPermission {
+                action: self.action,
+                resource: self.resource.to_string(),
+            })?,
+            &Authorization::Authorized {
+                user: _,
+                ref permissions,
+            } => Ok(permissions),
+            &Authorization::UnAuthorized { .. } => Err(AuthError::NoPermission {
+                action: self.action,
+                resource: self.resource.to_string(),
+            })?,
+        }
+    }
+
+    pub fn get_resource(&self) -> &str {
+        &self.resource
+    }
+
+    pub fn get_action(&self) -> ActionType {
+        self.action
+    }
+
+    pub fn get_modifier(&self) -> ActionModifier {
+        self.modifier
     }
 }

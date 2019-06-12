@@ -28,7 +28,6 @@ use rocket::response::content;
 use rocket::*;
 use rocket_cors::CorsOptions;
 
-mod authorization;
 mod db;
 mod github;
 mod graphql;
