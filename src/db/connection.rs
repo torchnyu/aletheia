@@ -14,7 +14,7 @@ pub enum AuthState {
         user: User,
         permissions: Vec<Permission>,
     },
-    InValid {
+    Invalid {
         user: User,
     },
     Anon,
@@ -59,7 +59,11 @@ impl RequestContext {
         DatabaseContext::from(&self.conn, resource, token, action, modifier)
     }
 
-    pub fn db_context_for_anon_user(&self, action: ActionType, modifier: ActionModifier) -> DatabaseContext {
+    pub fn db_context_for_anon_user(
+        &self,
+        action: ActionType,
+        modifier: ActionModifier,
+    ) -> DatabaseContext {
         DatabaseContext::from(&self.conn, &"none", None, action, modifier)
             .expect("Error is unreachable")
     }
@@ -141,7 +145,7 @@ impl<'a> DatabaseContext<'a> {
             let user = user::get_by_email(&token.uid, conn)?;
             let permissions = permission::get_permission(conn, &user, resource, action, modifier)?;
             if permissions.is_empty() {
-                Ok(AuthState::InValid { user })
+                Ok(AuthState::Invalid { user })
             } else {
                 Ok(AuthState::Valid { user, permissions })
             }
@@ -174,7 +178,7 @@ impl<'a> DatabaseContext<'a> {
                 ref user,
                 permissions: _,
             } => Ok(user),
-            &AuthState::InValid { ref user } => Ok(user),
+            &AuthState::Invalid { ref user } => Ok(user),
         }
     }
 
@@ -185,7 +189,7 @@ impl<'a> DatabaseContext<'a> {
                 user: _,
                 ref permissions,
             } => Ok(permissions),
-            &AuthState::InValid { .. } => Err(AuthError::NoPermission {
+            &AuthState::Invalid { .. } => Err(AuthError::NoPermission {
                 action: self.action,
                 resource: self.resource.to_string(),
             })?,
