@@ -19,7 +19,8 @@ pub fn create(
     token: Token,
 ) -> Result<Json<Tokenized<Submission>>> {
     let submission = submission.into_inner();
-    let database_context = context.db_context_for_anon_user(ActionType::Create, ActionModifier::Own);
+    let database_context =
+        context.db_context_for_anon_user(ActionType::Create, ActionModifier::Own);
     Ok(Json(Tokenized {
         payload: resolvers::submission::insert(submission, &database_context)?,
         token: token.to_string()?,

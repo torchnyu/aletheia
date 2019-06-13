@@ -23,7 +23,8 @@ pub fn index(context: RequestContext) -> Result<Json<Vec<User>>> {
 #[post("/", format = "application/json", data = "<user>")]
 pub fn create(context: RequestContext, user: Json<UserRequest>) -> Result<Json<User>> {
     let user = user.into_inner();
-    let database_context = context.db_context_for_anon_user(ActionType::Create, ActionModifier::One);
+    let database_context =
+        context.db_context_for_anon_user(ActionType::Create, ActionModifier::One);
     Ok(Json(resolvers::user::create(user, &database_context)?))
 }
 

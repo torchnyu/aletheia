@@ -113,7 +113,8 @@ fn process_entries(
     let user_id = get_foreign_key("user_id", &entries)?;
 
     let file_ext = get_file_ext(file_fields)?;
-    let database_context = context.db_context_for_anon_user(ActionType::Create, ActionModifier::Own);
+    let database_context =
+        context.db_context_for_anon_user(ActionType::Create, ActionModifier::Own);
 
     match &file_fields[0].data {
         SavedData::File(path, _) => {

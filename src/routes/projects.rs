@@ -19,7 +19,8 @@ pub fn create(
     token: Token,
 ) -> Result<Json<Tokenized<Project>>> {
     let project = project.into_inner();
-    let database_context = context.db_context_for_anon_user(ActionType::Create, ActionModifier::Own);
+    let database_context =
+        context.db_context_for_anon_user(ActionType::Create, ActionModifier::Own);
     let new_project = resolvers::project::create(&token.uid, project, &database_context)?;
     Ok(Json(Tokenized {
         payload: new_project,
