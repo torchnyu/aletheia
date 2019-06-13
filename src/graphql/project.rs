@@ -34,12 +34,12 @@ graphql_object!(Project: RequestContext |&self| {
     }
 
     field media(&executor) -> Vec<Medium> {
-        let database_context = executor.context().db_context_anon(ActionType::Read, ActionModifier::All);
+        let database_context = executor.context().db_context_for_anon_user(ActionType::Read, ActionModifier::All);
         self.media(&database_context)
     }
 
     field contributors(&executor) -> Vec<User> {
-        let database_context = executor.context().db_context_anon(ActionType::Read, ActionModifier::All);
+        let database_context = executor.context().db_context_for_anon_user(ActionType::Read, ActionModifier::All);
         self.contributors(&database_context)
     }
 });
