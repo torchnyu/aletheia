@@ -1,5 +1,6 @@
 use super::RequestContext;
 use crate::db::schema::{projects, submissions};
+use crate::db::sql_types::{ActionModifier, ActionType};
 use crate::types::{Project, Submission, User};
 use diesel::pg::expression::dsl::any;
 use diesel::BelongingToDsl;
@@ -23,10 +24,10 @@ graphql_object!(User: RequestContext |&self| {
     }
 
     field projects(&executor) -> Vec<Project> {
-        let database: &diesel::PgConnection = &executor.context().conn;
+        let database_context = &executor.context().db_context_for_anon_user(ActionType::Read, ActionModifier::Own);
         let project_ids = Submission::belonging_to(self).select(submissions::project_id);
         projects::table
             .filter(projects::id.eq(any(project_ids)))
-            .load::<Project>(database).expect("Could not load projects")
+            .load::<Project>(database_context.conn).expect("Could not load projects")
     }
 });
