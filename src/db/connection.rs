@@ -27,7 +27,7 @@ pub enum AuthError {
         action: ActionType,
         resource: String,
     },
-    #[fail(display = "No associated user to autheticate with")]
+    #[fail(display = "No associated user to authenticate with")]
     NoUser,
 }
 
