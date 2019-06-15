@@ -23,7 +23,6 @@ RUN rm src/*.rs
 # Copy over source files
 # COPY ./tests ./tests
 COPY ./src ./src
-COPY ./migrations ./migrations
 
 # Not sure about this one; apparently cargo doesn't rebuild, but
 RUN rm ./target/release/deps/aletheia*
