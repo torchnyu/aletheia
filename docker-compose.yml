@@ -11,8 +11,6 @@ services:
       - "5432"
     networks:
       - internal
-    labels:
-      - "traefik.enable=false"
     environment:
       POSTGRES_DB: aletheia
 
@@ -20,16 +18,9 @@ services:
     build: .
     restart: always
     networks:
-      - proxy
       - internal
     expose:
       - "8000"
-    labels:
-      - "traefik.backend=aletheia"
-      - "traefik.docker.network=proxy"
-      - "traefik.frontend.rule=Host:aletheia.atibon.com"
-      - "traefik.protocol=http"
-      - "traefik.port=8000"
 
     environment:
       ROCKET_DATABASES: "{postgres={url=\"postgres://postgres:${POSTGRES_PASSWORD}@db/aletheia\"}}"
@@ -44,7 +35,5 @@ volumes:
   data:
 
 networks:
-  proxy:
-    external: true
   internal:
     external: false
