@@ -1,5 +1,6 @@
 mod event;
 mod medium;
+mod password_reset_request;
 mod permission;
 mod project;
 mod role;
@@ -9,6 +10,7 @@ mod user_event;
 mod user_role;
 pub use self::event::*;
 pub use self::medium::*;
+pub use self::password_reset_request::*;
 pub use self::permission::*;
 pub use self::project::*;
 pub use self::role::*;

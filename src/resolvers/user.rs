@@ -1,11 +1,12 @@
 use crate::db::connection::DatabaseContext;
 use crate::db::models::{
-    LoginRequest, Medium, RawUser, Role, User, UserInsert, UserRequest, UserRole,
+    LoginRequest, Medium, PasswordResetRequest, RawUser, Role, User, UserInsert, UserRequest,
+    UserRole,
 };
-use crate::db::schema::{media, roles, user_roles, users};
+use crate::db::schema::{media, password_reset_requests, roles, user_roles, users};
+use crate::services;
 use crate::utils::{AletheiaError, Result};
-use argonautica::input::Salt;
-use argonautica::{Hasher, Verifier};
+use argonautica::Verifier;
 use diesel::dsl::*;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
@@ -60,6 +61,15 @@ pub fn get_by_email(email: &str, conn: &PgConnection) -> Result<User> {
     Ok(User::from_raw_user(user))
 }
 
+pub fn reset_password(email: &str, conn: &diesel::PgConnection) -> Result<()> {
+    let user = get_by_email(email, conn)?;
+    let reset_request = services::user::reset_password(&user)?;
+    let _res = diesel::insert_into(password_reset_requests::table)
+        .values(reset_request)
+        .execute(conn)?;
+    Ok(())
+}
+
 impl User {
     pub fn roles(&self, db: &DatabaseContext) -> Vec<Role> {
         let role_ids = UserRole::belonging_to(self).select(user_roles::role_id);
@@ -80,15 +90,7 @@ impl User {
 
 impl UserInsert {
     pub fn from_request(request: UserRequest) -> Result<UserInsert> {
-        let mut hasher = Hasher::default();
-        let salt_length = env::var("SALT_LENGTH")?;
-        let salt = Salt::random(salt_length.parse::<u32>()?);
-        let salt = salt.to_str()?;
-        let password_digest = hasher
-            .with_password(request.password)
-            .with_secret_key(env::var("SECRET_KEY")?)
-            .with_salt(salt)
-            .hash()?;
+        let password_digest = services::user::hash_password(&request.password)?;
         Ok(UserInsert {
             display_name: request.display_name,
             email: request.email,

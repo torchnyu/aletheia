@@ -29,6 +29,17 @@ table! {
     use diesel::sql_types::*;
     use crate::db::sql_types::*;
 
+    password_reset_requests (id) {
+        id -> Varchar,
+        created_at -> Timestamp,
+        user_id -> Int4,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use crate::db::sql_types::*;
+
     permissions (id) {
         id -> Int4,
         role_id -> Int4,
@@ -120,6 +131,7 @@ table! {
 
 joinable!(media -> projects (project_id));
 joinable!(media -> users (user_id));
+joinable!(password_reset_requests -> users (user_id));
 joinable!(permissions -> roles (role_id));
 joinable!(submissions -> projects (project_id));
 joinable!(submissions -> users (user_id));
@@ -131,6 +143,7 @@ joinable!(user_roles -> users (user_id));
 allow_tables_to_appear_in_same_query!(
     events,
     media,
+    password_reset_requests,
     permissions,
     projects,
     registrations,
