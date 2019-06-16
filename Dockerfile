@@ -33,6 +33,7 @@ FROM rustlang/rust:nightly
 
 # copy the build artifact from the build stage
 COPY --from=build /aletheia/target/release/aletheia .
+COPY ./.env ./.env
 
 # set the startup command to run your binary
 CMD ["./aletheia"]
