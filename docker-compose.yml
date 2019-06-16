@@ -8,12 +8,9 @@ services:
     volumes:
       - data:/var/lib/postgresql/data
     ports:
-      - "5432"
+      - "5432:5432"
     labels:
-      - traefik.backend=db
-      - traefik.frontend.rule=Host:db.atibon.com
-      - traefik.docker.network=web
-      - traefik.port=5432
+      - traefik.enable=false
     networks:
       - internal
       - web
