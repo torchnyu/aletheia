@@ -7,10 +7,16 @@ services:
     restart: always
     volumes:
       - data:/var/lib/postgresql/data
-    expose:
+    ports:
       - "5432"
+    labels:
+      - traefik.backend=db
+      - traefik.frontend.rule=Host:db.atibon.com
+      - traefik.docker.network=web
+      - traefik.port=5432
     networks:
       - internal
+      - web
     environment:
       POSTGRES_DB: aletheia
 
@@ -22,7 +28,7 @@ services:
       - web
     depends_on:
       - db
-    expose:
+    ports:
       - "8000"
     labels:
       - traefik.backend=app
@@ -37,6 +43,7 @@ services:
       AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
       BUCKET_NAME: "${BUCKET_NAME}"
       AWS_REGION: "${AWS_REGION}"
+      ROCKET_SECRET_KEY: "${ROCKET_SECRET_KEY}"
 
 volumes:
   data:
