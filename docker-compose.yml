@@ -19,9 +19,16 @@ services:
     restart: always
     networks:
       - internal
+      - web
+    depends_on:
+      - db
     expose:
       - "8000"
-
+    labels:
+      - traefik.backend=app
+      - traefik.frontend.rule=Host:aletheia.atibon.com
+      - traefik.docker.network=web
+      - traefik.port=8000
     environment:
       ROCKET_DATABASES: "{postgres={url=\"postgres://postgres:${POSTGRES_PASSWORD}@db/aletheia\"}}"
       SECRET_KEY: "${SECRET_KEY}"
@@ -35,5 +42,7 @@ volumes:
   data:
 
 networks:
+  web:
+    external: true
   internal:
     external: false
