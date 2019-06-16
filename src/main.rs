@@ -69,19 +69,10 @@ fn handle_graphql_post(
     request.execute(&schema, &context)
 }
 
-#[cfg(debug_assertions)]
-fn load_dotenv() {
-    dotenv::dotenv().expect("Failed to read .env file");
-}
-
-// In production we don't load a dotenv
-#[cfg(not(debug_assertions))]
-fn load_dotenv() {}
-
 fn main() -> Result<()> {
     let default = CorsOptions::default();
     let cors = CorsOptions::to_cors(&default)?;
-    load_dotenv();
+    dotenv::dotenv().expect("Failed to read .env file");
     rocket::ignite()
         .mount(
             "/projects",
