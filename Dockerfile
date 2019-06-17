@@ -11,6 +11,10 @@ WORKDIR /aletheia
 # copy over manifests
 COPY ./Cargo.lock ./Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
+COPY ./diesel.toml ./diesel.toml
+
+# copy over reset db script
+COPY ./reset_db.sh ./reset_db.sh
 
 # this build step will cache dependencies
 RUN cargo build --release
@@ -29,6 +33,7 @@ FROM rustlang/rust:nightly
 
 # copy the build artifact from the build stage
 COPY --from=build /aletheia/target/release/aletheia .
+COPY ./.env ./.env
 
 # set the startup command to run your binary
 CMD ["./aletheia"]
