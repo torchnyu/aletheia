@@ -1,14 +1,18 @@
 use crate::db::models::{PasswordResetRequest, User};
 use crate::utils::Result;
 use argonautica::Hasher;
+use rand::distributions::Alphanumeric;
 use rand::Rng;
 use std::env;
 
 static RESET_KEY_LENGTH: usize = 16;
 
 pub fn call(user: &User) -> Result<PasswordResetRequest> {
-    let rand_bytes = rand::thread_rng().gen_ascii_chars().take(16).collect();
-    let hasher = Hasher::default();
+    let rand_bytes: String = rand::thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(RESET_KEY_LENGTH)
+        .collect();
+    let mut hasher = Hasher::default();
     // Hash the random bytes
     let id = hasher
         .with_password(rand_bytes)

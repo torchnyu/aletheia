@@ -19,7 +19,7 @@ pub enum ActionModifier {
     One,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Resource {
     Project,
     Submission,

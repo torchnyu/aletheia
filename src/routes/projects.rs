@@ -39,8 +39,18 @@ pub fn upload_image(
     let boundary = validate_medium_upload(&conn, content_type, &token)?;
     let entries = process_file_upload(boundary, data)?;
     let project_id = get_foreign_key("project_id", &entries)?;
-    let user = crate::resolvers::user::get_by_email(&token.uid, &conn).unwrap();
-    let medium = process_entries(entries, conn, project_id, Some(user.id))?;
+    let database_context = match conn.database_context(
+        Resource::Medium,
+        Some(&token),
+        ActionType::Create,
+        ActionModifier::Own,
+    ) {
+        Ok(ctx) => ctx,
+        Err(err) => return Err(Custom(Status::Unauthorized, err.to_string())),
+    };
+
+    let user = crate::resolvers::user::get_by_email(&token.uid, database_context.conn).unwrap();
+    let medium = process_entries(entries, &conn, project_id, Some(user.id))?;
     match medium.try_into() {
         Ok(response) => Ok(Json(response)),
         Err(err) => Err(Custom(Status::InternalServerError, err.to_string())),
