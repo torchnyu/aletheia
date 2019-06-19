@@ -34,7 +34,7 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
     ) -> FieldResult<Tokenized<Project>> {
         let token = token.parse::<Token>()?;
         let token_string = token.to_string()?;
-        let database_context = executor.context().database_context(Resource::Project, Some(token), ActionType::Create, ActionModifier::Own)?;
+        let database_context = executor.context().database_context(Resource::Project, Some(&token), ActionType::Create, ActionModifier::Own)?;
         let project = crate::resolvers::project::create(
             &(database_context.get_user()?).email,
             project,
@@ -50,7 +50,7 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
     ) -> FieldResult<Tokenized<Event>> {
         let token = token.parse::<Token>()?;
         let token_string = token.to_string()?;
-        let database_context = executor.context().database_context(Resource::Event, Some(token), ActionType::Create, ActionModifier::Own)?;
+        let database_context = executor.context().database_context(Resource::Event, Some(&token), ActionType::Create, ActionModifier::Own)?;
         let event = crate::resolvers::event::create(
             &(database_context.get_user()?).email,
             EventInsert::from_request(event),

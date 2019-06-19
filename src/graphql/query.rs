@@ -33,19 +33,9 @@ graphql_object!(QueryRoot: RequestContext as "Query" |&self| {
         &executor,
         token: String,
     ) -> FieldResult<User> {
-        let database = &executor.context().conn;
         let token = token.parse::<Token>()?;
-        crate::authorization::validate(
-            &database,
-            &token,
-            Resource::User,
-            ActionType::Read,
-            ActionModifier::Own
-        )?;
-        // We're fetching the user in the validation, so this is
-        // technically a second fetch, but I don't want to break the
-        // conceptual integrity of validate
-        let user = crate::resolvers::user::get_by_email(&token.uid, database)?;
+        let database = &executor.context().database_context(Resource::User, Some(&token), ActionType::Read, ActionModifier::Own)?;
+        let user = crate::resolvers::user::get_by_email(&token.uid, &database.conn)?;
         Ok(user)
     }
 

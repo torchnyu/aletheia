@@ -6,7 +6,7 @@ use serde_derive::{Deserialize, Serialize};
 #[derive(Identifiable, Insertable, Queryable, AsChangeset, Serialize, Deserialize, Associations)]
 #[table_name = "password_reset_requests"]
 pub struct PasswordResetRequest {
-    id: String,
-    created_at: Option<NaiveDateTime>,
-    user_id: i32,
+    pub id: String,
+    pub created_at: Option<NaiveDateTime>,
+    pub user_id: i32,
 }

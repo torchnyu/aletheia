@@ -1,7 +1,6 @@
 use crate::db::connection::DatabaseContext;
 use crate::db::models::{
-    LoginRequest, Medium, PasswordResetRequest, RawUser, Role, User, UserInsert, UserRequest,
-    UserRole,
+    LoginRequest, Medium, RawUser, Role, User, UserInsert, UserRequest, UserRole,
 };
 use crate::db::schema::{media, password_reset_requests, roles, user_roles, users};
 use crate::services;

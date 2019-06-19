@@ -52,7 +52,7 @@ impl RequestContext {
     pub fn database_context<'a>(
         &'a self,
         resource: Resource,
-        token: Option<Token>,
+        token: Option<&Token>,
         action: ActionType,
         modifier: ActionModifier,
     ) -> Result<DatabaseContext<'a>> {
@@ -125,7 +125,7 @@ impl<'a, 'r> rocket::request::FromRequest<'a, 'r> for RequestContext {
 pub struct DatabaseContext<'a> {
     // Eventually make this private
     pub conn: &'a PgConnection,
-    pub resource: &'a str,
+    pub resource: Resource,
     pub auth: AuthState,
     pub action: ActionType,
     pub modifier: ActionModifier,
@@ -135,7 +135,7 @@ impl<'a> DatabaseContext<'a> {
     fn try_get_permissions(
         conn: &'a PgConnection,
         resource: Resource,
-        token: Option<Token>,
+        token: Option<&Token>,
         action: ActionType,
         modifier: ActionModifier,
     ) -> Result<AuthState> {
@@ -143,7 +143,8 @@ impl<'a> DatabaseContext<'a> {
         use crate::resolvers::user;
         if let Some(token) = token {
             let user = user::get_by_email(&token.uid, conn)?;
-            let permissions = permission::get_permission(conn, &user, &resource, action, modifier)?;
+            let permissions =
+                permission::get_permission(conn, &user, &resource, &action, &modifier)?;
             if permissions.is_empty() {
                 Ok(AuthState::Invalid { user })
             } else {
@@ -157,11 +158,11 @@ impl<'a> DatabaseContext<'a> {
     fn from(
         conn: &'a PgConnection,
         resource: Resource,
-        token: Option<Token>,
+        token: Option<&Token>,
         action: ActionType,
         modifier: ActionModifier,
     ) -> Result<Self> {
-        let auth = Self::try_get_permissions(conn, resource, token, action, modifier)?;
+        let auth = Self::try_get_permissions(conn, resource.clone(), token, action, modifier)?;
         Ok(Self {
             conn,
             auth,
@@ -191,13 +192,9 @@ impl<'a> DatabaseContext<'a> {
             } => Ok(permissions),
             &AuthState::Invalid { .. } => Err(AuthError::NoPermission {
                 action: self.action,
-                resource: self.resource.to_string(),
+                resource: (&self.resource).into(),
             })?,
         }
-    }
-
-    pub fn get_resource(&self) -> &str {
-        &self.resource
     }
 
     pub fn get_action(&self) -> ActionType {

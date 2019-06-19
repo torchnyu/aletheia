@@ -1,5 +1,5 @@
 use crate::db::models::{LoginRequest, User, UserRequest};
-use crate::db::sql_types::{ActionModifier, ActionType};
+use crate::db::sql_types::{ActionModifier, ActionType, Resource};
 use crate::db::RequestContext;
 use crate::resolvers;
 use crate::routes::media::*;
@@ -48,16 +48,25 @@ pub fn login(context: RequestContext, creds: Json<LoginRequest>) -> Result<Authe
 
 #[post("/profile-picture", data = "<data>")]
 pub fn upload_profile_picture(
-    conn: RequestContext,
+    ctx: RequestContext,
     content_type: &ContentType,
     token: Token,
     data: Data,
 ) -> core::result::Result<Json<MediumResponse>, Custom<String>> {
-    let boundary = validate_medium_upload(&conn, content_type, &token)?;
+    let boundary = validate_medium_upload(&ctx, content_type, &token)?;
+    let database_context = match ctx.database_context(
+        Resource::Medium,
+        Some(&token),
+        ActionType::Create,
+        ActionModifier::Own,
+    ) {
+        Ok(ctx) => ctx,
+        Err(err) => return Err(Custom(Status::Unauthorized, err.to_string())),
+    };
     let entries = process_file_upload(boundary, data)?;
     // Unwrap cause we know user exists due to validate_medium_upload
-    let user = crate::resolvers::user::get_by_email(&token.uid, &conn).unwrap();
-    let medium = process_entries(entries, conn, None, Some(user.id))?;
+    let user = crate::resolvers::user::get_by_email(&token.uid, database_context.conn).unwrap();
+    let medium = process_entries(entries, &ctx, None, Some(user.id))?;
     match medium.try_into() {
         Ok(response) => Ok(Json(response)),
         Err(err) => Err(Custom(Status::InternalServerError, err.to_string())),
@@ -66,13 +75,25 @@ pub fn upload_profile_picture(
 
 #[get("/profile-picture")]
 pub fn get_profile_picture(
-    conn: RequestContext,
+    ctx: RequestContext,
     token: Token,
-) -> Result<Json<Option<MediumResponse>>> {
-    let user = crate::resolvers::user::get_by_email(&token.uid, &conn)?;
-    let profile_picture = match user.profile_picture(&conn) {
-        Some(pfp) => Some(pfp.try_into()?),
-        None => None,
+) -> core::result::Result<Option<Json<MediumResponse>>, Custom<String>> {
+    let database_context = match ctx.database_context(
+        Resource::Medium,
+        Some(&token),
+        ActionType::Read,
+        ActionModifier::Own,
+    ) {
+        Ok(ctx) => ctx,
+        Err(err) => return Err(Custom(Status::Unauthorized, err.to_string())),
     };
-    Ok(Json(profile_picture))
+    let user = crate::resolvers::user::get_by_email(&token.uid, &database_context.conn).unwrap();
+    let profile_picture = match user.profile_picture(&database_context.conn) {
+        Some(pfp) => pfp,
+        None => return Ok(None),
+    };
+    match profile_picture.try_into() {
+        Ok(pfp) => Ok(Some(Json(pfp))),
+        Err(err) => Err(Custom(Status::InternalServerError, err.to_string())),
+    }
 }

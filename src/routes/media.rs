@@ -1,4 +1,3 @@
-use rocket::post;
 use crate::db::sql_types::{ActionModifier, ActionType, Resource};
 use crate::db::RequestContext;
 use crate::types::{Medium, Token};
@@ -20,10 +19,9 @@ pub fn validate_medium_upload<'a>(
     content_type: &'a ContentType,
     token: &Token,
 ) -> core::result::Result<&'a str, Custom<String>> {
-    match crate::authorization::validate(
-        conn,
-        token,
+    match conn.database_context(
         Resource::Medium,
+        Some(token),
         ActionType::Create,
         ActionModifier::Own,
     ) {
@@ -101,13 +99,9 @@ pub fn get_foreign_key(
 
 pub fn process_entries(
     entries: Entries,
-<<<<<<< HEAD
-    context: RequestContext,
-=======
-    conn: RequestContext,
+    context: &RequestContext,
     project_id: Option<i32>,
     user_id: Option<i32>,
->>>>>>> Probably should have broken these commits up.
 ) -> core::result::Result<Medium, Custom<String>> {
     let file_fields = match entries.fields.get("file") {
         Some(field) => field,
