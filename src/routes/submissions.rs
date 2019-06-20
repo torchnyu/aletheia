@@ -1,4 +1,3 @@
-use crate::db::sql_types::{ActionModifier, ActionType};
 use crate::db::RequestContext;
 use crate::resolvers;
 use crate::types::{Submission, SubmissionInsert, Token, Tokenized};
@@ -8,8 +7,7 @@ use rocket_contrib::json::Json;
 
 #[get("/")]
 pub fn index(context: RequestContext) -> Result<Json<Vec<Submission>>> {
-    let database_context = context.db_context_for_anon_user(ActionType::Read, ActionModifier::All);
-    Ok(Json(resolvers::submission::all(&database_context)?))
+    Ok(Json(resolvers::submission::all(&context.conn)?))
 }
 
 #[post("/", format = "application/json", data = "<submission>")]
@@ -19,10 +17,8 @@ pub fn create(
     token: Token,
 ) -> Result<Json<Tokenized<Submission>>> {
     let submission = submission.into_inner();
-    let database_context =
-        context.db_context_for_anon_user(ActionType::Create, ActionModifier::Own);
     Ok(Json(Tokenized {
-        payload: resolvers::submission::insert(submission, &database_context)?,
+        payload: resolvers::submission::insert(submission, &context.conn)?,
         token: token.to_string()?,
     }))
 }

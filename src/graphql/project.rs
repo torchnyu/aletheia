@@ -1,5 +1,4 @@
 use super::RequestContext;
-use crate::db::sql_types::{ActionModifier, ActionType};
 use crate::types::{Medium, Project, User};
 use heck::TitleCase;
 
@@ -34,12 +33,10 @@ graphql_object!(Project: RequestContext |&self| {
     }
 
     field media(&executor) -> Vec<Medium> {
-        let database_context = executor.context().db_context_for_anon_user(ActionType::Read, ActionModifier::All);
-        self.media(&database_context)
+        self.media(&executor.context().conn)
     }
 
     field contributors(&executor) -> Vec<User> {
-        let database_context = executor.context().db_context_for_anon_user(ActionType::Read, ActionModifier::All);
-        self.contributors(&database_context)
+        self.contributors(&executor.context().conn)
     }
 });

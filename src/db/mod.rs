@@ -4,4 +4,5 @@ pub mod models;
 pub mod schema;
 pub mod sql_types;
 
-pub use connection::RequestContext;
+pub use connection::*;
+pub use diesel::pg::PgConnection;
