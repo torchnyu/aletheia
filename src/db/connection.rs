@@ -1,9 +1,8 @@
-use crate::db::sql_types::*;
+use crate::db::sql_types::ActionType;
 pub use diesel::pg::PgConnection;
-use rocket::fairing::{AdHoc, Fairing};
-use rocket::logger::error;
+use rocket::fairing::Fairing;
 use rocket_contrib::databases::r2d2::{Pool, PooledConnection};
-use rocket_contrib::databases::{database_config, Poolable};
+use rocket_contrib::databases::Poolable;
 
 #[derive(Debug, Fail)]
 pub enum AuthError {
@@ -26,15 +25,14 @@ pub struct RequestContext {
 /// The pool type.
 pub struct ConnectionPool(Pool<<PgConnection as Poolable>::Manager>);
 
-impl From<Connection> for RequestContext {
-    fn from(conn: Connection) -> Self {
-        Self { conn }
-    }
-}
 impl RequestContext {
     /// Returns a fairing that initializes the associated database
     /// connection pool.
     pub fn fairing() -> impl Fairing {
+        use rocket::fairing::AdHoc;
+        use rocket::logger::error;
+        use rocket_contrib::databases::database_config;
+
         AdHoc::on_attach("\'postgres\' Database Pool", |rocket| {
             let config = match database_config("postgres", rocket.config()) {
                 Ok(cfg) => cfg,
@@ -59,15 +57,6 @@ impl RequestContext {
             Ok(rocket.manage(ConnectionPool(pool)))
         })
     }
-    /// Retrieves a connection of type `Self` from the `rocket`
-    /// instance. Returns `Some` as long as `Self::fairing()` has been
-    /// attached and there is at least one connection in the pool.
-    pub fn get_one(rocket: &::rocket::Rocket) -> Option<Self> {
-        rocket
-            .state::<ConnectionPool>()
-            .and_then(|pool| pool.0.get().ok())
-            .map(|conn| RequestContext::from(conn))
-    }
 }
 
 impl<'a, 'r> rocket::request::FromRequest<'a, 'r> for RequestContext {
@@ -81,5 +70,11 @@ impl<'a, 'r> rocket::request::FromRequest<'a, 'r> for RequestContext {
             Ok(conn) => Outcome::Success(RequestContext::from(conn)),
             Err(_) => Outcome::Failure((Status::ServiceUnavailable, ())),
         }
+    }
+}
+
+impl From<Connection> for RequestContext {
+    fn from(conn: Connection) -> Self {
+        Self { conn }
     }
 }
