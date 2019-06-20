@@ -46,28 +46,20 @@ impl From<Connection> for RequestContext {
         Self { conn }
     }
 }
+
 impl RequestContext {
-    /// Get a DatabaseContext from this struct that can be used to connect
-    /// to the db
-    pub fn database_context<'a>(
-        &'a self,
-        resource: Resource,
-        token: Option<&Token>,
-        action: ActionType,
-        modifier: ActionModifier,
-    ) -> Result<DatabaseContext<'a>> {
-        DatabaseContext::from(&self.conn, resource, token, action, modifier)
+    pub fn into_connection(self, permissions: Vec<Permissions>, user: Option<User>>) -> Connection {
+        for permission in permissions {
+            let permissions =
+                permission::get_permission(conn, &user, &resource, &action, &modifier)?;
+            if permissions.is_empty() {
+                Ok(AuthState::Invalid { user })
+            } else {
+                Ok(AuthState::Valid { user, permissions })
+            }
+        }
+        }
     }
-
-    pub fn db_context_for_anon_user(
-        &self,
-        action: ActionType,
-        modifier: ActionModifier,
-    ) -> DatabaseContext {
-        DatabaseContext::from(&self.conn, Resource::None, None, action, modifier)
-            .expect("Error is unreachable")
-    }
-
     /// Returns a fairing that initializes the associated database
     /// connection pool.
     pub fn fairing() -> impl Fairing {
