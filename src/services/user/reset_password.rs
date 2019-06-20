@@ -4,6 +4,7 @@ use argonautica::Hasher;
 use rand::distributions::Alphanumeric;
 use rand::Rng;
 use std::env;
+use std::collections::HashMap;
 
 static RESET_KEY_LENGTH: usize = 16;
 
@@ -12,6 +13,7 @@ pub fn call(user: &User) -> Result<PasswordResetRequest> {
         .sample_iter(&Alphanumeric)
         .take(RESET_KEY_LENGTH)
         .collect();
+    send_email(user, &rand_bytes)?;
     let mut hasher = Hasher::default();
     // Hash the random bytes
     let id = hasher
@@ -23,4 +25,14 @@ pub fn call(user: &User) -> Result<PasswordResetRequest> {
         created_at: None,
         user_id: user.id,
     })
+}
+
+fn send_email(user: &User, key: &str) -> Result<()> {
+    let client = reqwest::Client::new();
+    let mut body = HashMap::new();
+    body.insert("email", user.email.as_str());
+    body.insert("resetKey", key);
+    let hermes_url = env::var("HERMES_URL")?;
+    client.post(&format!("{}/reset-password", hermes_url)).json(&body).send()?;
+    Ok(())
 }

@@ -30,6 +30,7 @@ pub enum Resource {
     Event,
     UserEvent,
     Medium,
+    PasswordResetRequest,
     None,
 }
 
@@ -44,6 +45,7 @@ fn resource_to_string(resource: &Resource) -> String {
         Resource::Event => "event".to_string(),
         Resource::UserEvent => "user_event".to_string(),
         Resource::Medium => "medium".to_string(),
+        Resource::PasswordResetRequest => "password_reset_request".to_string(),
         Resource::None => "none".to_string(),
     }
 }

@@ -23,6 +23,7 @@ juniper_rocket = "0.2.0"
 multipart = "0.16.1"
 r2d2 = "0.8.3"
 rand = "0.6.5"
+reqwest = "0.9.18"
 rocket = "0.4.0"
 rocket_cors = { git = "https://github.com/lawliet89/rocket_cors", branch = "master" }
 rusoto_core = "0.37.0"

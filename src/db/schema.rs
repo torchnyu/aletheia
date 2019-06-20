@@ -31,8 +31,8 @@ table! {
 
     password_reset_requests (id) {
         id -> Varchar,
-        created_at -> Timestamp,
         user_id -> Int4,
+        created_at -> Timestamp,
     }
 }
 

@@ -18,6 +18,7 @@ extern crate r2d2;
 extern crate rand;
 extern crate rusoto_core;
 extern crate rusoto_s3;
+extern crate reqwest;
 extern crate slug;
 #[macro_use]
 extern crate diesel_derive_enum;
@@ -92,7 +93,8 @@ fn main() -> Result<()> {
                 routes::users::create,
                 routes::users::login,
                 routes::users::upload_profile_picture,
-                routes::users::get_profile_picture
+                routes::users::get_profile_picture,
+                routes::users::reset_password
             ],
         )
         .mount(

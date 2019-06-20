@@ -5,18 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d73d2810-0b17-4ce9-a95f-bc6ac8168c96" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/src/db/connection.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/connection.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/db/models/password_reset_request.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/models/password_reset_request.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/types/reset_password_params.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/2019-06-16-204006_create_password_reset_requests/up.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/2019-06-16-204006_create_password_reset_requests/up.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/db/models/user.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/models/user.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/db/schema.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/schema.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/db/sql_types.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/sql_types.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/graphql/event.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphql/event.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/graphql/mutation.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphql/mutation.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/graphql/query.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphql/query.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/graphql/user.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphql/user.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/resolvers/user.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/resolvers/user.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/routes/media.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/media.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/routes/projects.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/projects.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/routes/users.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/users.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/services/user/reset_password.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/user/reset_password.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/types/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/mod.rs" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -48,11 +48,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/db/connection.rs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="262">
-              <caret line="32" selection-start-line="32" selection-end-line="32" />
+            <state relative-caret-position="241">
+              <caret line="34" column="4" selection-start-line="34" selection-start-column="4" selection-end-line="34" selection-end-column="4" />
               <folding>
                 <element signature="e#3325#3326#0" expanded="true" />
                 <element signature="e#3353#3354#0" expanded="true" />
@@ -61,11 +61,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Cargo.lock">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="239">
-              <caret line="3091" selection-start-line="3091" selection-end-line="3091" />
+            <state relative-caret-position="89">
+              <caret line="3189" selection-start-line="3189" selection-end-line="3189" />
             </state>
           </provider>
         </entry>
@@ -82,8 +82,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/graphql/event.rs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="547">
-              <caret line="38" selection-start-line="38" selection-end-line="38" />
+            <state relative-caret-position="15">
+              <caret line="1" selection-start-line="1" selection-end-line="1" />
             </state>
           </provider>
         </entry>
@@ -100,8 +100,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/routes/users.rs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="241">
-              <caret line="21" selection-start-line="21" selection-end-line="21" />
+            <state relative-caret-position="75">
+              <caret line="5" column="25" selection-start-line="5" selection-start-column="25" selection-end-line="5" selection-end-column="25" />
             </state>
           </provider>
         </entry>
@@ -134,13 +134,13 @@
         <option value="$PROJECT_DIR$/src/graphql/user.rs" />
         <option value="$PROJECT_DIR$/src/resolvers/user.rs" />
         <option value="$PROJECT_DIR$/src/graphql/query.rs" />
-        <option value="$PROJECT_DIR$/Cargo.lock" />
-        <option value="$PROJECT_DIR$/src/routes/users.rs" />
         <option value="$PROJECT_DIR$/src/routes/projects.rs" />
         <option value="$PROJECT_DIR$/src/routes/media.rs" />
         <option value="$PROJECT_DIR$/src/graphql/mutation.rs" />
-        <option value="$PROJECT_DIR$/src/graphql/event.rs" />
         <option value="$PROJECT_DIR$/src/db/connection.rs" />
+        <option value="$PROJECT_DIR$/src/routes/users.rs" />
+        <option value="$PROJECT_DIR$/src/graphql/event.rs" />
+        <option value="$PROJECT_DIR$/Cargo.lock" />
       </list>
     </option>
   </component>
@@ -239,12 +239,12 @@
       <updated>1561935579000</updated>
       <workItem from="1561935581801" duration="1120000" />
       <workItem from="1562378897106" duration="611000" />
-      <workItem from="1562792105290" duration="382000" />
+      <workItem from="1562792105290" duration="539000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="2113000" />
+    <option name="totallyTimeSpent" value="2270000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="806" extended-state="0" />
@@ -353,20 +353,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Cargo.lock">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="239">
-          <caret line="3091" selection-start-line="3091" selection-end-line="3091" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/routes/users.rs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="241">
-          <caret line="21" selection-start-line="21" selection-end-line="21" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/routes/projects.rs">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -380,21 +366,35 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/graphql/event.rs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="547">
-          <caret line="38" selection-start-line="38" selection-end-line="38" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/db/connection.rs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="262">
-          <caret line="32" selection-start-line="32" selection-end-line="32" />
+        <state relative-caret-position="241">
+          <caret line="34" column="4" selection-start-line="34" selection-start-column="4" selection-end-line="34" selection-end-column="4" />
           <folding>
             <element signature="e#3325#3326#0" expanded="true" />
             <element signature="e#3353#3354#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/routes/users.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="25" selection-start-line="5" selection-start-column="25" selection-end-line="5" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/graphql/event.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" selection-start-line="1" selection-end-line="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Cargo.lock">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="89">
+          <caret line="3189" selection-start-line="3189" selection-end-line="3189" />
         </state>
       </provider>
     </entry>
