@@ -16,10 +16,13 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         email: String,
         password: String,
     ) -> FieldResult<Tokenized<User>>  {
+        use crate::resolvers::user;
+
         let credentials = LoginRequest {
             email, password
         };
-        let user = crate::resolvers::user::login(&credentials, &executor.context().conn)?;
+        let conn = &executor.context().conn;
+        let user = user::login(&credentials, conn)?;
         let token = Token::new(&user.email).to_string()?;
         Ok(Tokenized { payload: user, token })
     }
@@ -29,13 +32,13 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         project: ProjectRequest,
         token: String
     ) -> FieldResult<Tokenized<Project>> {
-        use crate::resolvers::user;
+        use crate::resolvers::{user, project};
 
         let token = token.parse::<Token>()?;
         let token_string = token.to_string()?;
         let conn = &executor.context().conn;
         let user = user::get_by_email(&token.uid, conn)?;
-        let project = crate::resolvers::project::create(
+        let project = project::create(
             &user.email,
             project,
             conn
@@ -48,13 +51,13 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         event: EventRequest,
         token: String
     ) -> FieldResult<Tokenized<Event>> {
-        use crate::resolvers::user;
+        use crate::resolvers::{user, event};
 
         let token = token.parse::<Token>()?;
         let token_string = token.to_string()?;
         let conn = &executor.context().conn;
         let user = user::get_by_email(&token.uid, conn)?;
-        let event = crate::resolvers::event::create(
+        let event = event::create(
             &user.email,
             EventInsert::from_request(event),
             conn
@@ -67,12 +70,16 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         email: String,
         password: String
     ) -> FieldResult<Tokenized<User>> {
+        use crate::resolvers::user;
+
         let user_request = UserRequest {
             display_name: None,
             email,
             password,
         };
-        let user = crate::resolvers::user::create(user_request, &executor.context().conn)?;
+
+        let conn = &executor.context().conn;
+        let user = user::create(user_request, conn)?;
         let token = Token::new(&user.email).to_string()?;
         Ok(Tokenized { payload: user, token })
     }
