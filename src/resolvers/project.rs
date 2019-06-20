@@ -11,31 +11,31 @@ use diesel::BelongingToDsl;
 use rocket_contrib::databases::diesel;
 use slug::slugify;
 
-pub fn all(db: &PgConnection) -> Result<Vec<Project>> {
-    Ok(projects::table.load::<Project>(db)?)
+pub fn all(conn: &PgConnection) -> Result<Vec<Project>> {
+    Ok(projects::table.load::<Project>(conn)?)
 }
 
-pub fn get(id: i32, db: &PgConnection) -> Result<Project> {
-    Ok(projects::table.find(id).get_result::<Project>(db)?)
+pub fn get(id: i32, conn: &PgConnection) -> Result<Project> {
+    Ok(projects::table.find(id).get_result::<Project>(conn)?)
 }
 
-pub fn get_by_slug_and_event(slug: &str, event_slug: &str, db: &PgConnection) -> Result<Project> {
+pub fn get_by_slug_and_event(slug: &str, event_slug: &str, conn: &PgConnection) -> Result<Project> {
     let event_id: i32 = events::table
         .filter(events::slug.eq(event_slug))
         .select(events::id)
-        .first(db)?;
+        .first(conn)?;
     Ok(projects::table
         .filter(projects::event_id.eq(event_id))
         .filter(projects::slug.eq(slug))
-        .first(db)?)
+        .first(conn)?)
 }
 
-pub fn create(email: &str, project: ProjectRequest, db: &PgConnection) -> Result<Project> {
-    db.transaction::<_, _, _>(|| {
+pub fn create(email: &str, project: ProjectRequest, conn: &PgConnection) -> Result<Project> {
+    conn.transaction::<_, _, _>(|| {
         let event_id = events::table
             .filter(events::slug.eq(project.event_slug))
             .select(events::id)
-            .first(db)?;
+            .first(conn)?;
         let slug = slugify(&project.name);
         let project = ProjectInsert {
             name: project.name,
@@ -47,14 +47,14 @@ pub fn create(email: &str, project: ProjectRequest, db: &PgConnection) -> Result
         // Create project
         let project: Project = diesel::insert_into(projects::table)
             .values(&project)
-            .get_result(db)?;
+            .get_result(conn)?;
         // Get id from users table. We could probably also call user
         // resolver. Idk if that's better (could cause circular
         // dependencies)
         let user_id = users::table
             .filter(users::email.eq(email))
             .select(users::id)
-            .first(db)?;
+            .first(conn)?;
 
         let submission = SubmissionInsert {
             user_id,
@@ -65,35 +65,35 @@ pub fn create(email: &str, project: ProjectRequest, db: &PgConnection) -> Result
         // is a little cleaner imo
         let _submission: Submission = diesel::insert_into(submissions::table)
             .values(&submission)
-            .get_result(db)?;
+            .get_result(conn)?;
         Ok(project)
     })
 }
 
-pub fn update(id: i32, person: Project, db: &PgConnection) -> Result<Project> {
+pub fn update(id: i32, person: Project, conn: &PgConnection) -> Result<Project> {
     Ok(diesel::update(projects::table.find(id))
         .set(&person)
-        .get_result(db)?)
+        .get_result(conn)?)
 }
 
-pub fn delete(id: i32, db: &PgConnection) -> Result<usize> {
-    Ok(diesel::delete(projects::table.find(id)).execute(db)?)
+pub fn delete(id: i32, conn: &PgConnection) -> Result<usize> {
+    Ok(diesel::delete(projects::table.find(id)).execute(conn)?)
 }
 
 impl Project {
-    pub fn contributors(&self, db: &PgConnection) -> Vec<User> {
+    pub fn contributors(&self, conn: &PgConnection) -> Vec<User> {
         let user_ids = Submission::belonging_to(self).select(submissions::user_id);
         users::table
             .filter(users::id.eq(any(user_ids)))
             .select((columns::id, columns::display_name, columns::email))
-            .load::<User>(db)
+            .load::<User>(conn)
             .expect("Could not load contributors")
     }
 
-    pub fn media(&self, db: &PgConnection) -> Vec<Medium> {
+    pub fn media(&self, conn: &PgConnection) -> Vec<Medium> {
         media::table
             .filter(media::project_id.eq(self.id))
-            .load::<Medium>(db)
+            .load::<Medium>(conn)
             .expect("Could not load media")
     }
 }

@@ -10,22 +10,22 @@ use diesel::BelongingToDsl;
 use rocket_contrib::databases::diesel;
 use std::env;
 
-pub fn all(db: &PgConnection) -> Result<Vec<User>> {
+pub fn all(conn: &PgConnection) -> Result<Vec<User>> {
     Ok(users::table
         .select((users::id, users::display_name, users::email))
-        .load::<User>(db)?)
+        .load::<User>(conn)?)
 }
 
-pub fn create(user: UserRequest, db: &PgConnection) -> Result<User> {
+pub fn create(user: UserRequest, conn: &PgConnection) -> Result<User> {
     let user_exists = match &user.display_name {
         Some(display_name) => select(exists(
             users::table
                 .filter(users::email.eq(&(user.email)))
                 .or_filter(users::display_name.eq(&(display_name))),
         ))
-        .get_result(db)?,
+        .get_result(conn)?,
         None => {
-            select(exists(users::table.filter(users::email.eq(&(user.email))))).get_result(db)?
+            select(exists(users::table.filter(users::email.eq(&(user.email))))).get_result(conn)?
         }
     };
     if user_exists {
@@ -36,14 +36,14 @@ pub fn create(user: UserRequest, db: &PgConnection) -> Result<User> {
     let user = UserInsert::from_request(user)?;
     let user = diesel::insert_into(users::table)
         .values(&user)
-        .get_result(db)?;
+        .get_result(conn)?;
     Ok(User::from_raw_user(user))
 }
 
-pub fn login(credentials: &LoginRequest, db: &PgConnection) -> Result<User> {
+pub fn login(credentials: &LoginRequest, conn: &PgConnection) -> Result<User> {
     let user: RawUser = users::table
         .filter(users::email.eq(&(credentials.email)))
-        .first(db)?;
+        .first(conn)?;
     if user.validate_credentials(credentials)? {
         Ok(User::from_raw_user(user))
     } else {
@@ -59,11 +59,11 @@ pub fn get_by_email(email: &str, conn: &PgConnection) -> Result<User> {
 }
 
 impl User {
-    pub fn roles(&self, db: &PgConnection) -> Vec<Role> {
+    pub fn roles(&self, conn: &PgConnection) -> Vec<Role> {
         let role_ids = UserRole::belonging_to(self).select(user_roles::role_id);
         roles::table
             .filter(roles::id.eq(any(role_ids)))
-            .load::<Role>(db)
+            .load::<Role>(conn)
             .expect("Could not load contributors")
     }
 }
