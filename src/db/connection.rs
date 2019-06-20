@@ -1,5 +1,5 @@
 use crate::db::sql_types::ActionType;
-pub use diesel::pg::PgConnection;
+use diesel::pg::PgConnection;
 use rocket::fairing::Fairing;
 use rocket_contrib::databases::r2d2::{Pool, PooledConnection};
 use rocket_contrib::databases::Poolable;

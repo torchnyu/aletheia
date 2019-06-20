@@ -1,9 +1,9 @@
-use crate::db::connection::PgConnection;
 use crate::db::models::{
     Medium, Project, ProjectInsert, ProjectRequest, Submission, SubmissionInsert, User,
 };
 use crate::db::schema::users::columns;
 use crate::db::schema::{events, media, projects, submissions, users};
+use crate::db::PgConnection;
 use crate::utils::*;
 use diesel::dsl::any;
 use diesel::prelude::*;
