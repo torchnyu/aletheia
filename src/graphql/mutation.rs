@@ -2,8 +2,8 @@ use super::RequestContext;
 use crate::resolvers::{event, project, user};
 use crate::types::Token;
 use crate::types::{
-    Event, EventInsert, EventRequest, LoginRequest, Project, ProjectRequest, Tokenized, User,
-    UserRequest,
+    Event, EventInsert, EventRequest, LoginRequest, Project, ProjectRequest,
+    SendResetPasswordParams, Tokenized, User, UserRequest,
 };
 use juniper::FieldResult;
 
@@ -82,4 +82,11 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         Ok(Tokenized { payload: user, token })
     }
 
+    field send_reset_password_email(
+        &executor,
+        params: SendResetPasswordParams
+    ) -> FieldResult<()> {
+        let database_context = &executor.context().conn;
+        Ok(())
+    }
 });

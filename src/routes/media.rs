@@ -1,14 +1,14 @@
-use rocket::post;
 use crate::db::RequestContext;
 use crate::types::{Medium, Token};
 use multipart::server::save::Entries;
 use multipart::server::save::SaveResult::*;
 use multipart::server::save::SavedData;
 use multipart::server::Multipart;
-use rocket::post;
 use std::ffi::OsStr;
 use std::path::Path;
 
+use crate::authorization::validate;
+use crate::db::sql_types::{ActionModifier, ActionType, Resource};
 use rocket::http::{ContentType, Status};
 use rocket::response::status::Custom;
 use rocket::Data;
@@ -16,13 +16,14 @@ use rocket::Data;
 static MAX_BYTES: u64 = 128_000_000;
 
 pub fn validate_medium_upload<'a>(
-    conn: &RequestContext,
+    ctx: &RequestContext,
     content_type: &'a ContentType,
     token: &Token,
 ) -> core::result::Result<&'a str, Custom<String>> {
-    match conn.database_context(
+    match validate(
+        &ctx.conn,
+        token,
         Resource::Medium,
-        Some(token),
         ActionType::Create,
         ActionModifier::Own,
     ) {
@@ -100,7 +101,7 @@ pub fn get_foreign_key(
 
 pub fn process_entries(
     entries: Entries,
-    context: &RequestContext,
+    ctx: &RequestContext,
     project_id: Option<i32>,
     user_id: Option<i32>,
 ) -> core::result::Result<Medium, Custom<String>> {
@@ -122,7 +123,7 @@ pub fn process_entries(
                 file_ext.to_owned(),
                 project_id,
                 user_id,
-                &context.conn,
+                &ctx.conn,
             ) {
                 Ok(s) => Ok(s),
                 Err(_) => Err(Custom(

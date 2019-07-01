@@ -16,9 +16,9 @@ extern crate juniper_rocket;
 extern crate multipart;
 extern crate r2d2;
 extern crate rand;
+extern crate reqwest;
 extern crate rusoto_core;
 extern crate rusoto_s3;
-extern crate reqwest;
 extern crate slug;
 #[macro_use]
 extern crate diesel_derive_enum;
@@ -30,13 +30,13 @@ use rocket::*;
 use rocket_cors::CorsOptions;
 use std::collections::HashSet;
 
+mod authorization;
 mod db;
 mod github;
 mod graphql;
 mod resolvers;
 mod routes;
 mod services;
-#[allow(unused_imports)]
 mod types;
 mod utils;
 
@@ -94,7 +94,7 @@ fn main() -> Result<()> {
                 routes::users::login,
                 routes::users::upload_profile_picture,
                 routes::users::get_profile_picture,
-                routes::users::reset_password
+                routes::users::send_reset_password_email
             ],
         )
         .mount(

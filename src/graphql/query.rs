@@ -33,8 +33,8 @@ graphql_object!(QueryRoot: RequestContext as "Query" |&self| {
         token: String,
     ) -> FieldResult<User> {
         let token = token.parse::<Token>()?;
-        let database = &executor.context().database_context(Resource::User, Some(&token), ActionType::Read, ActionModifier::Own)?;
-        let user = crate::resolvers::user::get_by_email(&token.uid, &database.conn)?;
+        let conn = &executor.context().conn;
+        let user = crate::resolvers::user::get_by_email(&token.uid, &conn)?;
         Ok(user)
     }
 

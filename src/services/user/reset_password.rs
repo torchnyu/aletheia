@@ -1,10 +1,11 @@
 use crate::db::models::{PasswordResetRequest, User};
 use crate::utils::Result;
 use argonautica::Hasher;
+use chrono::Utc;
 use rand::distributions::Alphanumeric;
 use rand::Rng;
-use std::env;
 use std::collections::HashMap;
+use std::env;
 
 static RESET_KEY_LENGTH: usize = 16;
 
@@ -22,7 +23,7 @@ pub fn call(user: &User) -> Result<PasswordResetRequest> {
         .hash()?;
     Ok(PasswordResetRequest {
         id,
-        created_at: None,
+        created_at: Utc::now(),
         user_id: user.id,
     })
 }
@@ -33,6 +34,9 @@ fn send_email(user: &User, key: &str) -> Result<()> {
     body.insert("email", user.email.as_str());
     body.insert("resetKey", key);
     let hermes_url = env::var("HERMES_URL")?;
-    client.post(&format!("{}/reset-password", hermes_url)).json(&body).send()?;
+    client
+        .post(&format!("{}/reset-password", hermes_url))
+        .json(&body)
+        .send()?;
     Ok(())
 }

@@ -23,8 +23,8 @@ graphql_object!(User: RequestContext |&self| {
     }
 
     field profile_picture(&executor) -> Option<Medium> {
-        let database_context = &executor.context().db_context_for_anon_user(ActionType::Read, ActionModifier::Own);
-        self.profile_picture(&database_context.conn)
+        let conn = &executor.context().conn;
+        self.profile_picture(&conn)
     }
 
     field projects(&executor) -> Vec<Project> {
