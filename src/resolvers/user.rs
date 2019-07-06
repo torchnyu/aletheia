@@ -4,7 +4,6 @@ use crate::db::models::{
 };
 use crate::db::schema::{media, password_reset_requests, roles, user_roles, users};
 use crate::services;
-use crate::types::ResetPasswordParams;
 use crate::utils::{AletheiaError, Result};
 use argonautica::Hasher;
 use argonautica::Verifier;
@@ -64,7 +63,7 @@ pub fn get_by_email(email: &str, conn: &PgConnection) -> Result<User> {
     Ok(User::from_raw_user(user))
 }
 
-pub fn send_reset_email(email: &str, conn: &diesel::PgConnection) -> Result<()> {
+pub fn send_reset_email(email: &str, domain: &str, conn: &diesel::PgConnection) -> Result<()> {
     // Want to get the user but also not error if None
     let user = match users::table
         .filter(users::email.eq(email))
@@ -79,8 +78,8 @@ pub fn send_reset_email(email: &str, conn: &diesel::PgConnection) -> Result<()> 
         Some(user) => User::from_raw_user(user),
     };
 
-    let reset_request = services::user::reset_password(&user)?;
-    let _res = diesel::insert_into(password_reset_requests::table)
+    let reset_request = services::user::send_reset_password_email(&user, domain)?;
+    diesel::insert_into(password_reset_requests::table)
         .values(reset_request)
         .execute(conn)?;
     Ok(())
@@ -88,25 +87,30 @@ pub fn send_reset_email(email: &str, conn: &diesel::PgConnection) -> Result<()> 
 
 static ONE_DAY: i64 = 60 * 60 * 24;
 
-pub fn reset_password(params: &ResetPasswordParams, conn: &diesel::PgConnection) -> Result<User> {
-    let user = get_by_email(&params.email, conn)?;
+pub fn reset_password(
+    email: &str,
+    password: &str,
+    key: &str,
+    conn: &diesel::PgConnection,
+) -> Result<User> {
+    let user = get_by_email(email, conn)?;
     let mut hasher = Hasher::default();
     // Hash the random bytes
     let id = hasher
-        .with_password(&params.key)
+        .with_password(key)
+        .with_salt(env::var("KEY_SALT")?)
         .with_secret_key(env::var("SECRET_KEY")?)
         .hash()?;
     let reset_request = password_reset_requests::table
         .filter(password_reset_requests::user_id.eq(user.id))
         .filter(password_reset_requests::id.eq(id))
         .first::<PasswordResetRequest>(conn)?;
-    // Oh boy, we gotta go through all the date based logic and make
-    // sure it isn't screwed up if/when we don't collocate the
-    // database with the server
+
     if Utc::now().timestamp() - reset_request.created_at.timestamp() > ONE_DAY {
         Err(AletheiaError::ExpiredResetKey.into())
     } else {
-        let new_password_digest = services::user::hash_password(&params.password)?;
+        let new_password_digest = services::user::hash_password(&password)?;
+        diesel::delete(&reset_request).execute(conn)?;
         diesel::update(&user)
             .set(users::password_digest.eq(new_password_digest))
             .execute(conn)?;

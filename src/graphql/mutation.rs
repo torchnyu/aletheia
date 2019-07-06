@@ -84,9 +84,21 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
 
     field send_reset_password_email(
         &executor,
-        params: SendResetPasswordParams
-    ) -> FieldResult<()> {
-        let database_context = &executor.context().conn;
-        Ok(())
+        email: String,
+        domain: String
+    ) -> FieldResult<&'static str> {
+        crate::resolvers::user::send_reset_email(&email, &domain, &executor.context().conn)?;
+        Ok("Sent password reset email")
+    }
+
+    field reset_password(
+        &executor,
+        email: String,
+        password: String,
+        key: String
+    ) -> FieldResult<Tokenized<User>> {
+        let user = crate::resolvers::user::reset_password(&email, &password, &key, &executor.context().conn)?;
+        let token = Token::new(&user.email).to_string()?;
+        Ok(Tokenized { payload: user, token })
     }
 });
