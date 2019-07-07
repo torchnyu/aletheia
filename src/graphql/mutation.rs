@@ -1,4 +1,5 @@
 use super::RequestContext;
+use crate::resolvers::{event, project, user};
 use crate::types::Token;
 use crate::types::{
     Event, EventInsert, EventRequest, LoginRequest, Project, ProjectRequest, Tokenized, User,
@@ -16,7 +17,6 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         email: String,
         password: String,
     ) -> FieldResult<Tokenized<User>>  {
-        use crate::resolvers::user;
 
         let credentials = LoginRequest {
             email, password
@@ -32,7 +32,6 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         project: ProjectRequest,
         token: String
     ) -> FieldResult<Tokenized<Project>> {
-        use crate::resolvers::{user, project};
 
         let token = token.parse::<Token>()?;
         let token_string = token.to_string()?;
@@ -51,7 +50,6 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         event: EventRequest,
         token: String
     ) -> FieldResult<Tokenized<Event>> {
-        use crate::resolvers::{user, event};
 
         let token = token.parse::<Token>()?;
         let token_string = token.to_string()?;

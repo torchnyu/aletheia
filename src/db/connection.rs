@@ -1,6 +1,10 @@
 use crate::db::sql_types::ActionType;
 use diesel::pg::PgConnection;
+use rocket::fairing::AdHoc;
 use rocket::fairing::Fairing;
+use rocket::logger::error;
+use rocket::{http::Status, Outcome};
+use rocket_contrib::databases::database_config;
 use rocket_contrib::databases::r2d2::{Pool, PooledConnection};
 use rocket_contrib::databases::Poolable;
 
@@ -29,10 +33,6 @@ impl RequestContext {
     /// Returns a fairing that initializes the associated database
     /// connection pool.
     pub fn fairing() -> impl Fairing {
-        use rocket::fairing::AdHoc;
-        use rocket::logger::error;
-        use rocket_contrib::databases::database_config;
-
         AdHoc::on_attach("\'postgres\' Database Pool", |rocket| {
             let config = match database_config("postgres", rocket.config()) {
                 Ok(cfg) => cfg,
@@ -64,7 +64,6 @@ impl<'a, 'r> rocket::request::FromRequest<'a, 'r> for RequestContext {
     fn from_request(
         request: &'a rocket::request::Request<'r>,
     ) -> rocket::request::Outcome<Self, ()> {
-        use rocket::{http::Status, Outcome};
         let pool = request.guard::<::rocket::State<ConnectionPool>>()?;
         match pool.0.get() {
             Ok(conn) => Outcome::Success(RequestContext::from(conn)),
