@@ -34,7 +34,7 @@ graphql_object!(Event: RequestContext |&self| {
     }
 
     field projects(&executor) -> FieldResult<Vec<Project>> {
-        let database: &diesel::PgConnection = &executor.context().conn;
-        Ok(self.projects(database)?)
+        let conn = &executor.context().conn;
+        Ok(self.projects(conn)?)
     }
 });

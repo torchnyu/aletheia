@@ -33,12 +33,10 @@ graphql_object!(Project: RequestContext |&self| {
     }
 
     field media(&executor) -> Vec<Medium> {
-        let database: &diesel::PgConnection = &executor.context().conn;
-        self.media(database)
+        self.media(&executor.context().conn)
     }
 
     field contributors(&executor) -> Vec<User> {
-        let database: &diesel::PgConnection = &executor.context().conn;
-        self.contributors(database)
+        self.contributors(&executor.context().conn)
     }
 });

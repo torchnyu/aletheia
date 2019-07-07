@@ -1,11 +1,10 @@
-use rocket::post;
-
 use crate::db::RequestContext;
 use crate::types::Medium;
 use multipart::server::save::Entries;
 use multipart::server::save::SaveResult::*;
 use multipart::server::save::SavedData;
 use multipart::server::Multipart;
+use rocket::post;
 use std::ffi::OsStr;
 use std::path::Path;
 
@@ -96,7 +95,7 @@ fn get_foreign_key(
 
 fn process_entries(
     entries: Entries,
-    conn: RequestContext,
+    context: RequestContext,
 ) -> core::result::Result<Medium, Custom<String>> {
     let file_fields = match entries.fields.get("file") {
         Some(field) => field,
@@ -112,7 +111,6 @@ fn process_entries(
     let user_id = get_foreign_key("user_id", &entries)?;
 
     let file_ext = get_file_ext(file_fields)?;
-
     match &file_fields[0].data {
         SavedData::File(path, _) => {
             match crate::resolvers::medium::create(
@@ -120,7 +118,7 @@ fn process_entries(
                 file_ext.to_owned(),
                 project_id,
                 user_id,
-                &conn,
+                &context.conn,
             ) {
                 Ok(s) => Ok(s),
                 Err(_) => Err(Custom(

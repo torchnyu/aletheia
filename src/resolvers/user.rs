@@ -4,18 +4,19 @@ use crate::utils::{AletheiaError, Result};
 use argonautica::input::Salt;
 use argonautica::{Hasher, Verifier};
 use diesel::dsl::*;
+use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use diesel::BelongingToDsl;
 use rocket_contrib::databases::diesel;
 use std::env;
 
-pub fn all(conn: &diesel::PgConnection) -> Result<Vec<User>> {
+pub fn all(conn: &PgConnection) -> Result<Vec<User>> {
     Ok(users::table
         .select((users::id, users::display_name, users::email))
-        .load::<User>(&*conn)?)
+        .load::<User>(conn)?)
 }
 
-pub fn create(user: UserRequest, conn: &diesel::PgConnection) -> Result<User> {
+pub fn create(user: UserRequest, conn: &PgConnection) -> Result<User> {
     let user_exists = match &user.display_name {
         Some(display_name) => select(exists(
             users::table
@@ -39,7 +40,7 @@ pub fn create(user: UserRequest, conn: &diesel::PgConnection) -> Result<User> {
     Ok(User::from_raw_user(user))
 }
 
-pub fn login(credentials: &LoginRequest, conn: &diesel::PgConnection) -> Result<User> {
+pub fn login(credentials: &LoginRequest, conn: &PgConnection) -> Result<User> {
     let user: RawUser = users::table
         .filter(users::email.eq(&(credentials.email)))
         .first(conn)?;
@@ -52,13 +53,13 @@ pub fn login(credentials: &LoginRequest, conn: &diesel::PgConnection) -> Result<
     }
 }
 
-pub fn get_by_email(email: &str, conn: &diesel::PgConnection) -> Result<User> {
+pub fn get_by_email(email: &str, conn: &PgConnection) -> Result<User> {
     let user: RawUser = users::table.filter(users::email.eq(email)).first(conn)?;
     Ok(User::from_raw_user(user))
 }
 
 impl User {
-    pub fn roles(&self, conn: &diesel::PgConnection) -> Vec<Role> {
+    pub fn roles(&self, conn: &PgConnection) -> Vec<Role> {
         let role_ids = UserRole::belonging_to(self).select(user_roles::role_id);
         roles::table
             .filter(roles::id.eq(any(role_ids)))

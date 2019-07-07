@@ -1,9 +1,19 @@
-use crate::db::sql_types::*;
+use crate::db::sql_types::ActionType;
 use diesel::pg::PgConnection;
-use rocket::fairing::{AdHoc, Fairing};
-use rocket::logger::error;
+use rocket::fairing::Fairing;
 use rocket_contrib::databases::r2d2::{Pool, PooledConnection};
-use rocket_contrib::databases::{database_config, Poolable};
+use rocket_contrib::databases::Poolable;
+
+#[derive(Debug, Fail)]
+pub enum AuthError {
+    #[fail(display = "You are not authorized to {:?} {}", action, resource)]
+    NoPermission {
+        action: ActionType,
+        resource: String,
+    },
+    #[fail(display = "No associated user to authenticate with")]
+    NoUser,
+}
 
 type Connection = PooledConnection<<PgConnection as Poolable>::Manager>;
 
@@ -15,25 +25,14 @@ pub struct RequestContext {
 /// The pool type.
 pub struct ConnectionPool(Pool<<PgConnection as Poolable>::Manager>);
 
-impl From<Connection> for RequestContext {
-    fn from(conn: Connection) -> Self {
-        Self { conn }
-    }
-}
 impl RequestContext {
-    /// Get a DatabaseContext from this struct that can be used to connect
-    /// to the db
-    pub fn database_context(
-        &self,
-        action: ActionType,
-        modifier: ActionModifier,
-    ) -> DatabaseContext {
-        return DatabaseContext::from(&self.conn, action, modifier);
-    }
-
     /// Returns a fairing that initializes the associated database
     /// connection pool.
     pub fn fairing() -> impl Fairing {
+        use rocket::fairing::AdHoc;
+        use rocket::logger::error;
+        use rocket_contrib::databases::database_config;
+
         AdHoc::on_attach("\'postgres\' Database Pool", |rocket| {
             let config = match database_config("postgres", rocket.config()) {
                 Ok(cfg) => cfg,
@@ -56,27 +55,7 @@ impl RequestContext {
                 }
             };
             Ok(rocket.manage(ConnectionPool(pool)))
-            /*match pool {
-                Ok(Ok(p)) => Ok(rocket.manage(ConnectionPool(p))),
-            }*/
         })
-    }
-    /// Retrieves a connection of type `Self` from the `rocket`
-    /// instance. Returns `Some` as long as `Self::fairing()` has been
-    /// attached and there is at least one connection in the pool.
-    pub fn get_one(rocket: &::rocket::Rocket) -> Option<Self> {
-        rocket
-            .state::<ConnectionPool>()
-            .and_then(|pool| pool.0.get().ok())
-            .map(|conn| RequestContext::from(conn))
-    }
-}
-
-impl std::ops::Deref for RequestContext {
-    type Target = PgConnection;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.conn
     }
 }
 
@@ -94,22 +73,8 @@ impl<'a, 'r> rocket::request::FromRequest<'a, 'r> for RequestContext {
     }
 }
 
-/// Context struct that contains information about
-/// how we're using the database
-pub struct DatabaseContext<'a> {
-    // Eventually make this private
-    pub conn: &'a PgConnection,
-    action: ActionType,
-    modifier: ActionModifier,
-}
-
-impl<'a> DatabaseContext<'a> {
-    /// Create a DatabaseContext Struct from a connection and modifier information
-    fn from(conn: &'a PgConnection, action: ActionType, modifier: ActionModifier) -> Self {
-        Self {
-            conn,
-            action,
-            modifier,
-        }
+impl From<Connection> for RequestContext {
+    fn from(conn: Connection) -> Self {
+        Self { conn }
     }
 }

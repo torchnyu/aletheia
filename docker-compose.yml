@@ -1,0 +1,52 @@
+version: '3'
+    
+services:
+
+  db:
+    image: "postgres"
+    restart: always
+    volumes:
+      - data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    labels:
+      - traefik.enable=false
+    networks:
+      - internal
+      - web
+    environment:
+      POSTGRES_DB: aletheia
+
+  app:
+    build: .
+    restart: always
+    networks:
+      - internal
+      - web
+    depends_on:
+      - db
+    ports:
+      - "8000"
+    labels:
+      - traefik.backend=app
+      - traefik.frontend.rule=Host:aletheia.atibon.com
+      - traefik.docker.network=web
+      - traefik.port=8000
+    environment:
+      ROCKET_DATABASES: "{postgres={url=\"postgres://postgres:${POSTGRES_PASSWORD}@db/aletheia\"}}"
+      SECRET_KEY: "${SECRET_KEY}"
+      SALT_LENGTH: "${SALT_LENGTH}"
+      AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}"
+      AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
+      BUCKET_NAME: "${BUCKET_NAME}"
+      AWS_REGION: "${AWS_REGION}"
+      ROCKET_SECRET_KEY: "${ROCKET_SECRET_KEY}"
+
+volumes:
+  data:
+
+networks:
+  web:
+    external: true
+  internal:
+    external: false

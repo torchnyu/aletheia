@@ -23,10 +23,10 @@ graphql_object!(User: RequestContext |&self| {
     }
 
     field projects(&executor) -> Vec<Project> {
-        let database: &diesel::PgConnection = &executor.context().conn;
+        let conn = &executor.context().conn;
         let project_ids = Submission::belonging_to(self).select(submissions::project_id);
         projects::table
             .filter(projects::id.eq(any(project_ids)))
-            .load::<Project>(database).expect("Could not load projects")
+            .load::<Project>(conn).expect("Could not load projects")
     }
 });

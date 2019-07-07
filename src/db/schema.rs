@@ -18,7 +18,7 @@ table! {
 
     media (id) {
         id -> Int4,
-        file_name -> Varchar,
+        folder_name -> Varchar,
         project_id -> Nullable<Int4>,
         user_id -> Nullable<Int4>,
     }

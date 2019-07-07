@@ -4,8 +4,6 @@ use crate::types::{
     Event, EventInsert, EventRequest, LoginRequest, Project, ProjectRequest, Tokenized, User,
     UserRequest,
 };
-
-use crate::db::sql_types::*;
 use juniper::FieldResult;
 
 pub struct MutationRoot {}
@@ -18,11 +16,13 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         email: String,
         password: String,
     ) -> FieldResult<Tokenized<User>>  {
-        let database = &executor.context().conn;
+        use crate::resolvers::user;
+
         let credentials = LoginRequest {
             email, password
         };
-        let user = crate::resolvers::user::login(&credentials, &database)?;
+        let conn = &executor.context().conn;
+        let user = user::login(&credentials, conn)?;
         let token = Token::new(&user.email).to_string()?;
         Ok(Tokenized { payload: user, token })
     }
@@ -32,21 +32,18 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         project: ProjectRequest,
         token: String
     ) -> FieldResult<Tokenized<Project>> {
+        use crate::resolvers::{user, project};
+
         let token = token.parse::<Token>()?;
-        let database = &executor.context().conn;
-        crate::authorization::validate(
-            &database,
-            &token,
-            "project".to_string(),
-            ActionType::Create,
-            ActionModifier::Own
-        )?;
-        let project = crate::resolvers::project::create(
-            &token.uid,
+        let token_string = token.to_string()?;
+        let conn = &executor.context().conn;
+        let user = user::get_by_email(&token.uid, conn)?;
+        let project = project::create(
+            &user.email,
             project,
-            database
+            conn
         )?;
-        Ok(Tokenized { payload: project, token: token.to_string()? })
+        Ok(Tokenized { payload: project, token: token_string })
     }
 
     field create_event(
@@ -54,21 +51,18 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         event: EventRequest,
         token: String
     ) -> FieldResult<Tokenized<Event>> {
+        use crate::resolvers::{user, event};
+
         let token = token.parse::<Token>()?;
-        let database = &executor.context().conn;
-        crate::authorization::validate(
-            &database,
-            &token,
-            "event".to_string(),
-            ActionType::Create,
-            ActionModifier::Own
-        )?;
-        let event = crate::resolvers::event::create(
-            &token.uid,
+        let token_string = token.to_string()?;
+        let conn = &executor.context().conn;
+        let user = user::get_by_email(&token.uid, conn)?;
+        let event = event::create(
+            &user.email,
             EventInsert::from_request(event),
-            database
+            conn
         )?;
-        Ok(Tokenized { payload: event, token: token.to_string()? })
+        Ok(Tokenized { payload: event, token: token_string })
     }
 
     field register(
@@ -76,13 +70,16 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         email: String,
         password: String
     ) -> FieldResult<Tokenized<User>> {
+        use crate::resolvers::user;
+
         let user_request = UserRequest {
             display_name: None,
             email,
             password,
         };
-        let database = &executor.context().conn;
-        let user = crate::resolvers::user::create(user_request, database)?;
+
+        let conn = &executor.context().conn;
+        let user = user::create(user_request, conn)?;
         let token = Token::new(&user.email).to_string()?;
         Ok(Tokenized { payload: user, token })
     }

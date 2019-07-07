@@ -14,20 +14,20 @@ pub struct AuthenticatedResponse {
 }
 
 #[get("/")]
-pub fn index(conn: RequestContext) -> Result<Json<Vec<User>>> {
-    Ok(Json(resolvers::user::all(&conn)?))
+pub fn index(context: RequestContext) -> Result<Json<Vec<User>>> {
+    Ok(Json(resolvers::user::all(&context.conn)?))
 }
 
 #[post("/", format = "application/json", data = "<user>")]
-pub fn create(conn: RequestContext, user: Json<UserRequest>) -> Result<Json<User>> {
+pub fn create(context: RequestContext, user: Json<UserRequest>) -> Result<Json<User>> {
     let user = user.into_inner();
-    Ok(Json(resolvers::user::create(user, &conn)?))
+    Ok(Json(resolvers::user::create(user, &context.conn)?))
 }
 
 #[post("/login", format = "application/json", data = "<creds>")]
-pub fn login(conn: RequestContext, creds: Json<LoginRequest>) -> Result<AuthenticatedResponse> {
+pub fn login(context: RequestContext, creds: Json<LoginRequest>) -> Result<AuthenticatedResponse> {
     let creds = creds.into_inner();
-    let user = resolvers::user::login(&creds, &conn)?;
+    let user = resolvers::user::login(&creds, &context.conn)?;
     let token = Token::new(&creds.email).to_string()?;
     let response = AuthenticatedResponse {
         data: Json(user),

@@ -11,12 +11,12 @@ graphql_object!(Medium: RequestContext |&self| {
     }
 
     // You probably want to use url
-    field file_name(&executor) -> &str {
-        &self.file_name
+    field folder_name(&executor) -> &str {
+        &self.folder_name
     }
 
-    field url(&executor) -> FieldResult<String> {
+    field large_url(&executor) -> FieldResult<String> {
         let bucket_name = env::var("BUCKET_NAME")?;
-        Ok(format!("https://s3.amazonaws.com/{}/{}", bucket_name, self.file_name))
+        Ok(format!("https://s3.amazonaws.com/{}/{}/{}", bucket_name, self.folder_name, "large.png"))
     }
 });

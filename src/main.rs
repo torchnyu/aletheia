@@ -10,6 +10,7 @@ extern crate juniper;
 extern crate base64;
 extern crate dotenv;
 extern crate heck;
+extern crate image;
 extern crate jsonwebtoken as jwt;
 extern crate juniper_rocket;
 extern crate multipart;
@@ -27,12 +28,12 @@ use rocket::response::content;
 use rocket::*;
 use rocket_cors::CorsOptions;
 
-mod authorization;
 mod db;
 mod github;
 mod graphql;
 mod resolvers;
 mod routes;
+mod services;
 #[allow(unused_imports)]
 mod types;
 mod utils;

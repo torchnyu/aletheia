@@ -6,7 +6,7 @@ use serde_derive::{Deserialize, Serialize};
 #[table_name = "media"]
 pub struct Medium {
     pub id: i32,
-    pub file_name: String,
+    pub folder_name: String,
     pub project_id: Option<i32>,
     pub user_id: Option<i32>,
 }
@@ -14,7 +14,7 @@ pub struct Medium {
 #[derive(Insertable)]
 #[table_name = "media"]
 pub struct MediumInsert {
-    pub file_name: String,
+    pub folder_name: String,
     pub project_id: Option<i32>,
     pub user_id: Option<i32>,
 }

@@ -3,6 +3,7 @@ use crate::db::models::{
 };
 use crate::db::schema::users::columns;
 use crate::db::schema::{events, media, projects, submissions, users};
+use crate::db::PgConnection;
 use crate::utils::*;
 use diesel::dsl::any;
 use diesel::prelude::*;
@@ -10,19 +11,15 @@ use diesel::BelongingToDsl;
 use rocket_contrib::databases::diesel;
 use slug::slugify;
 
-pub fn all(conn: &diesel::PgConnection) -> Result<Vec<Project>> {
-    Ok(projects::table.load::<Project>(&*conn)?)
+pub fn all(conn: &PgConnection) -> Result<Vec<Project>> {
+    Ok(projects::table.load::<Project>(conn)?)
 }
 
-pub fn get(id: i32, conn: &diesel::PgConnection) -> Result<Project> {
+pub fn get(id: i32, conn: &PgConnection) -> Result<Project> {
     Ok(projects::table.find(id).get_result::<Project>(conn)?)
 }
 
-pub fn get_by_slug_and_event(
-    slug: &str,
-    event_slug: &str,
-    conn: &diesel::PgConnection,
-) -> Result<Project> {
+pub fn get_by_slug_and_event(slug: &str, event_slug: &str, conn: &PgConnection) -> Result<Project> {
     let event_id: i32 = events::table
         .filter(events::slug.eq(event_slug))
         .select(events::id)
@@ -33,11 +30,7 @@ pub fn get_by_slug_and_event(
         .first(conn)?)
 }
 
-pub fn create(
-    email: &str,
-    project: ProjectRequest,
-    conn: &diesel::PgConnection,
-) -> Result<Project> {
+pub fn create(email: &str, project: ProjectRequest, conn: &PgConnection) -> Result<Project> {
     conn.transaction::<_, _, _>(|| {
         let event_id = events::table
             .filter(events::slug.eq(project.event_slug))
@@ -77,18 +70,18 @@ pub fn create(
     })
 }
 
-pub fn update(id: i32, person: Project, conn: &diesel::PgConnection) -> Result<Project> {
+pub fn update(id: i32, person: Project, conn: &PgConnection) -> Result<Project> {
     Ok(diesel::update(projects::table.find(id))
         .set(&person)
         .get_result(conn)?)
 }
 
-pub fn delete(id: i32, conn: &diesel::PgConnection) -> Result<usize> {
+pub fn delete(id: i32, conn: &PgConnection) -> Result<usize> {
     Ok(diesel::delete(projects::table.find(id)).execute(conn)?)
 }
 
 impl Project {
-    pub fn contributors(&self, conn: &diesel::PgConnection) -> Vec<User> {
+    pub fn contributors(&self, conn: &PgConnection) -> Vec<User> {
         let user_ids = Submission::belonging_to(self).select(submissions::user_id);
         users::table
             .filter(users::id.eq(any(user_ids)))
@@ -97,7 +90,7 @@ impl Project {
             .expect("Could not load contributors")
     }
 
-    pub fn media(&self, conn: &diesel::PgConnection) -> Vec<Medium> {
+    pub fn media(&self, conn: &PgConnection) -> Vec<Medium> {
         media::table
             .filter(media::project_id.eq(self.id))
             .load::<Medium>(conn)
