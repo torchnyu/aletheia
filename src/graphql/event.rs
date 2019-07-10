@@ -1,5 +1,4 @@
 use super::RequestContext;
-use crate::db::sql_types::{ActionModifier, ActionType};
 use crate::types::{Event, Project};
 use chrono::naive::NaiveDateTime;
 use juniper::FieldResult;
@@ -35,7 +34,7 @@ graphql_object!(Event: RequestContext |&self| {
     }
 
     field projects(&executor) -> FieldResult<Vec<Project>> {
-        let database_context = executor.context().database_context(&"projects", None, ActionType::Read, ActionModifier::All)?;
-        Ok(self.projects(&database_context)?)
+        let conn = &executor.context().conn;
+        Ok(self.projects(conn)?)
     }
 });

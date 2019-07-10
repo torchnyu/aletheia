@@ -1,12 +1,10 @@
-use rocket::post;
-
-use crate::db::sql_types::{ActionModifier, ActionType};
 use crate::db::RequestContext;
 use crate::types::Medium;
 use multipart::server::save::Entries;
 use multipart::server::save::SaveResult::*;
 use multipart::server::save::SavedData;
 use multipart::server::Multipart;
+use rocket::post;
 use std::ffi::OsStr;
 use std::path::Path;
 
@@ -113,9 +111,6 @@ fn process_entries(
     let user_id = get_foreign_key("user_id", &entries)?;
 
     let file_ext = get_file_ext(file_fields)?;
-    let database_context =
-        context.db_context_for_anon_user(ActionType::Create, ActionModifier::Own);
-
     match &file_fields[0].data {
         SavedData::File(path, _) => {
             match crate::resolvers::medium::create(
@@ -123,7 +118,7 @@ fn process_entries(
                 file_ext.to_owned(),
                 project_id,
                 user_id,
-                &database_context,
+                &context.conn,
             ) {
                 Ok(s) => Ok(s),
                 Err(_) => Err(Custom(

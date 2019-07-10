@@ -1,4 +1,3 @@
-use crate::db::connection::DatabaseContext;
 use crate::db::models::{LoginRequest, RawUser, Role, User, UserInsert, UserRequest, UserRole};
 use crate::db::schema::{roles, user_roles, users};
 use crate::utils::{AletheiaError, Result};
@@ -11,22 +10,23 @@ use diesel::BelongingToDsl;
 use rocket_contrib::databases::diesel;
 use std::env;
 
-pub fn all(db: &DatabaseContext) -> Result<Vec<User>> {
+pub fn all(conn: &PgConnection) -> Result<Vec<User>> {
     Ok(users::table
         .select((users::id, users::display_name, users::email))
-        .load::<User>(db.conn)?)
+        .load::<User>(conn)?)
 }
 
-pub fn create(user: UserRequest, db: &DatabaseContext) -> Result<User> {
+pub fn create(user: UserRequest, conn: &PgConnection) -> Result<User> {
     let user_exists = match &user.display_name {
         Some(display_name) => select(exists(
             users::table
                 .filter(users::email.eq(&(user.email)))
                 .or_filter(users::display_name.eq(&(display_name))),
         ))
-        .get_result(db.conn)?,
-        None => select(exists(users::table.filter(users::email.eq(&(user.email)))))
-            .get_result(db.conn)?,
+        .get_result(conn)?,
+        None => {
+            select(exists(users::table.filter(users::email.eq(&(user.email))))).get_result(conn)?
+        }
     };
     if user_exists {
         return Err(AletheiaError::UserAlreadyExists {
@@ -36,14 +36,14 @@ pub fn create(user: UserRequest, db: &DatabaseContext) -> Result<User> {
     let user = UserInsert::from_request(user)?;
     let user = diesel::insert_into(users::table)
         .values(&user)
-        .get_result(db.conn)?;
+        .get_result(conn)?;
     Ok(User::from_raw_user(user))
 }
 
-pub fn login(credentials: &LoginRequest, db: &DatabaseContext) -> Result<User> {
+pub fn login(credentials: &LoginRequest, conn: &PgConnection) -> Result<User> {
     let user: RawUser = users::table
         .filter(users::email.eq(&(credentials.email)))
-        .first(db.conn)?;
+        .first(conn)?;
     if user.validate_credentials(credentials)? {
         Ok(User::from_raw_user(user))
     } else {
@@ -59,11 +59,11 @@ pub fn get_by_email(email: &str, conn: &PgConnection) -> Result<User> {
 }
 
 impl User {
-    pub fn roles(&self, db: &DatabaseContext) -> Vec<Role> {
+    pub fn roles(&self, conn: &PgConnection) -> Vec<Role> {
         let role_ids = UserRole::belonging_to(self).select(user_roles::role_id);
         roles::table
             .filter(roles::id.eq(any(role_ids)))
-            .load::<Role>(db.conn)
+            .load::<Role>(conn)
             .expect("Could not load contributors")
     }
 }
