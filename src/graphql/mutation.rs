@@ -2,8 +2,8 @@ use super::RequestContext;
 use crate::resolvers::{event, project, user};
 use crate::types::Token;
 use crate::types::{
-    Event, EventInsert, EventRequest, LoginRequest, Project, ProjectRequest,
-    SendResetPasswordParams, Tokenized, User, UserRequest,
+    Event, EventInsert, EventRequest, LoginRequest, Project, ProjectRequest, Tokenized, User,
+    UserRequest,
 };
 use juniper::FieldResult;
 
