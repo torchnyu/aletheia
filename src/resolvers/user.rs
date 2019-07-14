@@ -141,7 +141,7 @@ impl UserInsert {
         let password_digest = services::user::hash_password(&request.password)?;
         Ok(UserInsert {
             display_name: request.display_name,
-            email: request.email,
+            email: request.email.to_ascii_lowercase(),
             password_digest,
         })
     }

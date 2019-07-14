@@ -38,7 +38,9 @@ pub fn login(
     context: RequestContext,
     creds: Json<LoginRequest>,
 ) -> crate::utils::Result<AuthenticatedResponse> {
-    let creds = creds.into_inner();
+    let mut creds = creds.into_inner();
+    let lowercase_email = creds.email.to_ascii_lowercase();
+    creds.email = lowercase_email;
     let user = resolvers::user::login(&creds, &context.conn)?;
     let token = Token::new(&creds.email).to_string()?;
     let response = AuthenticatedResponse {
