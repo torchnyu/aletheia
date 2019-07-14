@@ -4,5 +4,5 @@ use serde_derive::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, GraphQLInputObject)]
 pub struct SendResetPasswordParams {
     pub email: String,
-    pub domain: String
+    pub domain: String,
 }

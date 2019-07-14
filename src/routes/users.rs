@@ -102,7 +102,8 @@ pub fn send_reset_password_email(
     params: Json<SendResetPasswordParams>,
 ) -> Result<(), Custom<String>> {
     let params = params.into_inner();
-    match resolvers::user::send_reset_email(&params.email, &params.domain, &ctx.conn) {
+    let email = &params.email.to_ascii_lowercase();
+    match resolvers::user::send_reset_email(&email, &params.domain, &ctx.conn) {
         Ok(()) => Ok(()),
         Err(err) => Err(Custom(Status::InternalServerError, err.to_string())),
     }
@@ -114,7 +115,8 @@ pub fn reset_password(
     params: Json<ResetPasswordParams>,
 ) -> Result<AuthenticatedResponse, Custom<String>> {
     let params = params.into_inner();
-    match resolvers::user::reset_password(&params.email, &params.password, &params.key, &ctx.conn) {
+    let email = &params.email.to_ascii_lowercase();
+    match resolvers::user::reset_password(email, &params.password, &params.key, &ctx.conn) {
         Ok(user) => {
             let token = match Token::new(&user.email).to_string() {
                 Err(err) => return Err(Custom(Status::InternalServerError, err.to_string())),
