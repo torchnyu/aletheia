@@ -26,6 +26,8 @@ pub enum AletheiaError {
     NoUserError { email: String },
     #[fail(display = "User already exists with email: {}", email)]
     UserAlreadyExists { email: String },
+    #[fail(display = "Reset key expired, please request a new one")]
+    ExpiredResetKey,
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

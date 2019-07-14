@@ -19,17 +19,45 @@ pub enum ActionModifier {
     One,
 }
 
-#[derive(Debug, DbEnum, Serialize, Deserialize)]
-#[DieselType = "Resource"]
-pub enum Type {
+#[derive(Clone, Debug)]
+pub enum Resource {
     Project,
     Submission,
     User,
     Permission,
     Role,
-    #[db_rename = "user_role"]
     UserRole,
     Event,
-    #[db_rename = "user_event"]
     UserEvent,
+    Medium,
+    PasswordResetRequest,
+    None,
+}
+
+fn resource_to_string(resource: &Resource) -> String {
+    match resource {
+        Resource::Project => "project".to_string(),
+        Resource::Submission => "submission".to_string(),
+        Resource::User => "user".to_string(),
+        Resource::Permission => "permissionr".to_string(),
+        Resource::Role => "role".to_string(),
+        Resource::UserRole => "user_role".to_string(),
+        Resource::Event => "event".to_string(),
+        Resource::UserEvent => "user_event".to_string(),
+        Resource::Medium => "medium".to_string(),
+        Resource::PasswordResetRequest => "password_reset_request".to_string(),
+        Resource::None => "none".to_string(),
+    }
+}
+
+impl Into<String> for Resource {
+    fn into(self) -> String {
+        resource_to_string(&self)
+    }
+}
+
+impl From<&Resource> for String {
+    fn from(resource: &Resource) -> String {
+        resource_to_string(resource)
+    }
 }

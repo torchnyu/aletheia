@@ -1,7 +1,6 @@
 use super::RequestContext;
 use crate::db::models::Medium;
 use juniper::FieldResult;
-use std::env;
 
 graphql_object!(Medium: RequestContext |&self| {
     description: "A piece of media, mostly photos for now"
@@ -16,7 +15,14 @@ graphql_object!(Medium: RequestContext |&self| {
     }
 
     field large_url(&executor) -> FieldResult<String> {
-        let bucket_name = env::var("BUCKET_NAME")?;
-        Ok(format!("https://s3.amazonaws.com/{}/{}/{}", bucket_name, self.folder_name, "large.png"))
+        Ok(self.large_url()?)
+    }
+
+    field medium_url(&executor) -> FieldResult<String> {
+        Ok(self.medium_url()?)
+    }
+    
+    field thumbnail_url(&executor) -> FieldResult<String> {
+        Ok(self.thumbnail_url()?)
     }
 });

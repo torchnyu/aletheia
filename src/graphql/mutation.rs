@@ -17,7 +17,7 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         email: String,
         password: String,
     ) -> FieldResult<Tokenized<User>>  {
-
+        let email = email.to_ascii_lowercase();
         let credentials = LoginRequest {
             email, password
         };
@@ -68,8 +68,7 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         email: String,
         password: String
     ) -> FieldResult<Tokenized<User>> {
-        use crate::resolvers::user;
-
+        let email = email.to_ascii_lowercase();
         let user_request = UserRequest {
             display_name: None,
             email,
@@ -82,4 +81,25 @@ graphql_object!(MutationRoot: RequestContext as "Mutation" |&self| {
         Ok(Tokenized { payload: user, token })
     }
 
+    field send_reset_password_email(
+        &executor,
+        email: String,
+        domain: String
+    ) -> FieldResult<&'static str> {
+        let email = email.to_ascii_lowercase();
+        crate::resolvers::user::send_reset_email(&email, &domain, &executor.context().conn)?;
+        Ok("Sent password reset email")
+    }
+
+    field reset_password(
+        &executor,
+        email: String,
+        password: String,
+        key: String
+    ) -> FieldResult<Tokenized<User>> {
+        let email = email.to_ascii_lowercase();
+        let user = crate::resolvers::user::reset_password(&email, &password, &key, &executor.context().conn)?;
+        let token = Token::new(&user.email).to_string()?;
+        Ok(Tokenized { payload: user, token })
+    }
 });

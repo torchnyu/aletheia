@@ -16,6 +16,7 @@ extern crate juniper_rocket;
 extern crate multipart;
 extern crate r2d2;
 extern crate rand;
+extern crate reqwest;
 extern crate rusoto_core;
 extern crate rusoto_s3;
 extern crate slug;
@@ -27,14 +28,15 @@ use crate::utils::Result;
 use rocket::response::content;
 use rocket::*;
 use rocket_cors::CorsOptions;
+use std::collections::HashSet;
 
+mod authorization;
 mod db;
 mod github;
 mod graphql;
 mod resolvers;
 mod routes;
 mod services;
-#[allow(unused_imports)]
 mod types;
 mod utils;
 
@@ -69,27 +71,36 @@ fn handle_graphql_post(
 }
 
 fn main() -> Result<()> {
-    let default = CorsOptions::default();
+    let mut default = CorsOptions::default();
+    let mut exposed_headers = HashSet::new();
+    exposed_headers.insert("token".to_string());
+    default.expose_headers = exposed_headers;
     let cors = CorsOptions::to_cors(&default)?;
     dotenv::dotenv().expect("Failed to read .env file");
     rocket::ignite()
         .mount(
             "/projects",
-            routes![routes::projects::index, routes::projects::create],
+            routes![
+                routes::projects::index,
+                routes::projects::create,
+                routes::projects::upload_image
+            ],
         )
         .mount(
             "/users",
             routes![
                 routes::users::index,
                 routes::users::create,
-                routes::users::login
+                routes::users::login,
+                routes::users::upload_profile_picture,
+                routes::users::get_profile_picture,
+                routes::users::send_reset_password_email
             ],
         )
         .mount(
             "/submissions",
             routes![routes::submissions::index, routes::submissions::create],
         )
-        .mount("/media", routes![routes::media::create])
         .mount(
             "/",
             routes![index, graphiql, handle_graphql_get, handle_graphql_post],

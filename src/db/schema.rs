@@ -21,6 +21,18 @@ table! {
         folder_name -> Varchar,
         project_id -> Nullable<Int4>,
         user_id -> Nullable<Int4>,
+        file_ext -> Varchar,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use crate::db::sql_types::*;
+
+    password_reset_requests (id) {
+        id -> Varchar,
+        user_id -> Int4,
+        created_at -> Timestamptz,
     }
 }
 
@@ -48,6 +60,17 @@ table! {
         description -> Nullable<Varchar>,
         slug -> Varchar,
         event_id -> Int4,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use crate::db::sql_types::*;
+
+    registrations (id) {
+        id -> Int4,
+        application -> Jsonb,
+        confirmation -> Nullable<Jsonb>,
     }
 }
 
@@ -108,6 +131,7 @@ table! {
 
 joinable!(media -> projects (project_id));
 joinable!(media -> users (user_id));
+joinable!(password_reset_requests -> users (user_id));
 joinable!(permissions -> roles (role_id));
 joinable!(submissions -> projects (project_id));
 joinable!(submissions -> users (user_id));
@@ -119,8 +143,10 @@ joinable!(user_roles -> users (user_id));
 allow_tables_to_appear_in_same_query!(
     events,
     media,
+    password_reset_requests,
     permissions,
     projects,
+    registrations,
     roles,
     submissions,
     user_events,

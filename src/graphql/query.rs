@@ -1,5 +1,5 @@
 use super::RequestContext;
-use crate::types::{Event, Medium, Project, User};
+use crate::types::{Event, Medium, Project, Token, User};
 use juniper::FieldResult;
 
 pub struct QueryRoot {}
@@ -26,6 +26,16 @@ graphql_object!(QueryRoot: RequestContext as "Query" |&self| {
     ) -> FieldResult<Vec<Medium>> {
         let conn = &executor.context().conn;
         Ok(crate::resolvers::medium::all(conn)?)
+    }
+
+    field userByToken(
+        &executor,
+        token: String,
+    ) -> FieldResult<User> {
+        let token = token.parse::<Token>()?;
+        let conn = &executor.context().conn;
+        let user = crate::resolvers::user::get_by_email(&token.uid, &conn)?;
+        Ok(user)
     }
 
     field projectBySlugAndEvent(

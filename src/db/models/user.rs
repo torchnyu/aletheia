@@ -26,8 +26,9 @@ pub struct UserRequest {
     pub password: String,
 }
 
-#[derive(Identifiable, Queryable, AsChangeset, Serialize, Deserialize, Associations)]
+#[derive(Debug, Identifiable, Queryable, AsChangeset, Serialize, Deserialize, Associations)]
 #[table_name = "users"]
+#[serde(rename_all = "camelCase")]
 pub struct User {
     pub id: i32,
     pub display_name: String,
